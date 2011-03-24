@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Ant build file for the vod-crawler
+-->
+
+<project basedir="." default="build" name="vod-crawler">
+	<property file="build.properties" />
+
+	<!-- CLEAN -->
+	<target name="clean">
+		<delete dir="${classes.dir}" />
+		<delete dir="${jar.dir}" />
+	</target>
+	<!-- END CLEAN -->
+
+	<!-- BUILD -->
+	<target name="build" depends="clean">
+		<mkdir dir="${classes.dir}" />
+		<mkdir dir="${jar.dir}" />
+		
+		<javac srcdir="${src.dir}" destdir="${classes.dir}" target="${build.target}" optimize="on" debug="on" debuglevel="lines,vars,source">
+		    <classpath>
+		    	<fileset dir="${lib.dir}">
+		        	<include name="**/*.jar"/>
+		    	</fileset>
+		    </classpath>
+			<include name="**" />
+		</javac>
+		
+		<jar destfile="${dist.jar}">
+			<fileset dir="${classes.dir}">
+				<include name="**/*.class" />
+			</fileset>
+		</jar>
+	</target>
+	<!-- END BUILD -->
+
+	<!-- HELP -->
+	<target name="help" description="prints target descriptions">
+
+		<echo message="Tasks:" />
+		<echo message="" />
+		<echo message="ant clean : clean up a previous build" />
+		<echo message="ant build (default) : complete system build" />
+		<echo message="ant help : prints this help." />
+	</target>
+	<!-- END_HELP -->
+
+</project>
