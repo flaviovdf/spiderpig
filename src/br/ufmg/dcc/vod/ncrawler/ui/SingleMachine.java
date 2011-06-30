@@ -124,6 +124,7 @@ public class SingleMachine {
 			ThreadedCrawler tc = new ThreadedCrawler(nThreads, sleepTime, evaluator, workQueueFolder, serializer, 1024 * 1024 * 1024);
 			tc.crawl();
 			crawlerFactory.shutdown();
+			System.exit(0);
 		} catch (Exception e) {
 			HelpFormatter hf = new HelpFormatter();
 			hf.printHelp("java " + SingleMachine.class, opts);

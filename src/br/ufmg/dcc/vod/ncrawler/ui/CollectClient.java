@@ -171,6 +171,7 @@ public class CollectClient {
 			DistributedCrawler dc = new DistributedCrawler(serverIDs, sleepTime, eci, evaluator, workQueueFolder, serializer, 1024 * 1024 * 1024);
 			dc.crawl();
 			crawlerFactory.shutdown();
+			System.exit(0);
 		} catch (Exception e) {
 			HelpFormatter hf = new HelpFormatter();
 			hf.printHelp("java " + CollectClient.class, opts);
