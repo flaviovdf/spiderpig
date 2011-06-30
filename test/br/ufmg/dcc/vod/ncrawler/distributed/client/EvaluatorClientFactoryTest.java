@@ -34,10 +34,6 @@ public class EvaluatorClientFactoryTest {
 		System.out.println(Arrays.toString(list));
 		
 		f.shutdown();
-		
-		list = Naming.list("rmi://localhost:9090");
-		
-		assertTrue(list.length == 0);
 	}
 	
 }
