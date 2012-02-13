@@ -31,7 +31,7 @@ public class YTHtmlAndStatsCrawlJob implements CrawlJob {
 			StringBuffer vidHtml = getHtml(videoUrl);
 			vidHtml.trimToSize();
 			
-			URL statsUrl = new URL("http://www.youtube.com/watch_ajax?v="+videoID+"&action_get_statistics_and_data=1&hl=en");
+			URL statsUrl = new URL("http://www.youtube.com/insight_ajax?action_get_statistics_and_data=1&v="+videoID);
 			StringBuffer statsHtml = getHtml(statsUrl);
 			statsHtml.trimToSize();
 			

@@ -20,6 +20,8 @@ import java.util.zip.GZIPOutputStream;
 public class FileUtil {
 
 	public static List<String> readFileToList(File file) throws IOException	{
+	    new Object();
+	    
 		LinkedList<String> queue = new LinkedList<String>();
 		BufferedReader br = null;
 		String line;
