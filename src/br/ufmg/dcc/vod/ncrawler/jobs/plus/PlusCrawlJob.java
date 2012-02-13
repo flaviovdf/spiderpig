@@ -50,6 +50,7 @@ public class PlusCrawlJob implements CrawlJob {
 		try {
 			URLConnection openConnection = u.openConnection();
 			openConnection.setRequestProperty("User-Agent", "Research-Crawler-APIDEVKEY-AI39si59eqKb2OzKrx-4EkV1HkIRJcoYDf_VSKUXZ8AYPtJp-v9abtMYg760MJOqLZs5QIQwW4BpokfNyKKqk1gi52t0qMwJBg");
+			openConnection.setRequestProperty("Accept-Language", " en-US");
 			
 			openConnection.connect();
 			
