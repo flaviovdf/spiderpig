@@ -19,7 +19,9 @@ Ant build file for the vod-crawler
 		<mkdir dir="${classes.dir}" />
 		<mkdir dir="${jar.dir}" />
 		
-		<javac srcdir="${src.dir}" destdir="${classes.dir}" target="${build.target}" optimize="on" debug="on" debuglevel="lines,vars,source">
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" 
+            target="${build.target}" optimize="on" debug="on" 
+            debuglevel="lines,vars,source" includeantruntime="false">
 		    <classpath>
 		    	<fileset dir="${lib.dir}">
 		        	<include name="**/*.jar"/>
