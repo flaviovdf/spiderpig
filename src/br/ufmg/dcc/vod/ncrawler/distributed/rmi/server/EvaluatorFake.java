@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import java.util.Collection;
 
 import br.ufmg.dcc.vod.ncrawler.CrawlJob;
+import br.ufmg.dcc.vod.ncrawler.common.Constants;
 import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.EvaluatorClient;
 import br.ufmg.dcc.vod.ncrawler.evaluator.Evaluator;
 import br.ufmg.dcc.vod.ncrawler.evaluator.UnableToCollectException;
@@ -14,7 +15,7 @@ import br.ufmg.dcc.vod.ncrawler.tracker.TrackerFactory;
 
 public class EvaluatorFake<I, C> implements Evaluator<I, C>, Serializable {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = Constants.SERIAL_UID;
 	
 	private final EvaluatorClient<I, C> client;
 

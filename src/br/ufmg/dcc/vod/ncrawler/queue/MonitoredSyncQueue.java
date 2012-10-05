@@ -5,7 +5,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import br.ufmg.dcc.vod.ncrawler.common.Pair;
+import br.ufmg.dcc.vod.ncrawler.common.Tuple;
 
 /**
  * A synchronized queue of objects. This is a thread safe queue in which objects
@@ -111,10 +111,10 @@ class MonitoredSyncQueue<T> {
 		return e.size();
 	}
 
-	public Pair<Integer, Integer> synchronizationData() {
+	public Tuple<Integer, Integer> synchronizationData() {
 		try {
 			stampLock.readLock().lock();
-			return new Pair<Integer, Integer>(workHandle.get(), timeStamp.get());
+			return new Tuple<Integer, Integer>(workHandle.get(), timeStamp.get());
 		} finally {
 			stampLock.readLock().unlock();
 		}

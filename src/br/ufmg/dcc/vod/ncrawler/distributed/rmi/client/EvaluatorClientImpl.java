@@ -5,12 +5,13 @@ import java.rmi.server.UnicastRemoteObject;
 
 import org.apache.log4j.Logger;
 
+import br.ufmg.dcc.vod.ncrawler.common.Constants;
 import br.ufmg.dcc.vod.ncrawler.evaluator.Evaluator;
 import br.ufmg.dcc.vod.ncrawler.evaluator.UnableToCollectException;
 
 public class EvaluatorClientImpl<I, C> extends UnicastRemoteObject implements EvaluatorClient<I, C>  {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = Constants.SERIAL_UID;
 
 	private static final Logger LOG = Logger.getLogger(EvaluatorClientImpl.class);
 	

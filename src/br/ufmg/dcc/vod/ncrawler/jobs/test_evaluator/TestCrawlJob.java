@@ -1,11 +1,12 @@
 package br.ufmg.dcc.vod.ncrawler.jobs.test_evaluator;
 
 import br.ufmg.dcc.vod.ncrawler.CrawlJob;
+import br.ufmg.dcc.vod.ncrawler.common.Constants;
 import br.ufmg.dcc.vod.ncrawler.evaluator.Evaluator;
 
 public class TestCrawlJob implements CrawlJob {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = Constants.SERIAL_UID;
 	
 	private final int vertex;
 	private final RandomizedSyncGraph g;

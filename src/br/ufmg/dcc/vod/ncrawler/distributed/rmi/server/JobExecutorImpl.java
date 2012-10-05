@@ -6,13 +6,14 @@ import java.rmi.server.UnicastRemoteObject;
 import org.apache.log4j.Logger;
 
 import br.ufmg.dcc.vod.ncrawler.CrawlJob;
+import br.ufmg.dcc.vod.ncrawler.common.Constants;
 import br.ufmg.dcc.vod.ncrawler.ui.EXIT_CODES;
 
 public class JobExecutorImpl extends UnicastRemoteObject implements JobExecutor {
 
 	private static final Logger LOG = Logger.getLogger(JobExecutorImpl.class);
 	
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = Constants.SERIAL_UID;
 
 	protected JobExecutorImpl(int port) throws RemoteException {
 		super(port);
