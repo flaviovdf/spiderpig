@@ -10,7 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import br.ufmg.dcc.vod.ncrawler.common.Pair;
+import br.ufmg.dcc.vod.ncrawler.common.Tuple;
 
 /**
  * QueueServices are used to create MonitoredSyncQueues, add objects to these
@@ -170,7 +170,7 @@ public class QueueService {
 				int[] stamps = new int[ids.size()];
 				int i = 0;
 				for (MonitoredSyncQueue<?> m : ids.values()) {
-					Pair<Integer, Integer> sizeAndTimeStamp = m.synchronizationData();
+					Tuple<Integer, Integer> sizeAndTimeStamp = m.synchronizationData();
 					if (sizeAndTimeStamp.first != 0) {
 						someoneIsWorking = true;
 						break;
@@ -184,7 +184,7 @@ public class QueueService {
 				i = 0;
 				if (!someoneIsWorking) {
 					for (MonitoredSyncQueue<?> m : ids.values()) {
-						Pair<Integer, Integer> sizeAndTimeStamp = m.synchronizationData();
+						Tuple<Integer, Integer> sizeAndTimeStamp = m.synchronizationData();
 						if (sizeAndTimeStamp.first != 0 || stamps[i] != sizeAndTimeStamp.second) {
 							someoneIsWorking = true;
 							break;
