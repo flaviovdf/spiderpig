@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+     Ivy build file for the vod-crawler
+-->
+
+<ivy-module version="2.0">
+    <info organisation="br.ufmg.dcc.vod" module="vod-crawler"/>
+    <dependencies>
+        <dependency org="commons-cli" name="commons-cli" rev="[1.0,2.0["/>
+        <dependency org="log4j" name="log4j" transitive="false" rev="[1.0,2.0["/>
+
+        <exclude type="javadoc" ext="jar"/>
+    </dependencies>
+</ivy-module>
