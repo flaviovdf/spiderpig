@@ -22,8 +22,9 @@ Ant build file for the vod-crawler
         <ivy:retrieve/>
     </target>
     
-    <target name="clean-cache">
+    <target name="ivyclean">
         <ivy:cleancache/>
+        <delete dir="${lib.dir}"/>
     </target>
     <!-- END IVY -->
 
@@ -56,8 +57,10 @@ Ant build file for the vod-crawler
 
 		<echo message="Tasks:" />
 		<echo message="" />
-		<echo message="ant clean : clean up a previous build" />
 		<echo message="ant build (default) : complete system build" />
+		<echo message="ant clean : clean up a previous build" />
+		<echo message="ant deps : download dependecies using ivy" />
+		<echo message="ant ivyclean : delete dependecies using ivy" />
 		<echo message="ant help : prints this help." />
 	</target>
 	<!-- END_HELP -->
