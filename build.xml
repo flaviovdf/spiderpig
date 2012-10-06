@@ -4,7 +4,9 @@
 Ant build file for the vod-crawler
 -->
 
-<project basedir="." default="build" name="vod-crawler">
+<project basedir="." default="build" name="vod-crawler" 
+    xmlns:ivy="antlib:org.apache.ivy.ant">
+
 	<property file="build.properties" />
 
 	<!-- CLEAN -->
@@ -14,8 +16,19 @@ Ant build file for the vod-crawler
 	</target>
 	<!-- END CLEAN -->
 
+    <!-- IVY DEPS -->
+    <target name="deps">
+        <mkdir dir="${lib.dir}"/>
+        <ivy:retrieve/>
+    </target>
+    
+    <target name="clean-cache">
+        <ivy:cleancache/>
+    </target>
+    <!-- END IVY -->
+
 	<!-- BUILD -->
-	<target name="build" depends="clean">
+	<target name="build" depends="clean,deps">
 		<mkdir dir="${classes.dir}" />
 		<mkdir dir="${jar.dir}" />
 		
@@ -38,8 +51,8 @@ Ant build file for the vod-crawler
 	</target>
 	<!-- END BUILD -->
 
-	<!-- HELP -->
-	<target name="help" description="prints target descriptions">
+	<!-- HELP -->    
+    <target name="help" description="prints target descriptions">
 
 		<echo message="Tasks:" />
 		<echo message="" />
@@ -48,5 +61,7 @@ Ant build file for the vod-crawler
 		<echo message="ant help : prints this help." />
 	</target>
 	<!-- END_HELP -->
+
+
 
 </project>
