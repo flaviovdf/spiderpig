@@ -9,6 +9,7 @@
     <dependencies>
         <dependency org="commons-cli" name="commons-cli" rev="[1.0,2.0["/>
         <dependency org="log4j" name="log4j" transitive="false" rev="[1.0,2.0["/>
+        <dependency org="com.google.guava" name="guava" rev="13.0+"/>
 
         <exclude type="javadoc" ext="jar"/>
     </dependencies>
