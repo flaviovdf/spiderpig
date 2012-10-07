@@ -1,7 +1,7 @@
 package br.ufmg.dcc.vod.ncrawler.common;
 
 /**
- * Constants used throught the code.
+ * Constants used throughout the code.
  *  
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
