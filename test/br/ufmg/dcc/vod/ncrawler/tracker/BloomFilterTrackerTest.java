@@ -21,6 +21,9 @@ public class BloomFilterTrackerTest {
 		Assert.assertTrue(bf.wasCrawled("tudo"));
 		Assert.assertTrue(bf.wasCrawled("bem"));
 		Assert.assertFalse(bf.wasCrawled("bala"));
+		
+		bf.crawled("oi");
+		Assert.assertEquals(3, bf.numCrawled());
 	}
 
 }
