@@ -1,11 +1,32 @@
 package br.ufmg.dcc.vod.ncrawler.tracker;
 
-public interface Tracker<S> {
+/**
+ * A {@code Tracker} object keeps track of crawled objects. These IDs objects be
+ * {@code URLs}, {@code Strings}, {@code Byte Arrays} etc. 
+ *  
+ * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
+ * @param <T> Type which represents a crawled object
+ */
+public interface Tracker<T> {
 	
-	public boolean add(S s);
+	/**
+	 * Indicates to the tracker that {@code s} was crawled.
+	 * 
+	 * @param t The object which was crawled
+	 */
+	public void crawled(T t);
 	
-	public boolean contains(S s);
+	/**
+	 * Queries whether {@code s} has already been crawled.
+	 * 
+	 * @param t The object which was crawled
+	 * @return {@code true} if it was, {@false} otherwise
+	 */
+	public boolean wasCrawled(T t);
 	
-	public int size();
+	/**
+	 * @return The number of objects which are being tracked.
+	 */
+	public int numCrawled();
 	
 }

@@ -1,30 +1,38 @@
 package br.ufmg.dcc.vod.ncrawler.tracker;
 
-public class ThreadSafeTracker<S> implements Tracker<S> {
+/**
+ * Decorates another tracker providing thread safe access.
+ * 
+ * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
+ * @see {@link com.google.common.hash.BloomFilter} 
+ */
+public class ThreadSafeTracker<T> implements Tracker<T> {
 
-	private final Tracker<S> t;
+	private final Tracker<T> tracker;
 
-	public ThreadSafeTracker(Tracker<S> t) {
-		this.t = t;
+	/**
+	 * Creates this this tracker which will basically decorate the 
+	 * one given as parameter.
+	 * 
+	 * @param tracker {@code Tracker} to decorate
+	 */
+	protected ThreadSafeTracker(Tracker<T> tracker) {
+		this.tracker = tracker;
 	}
 	
 	@Override
-	public synchronized boolean add(S s) {
-		if (t.contains(s)) {
-			return false;
-		}
-		
-		return t.add(s);
+	public synchronized void crawled(T t) {
+		this.tracker.crawled(t);
 	}
 
 	@Override
-	public synchronized boolean contains(S s) {
-		return t.contains(s);
+	public synchronized boolean wasCrawled(T t) {
+		return this.tracker.wasCrawled(t);
 	}
 
 	@Override
-	public synchronized int size() {
-		return t.size();
+	public synchronized int numCrawled() {
+		return this.tracker.numCrawled();
 	}
 	
 }
