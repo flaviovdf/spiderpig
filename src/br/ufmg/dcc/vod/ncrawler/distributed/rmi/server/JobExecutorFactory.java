@@ -2,9 +2,9 @@ package br.ufmg.dcc.vod.ncrawler.distributed.rmi.server;
 
 import java.rmi.RemoteException;
 
-import br.ufmg.dcc.vod.ncrawler.distributed.rmi.AbstractRMIFactory;
+import br.ufmg.dcc.vod.ncrawler.distributed.rmi.AbstractRMIBuilder;
 
-public class JobExecutorFactory extends AbstractRMIFactory<JobExecutor> {
+public class JobExecutorFactory extends AbstractRMIBuilder<JobExecutor> {
 
 	public JobExecutorFactory(int port) throws RemoteException {
 		super(port);

@@ -1,4 +1,4 @@
-package br.ufmg.dcc.vod.ncrawler.distributed.client;
+package br.ufmg.dcc.vod.ncrawler.distributed.rmi.client;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;

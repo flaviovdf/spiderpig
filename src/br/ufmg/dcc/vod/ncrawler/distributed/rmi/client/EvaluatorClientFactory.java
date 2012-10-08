@@ -2,10 +2,10 @@ package br.ufmg.dcc.vod.ncrawler.distributed.rmi.client;
 
 import java.rmi.RemoteException;
 
-import br.ufmg.dcc.vod.ncrawler.distributed.rmi.AbstractRMIFactory;
+import br.ufmg.dcc.vod.ncrawler.distributed.rmi.AbstractRMIBuilder;
 
 public class EvaluatorClientFactory<I, C> 
-	extends AbstractRMIFactory<EvaluatorClientImpl<I, C>> {
+	extends AbstractRMIBuilder<EvaluatorClientImpl<I, C>> {
 
 	public EvaluatorClientFactory(int port) throws RemoteException {
 		super(port);
