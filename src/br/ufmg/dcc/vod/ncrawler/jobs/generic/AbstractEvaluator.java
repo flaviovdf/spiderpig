@@ -48,8 +48,8 @@ public abstract class AbstractEvaluator<C> implements Evaluator<String, C> {
 			LOG.info("Collected " + collectID);
 
 			if (next != null) {
-				Collection<CrawlJob> dispatch = createJobs(next);
-				for (CrawlJob j : dispatch) {
+				Collection<CrawlJob<String, C>> dispatch = createJobs(next);
+				for (CrawlJob<String, C> j : dispatch) {
 					this.processor.dispatch(j);
 				}
 			}
@@ -72,15 +72,15 @@ public abstract class AbstractEvaluator<C> implements Evaluator<String, C> {
 		this.tracker = factory.createThreadSafeTracker(String.class);
 	}
 	
-	public Collection<CrawlJob> createJobs(Collection<String> next) {
-		Collection<CrawlJob> rv = new ArrayList<CrawlJob>();
+	public Collection<CrawlJob<String, C>> createJobs(Collection<String> next) {
+		Collection<CrawlJob<String, C>> rv = new ArrayList<>();
 		Map<String, Integer> incs = new HashMap<String, Integer>();
 		incs.put(DIS, 0);
 		for (String n : next) {
 			if (!tracker.wasCrawled(n)) {
 				LOG.info("Discovered new ID " + n);
 				
-				CrawlJob createJob = createJob(n);
+				CrawlJob<String, C> createJob = createJob(n);
 				tracker.crawled(n);
 				incs.put(DIS, incs.get(DIS) + 1);
 				rv.add(createJob);
@@ -91,13 +91,13 @@ public abstract class AbstractEvaluator<C> implements Evaluator<String, C> {
 	}
 	
 	@Override
-	public final Collection<CrawlJob> getInitialCrawl() {
+	public final Collection<CrawlJob<String, C>> getInitialCrawl() {
 		Collection<String> seeds = getSeeds();
 		if (seeds != null) {
-			Collection<CrawlJob> dispatch = createJobs(seeds);
+			Collection<CrawlJob<String, C>> dispatch = createJobs(seeds);
 			return dispatch;
 		} else {
-			return new ArrayList<CrawlJob>();
+			return new ArrayList<CrawlJob<String, C>>();
 		}
 	}
 	

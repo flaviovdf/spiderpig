@@ -7,15 +7,17 @@ import br.ufmg.dcc.vod.ncrawler.evaluator.Evaluator;
 /**
  * Collects an object and returns the result of this crawl.
  * 
- * @param <R> Result from a crawl
- * @param <T> Type of object crawled
+ * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
+ * 
+ * @param <I> ID for crawling
+ * @param <C> Type of object crawled
  */
-public interface CrawlJob extends Serializable {
+public interface CrawlJob<I, C> extends Serializable {
 
 	public void collect();
 
-	public void setEvaluator(Evaluator e);
+	public void setEvaluator(Evaluator<I, C> e);
 
-	public String getID();
+	public I getID();
 	
 }

@@ -4,7 +4,7 @@ import br.ufmg.dcc.vod.ncrawler.CrawlJob;
 import br.ufmg.dcc.vod.ncrawler.common.Constants;
 import br.ufmg.dcc.vod.ncrawler.evaluator.Evaluator;
 
-public class TestCrawlJob implements CrawlJob {
+public class TestCrawlJob implements CrawlJob<Integer, int[]> {
 
 	private static final long serialVersionUID = Constants.SERIAL_UID;
 	
@@ -33,7 +33,7 @@ public class TestCrawlJob implements CrawlJob {
 	}
 
 	@Override
-	public String getID() {
-		return null;
+	public Integer getID() {
+		return vertex;
 	}
 }

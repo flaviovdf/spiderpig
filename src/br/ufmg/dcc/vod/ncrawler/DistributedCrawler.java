@@ -8,7 +8,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.DistributedProcessor;
-import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.EvaluatorClientImpl;
+import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.EvaluatorProxyImpl;
 import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.ServerID;
 import br.ufmg.dcc.vod.ncrawler.evaluator.Evaluator;
 import br.ufmg.dcc.vod.ncrawler.evaluator.ThreadSafeEvaluator;
@@ -28,9 +28,9 @@ public class DistributedCrawler {
 	private final StatsPrinter sp;
 	private final ThreadSafeEvaluator tEval;
 	private final Set<ServerID> workers;
-	private final EvaluatorClientImpl evaluatorClient;
+	private final EvaluatorProxyImpl evaluatorClient;
 
-	public <S> DistributedCrawler(Set<ServerID> workers, long sleep, EvaluatorClientImpl evaluatorClient, 
+	public <S> DistributedCrawler(Set<ServerID> workers, long sleep, EvaluatorProxyImpl evaluatorClient, 
 			Evaluator evaluator, File pQueueDir, Serializer<S> s, int fileSize) 
 		throws FileNotFoundException, IOException {
 		

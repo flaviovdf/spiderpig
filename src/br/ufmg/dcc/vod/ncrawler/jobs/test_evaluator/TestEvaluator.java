@@ -30,8 +30,9 @@ public class TestEvaluator implements Evaluator<Integer, int[]> {
 	}
 
 	@Override
-	public Collection<CrawlJob> getInitialCrawl()  {
-		return new ArrayList<CrawlJob>(Arrays.asList(new TestCrawlJob(0, g)));
+	public Collection<CrawlJob<Integer, int[]>> getInitialCrawl() {
+		return new ArrayList<CrawlJob<Integer, int[]>>(
+				Arrays.asList(new TestCrawlJob(0, g)));
 	}
 
 	@Override

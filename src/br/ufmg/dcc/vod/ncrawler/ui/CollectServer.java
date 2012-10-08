@@ -8,7 +8,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 
 import br.ufmg.dcc.vod.ncrawler.common.LoggerInitiator;
-import br.ufmg.dcc.vod.ncrawler.distributed.rmi.server.JobExecutorFactory;
+import br.ufmg.dcc.vod.ncrawler.distributed.rmi.server.JobExecutorBuilder;
 
 public class CollectServer {
 
@@ -51,7 +51,7 @@ public class CollectServer {
 		
 		
 		try {
-			JobExecutorFactory jef = new JobExecutorFactory(port);
+			JobExecutorBuilder jef = new JobExecutorBuilder(port);
 			jef.createAndBind();
 		} catch (Exception e) {
 			System.out.println("Already UP!");

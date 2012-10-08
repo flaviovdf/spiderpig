@@ -17,8 +17,9 @@ import org.apache.commons.cli.Options;
 import br.ufmg.dcc.vod.ncrawler.DistributedCrawler;
 import br.ufmg.dcc.vod.ncrawler.common.FileUtil;
 import br.ufmg.dcc.vod.ncrawler.common.LoggerInitiator;
-import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.EvaluatorClientFactory;
-import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.EvaluatorClientImpl;
+import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.EvaluatorProxy;
+import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.EvaluatorProxyBuilder;
+import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.EvaluatorProxyImpl;
 import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.ServerID;
 import br.ufmg.dcc.vod.ncrawler.evaluator.Evaluator;
 import br.ufmg.dcc.vod.ncrawler.evaluator.EvaluatorFactory;
@@ -139,10 +140,11 @@ public class CollectClient {
 				throw new Exception("work queue folder exists and is not empty");
 			}
 			
-			EvaluatorClientImpl<?, ?> eci = null;
+			EvaluatorProxyImpl<?, ?> eci = null;
 			try {
-				EvaluatorClientFactory<?, ?> ecf = new EvaluatorClientFactory(port);
-				eci = ecf.createAndBind();
+				EvaluatorProxyBuilder<?, ?> ecf = 
+						new EvaluatorProxyBuilder<>(port);
+				eci = (EvaluatorProxyImpl<?, ?>) ecf.createAndBind();
 			} catch (Exception e) {
 				System.out.println("Already UP!");
 				System.exit(EXIT_CODES.STATE_UNCHANGED);
@@ -156,7 +158,7 @@ public class CollectClient {
 			crawlerFactory.initiate(servers.size(), saveFolder, sleepTime, seeds);
 			
 			Evaluator<?, ?> evaluator = crawlerFactory.getEvaluator();
-			evaluator.setTrackerFactory(new BloomFilterTrackerFactory<>());
+			evaluator.setTrackerFactory(new BloomFilterTrackerFactory());
 			
 			if (ignoreIDs != null)
 				evaluator.ignore(ignoreIDs);

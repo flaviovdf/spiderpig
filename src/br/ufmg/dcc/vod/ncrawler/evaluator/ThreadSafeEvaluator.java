@@ -34,7 +34,7 @@ public class ThreadSafeEvaluator<I, C> implements Evaluator<I, C> {
 	}
 	
 	@Override
-	public Collection<CrawlJob> getInitialCrawl() {
+	public Collection<CrawlJob<I, C>> getInitialCrawl() {
 		return e.getInitialCrawl();
 	}
 

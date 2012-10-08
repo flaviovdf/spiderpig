@@ -112,7 +112,7 @@ public class SingleMachine {
 			
 			crawlerFactory.initiate(nThreads, saveFolder, sleepTime, seeds);
 			Evaluator<?, ?> evaluator = crawlerFactory.getEvaluator();
-			evaluator.setTrackerFactory(new BloomFilterTrackerFactory<>());
+			evaluator.setTrackerFactory(new BloomFilterTrackerFactory());
 			
 			Serializer<?> serializer = crawlerFactory.getSerializer();
 			

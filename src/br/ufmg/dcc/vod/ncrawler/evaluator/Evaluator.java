@@ -9,13 +9,13 @@ import br.ufmg.dcc.vod.ncrawler.tracker.TrackerFactory;
 
 public interface Evaluator<I, C> {
 	
-	public void setTrackerFactory(TrackerFactory factory);
+	public void setTrackerFactory(TrackerFactory<I> factory);
 	public void ignore(Collection<I> ignore);
 	
 	public void setStatsKeeper(StatsPrinter sp);
 	public void setProcessor(Processor processor);
 	
-	public Collection<CrawlJob> getInitialCrawl();
+	public Collection<CrawlJob<I, C>> getInitialCrawl();
 	
 	public void evaluteAndSave(I collectID, C collectContent);
 	public void error(I collectID, UnableToCollectException utc);
