@@ -13,7 +13,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import br.ufmg.dcc.vod.ncrawler.CrawlJob;
-import br.ufmg.dcc.vod.ncrawler.distributed.rmi.server.EvaluatorFake;
+import br.ufmg.dcc.vod.ncrawler.distributed.rmi.server.EvaluatorAdapter;
 import br.ufmg.dcc.vod.ncrawler.distributed.rmi.server.JobExecutor;
 import br.ufmg.dcc.vod.ncrawler.evaluator.Evaluator;
 import br.ufmg.dcc.vod.ncrawler.processor.AbstractProcessor;
@@ -25,19 +25,18 @@ public class DistributedProcessor extends AbstractProcessor {
 
 	private static final Logger LOG = Logger.getLogger(DistributedProcessor.class);
 	
-	@SuppressWarnings("unchecked")
-	private EvaluatorFake toSend;
+	private EvaluatorAdapter<?, ?> toSend;
 	
 	private Scheduler scheduler;
 
 	public <S, I, C> DistributedProcessor(long sleepTimePerExecution, QueueService service,
 			Serializer<S> serializer, File queueFile, int queueSize, Set<ServerID> workers,
-			Evaluator<I, C> evaluator, EvaluatorClient<I, C> client) 
+			Evaluator<I, C> evaluator, EvaluatorProxy<I, C> client) 
 			throws FileNotFoundException, IOException {
 		super(workers.size(), sleepTimePerExecution, service, serializer, queueFile, queueSize, evaluator);
 
 		this.scheduler = new Scheduler(workers);
-		this.toSend = new EvaluatorFake<I, C>(client);
+		this.toSend = new EvaluatorAdapter<I, C>(client);
 	}
 	
 	@Override

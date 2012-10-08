@@ -15,20 +15,20 @@ import org.junit.Test;
 
 import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.ServerID;
 import br.ufmg.dcc.vod.ncrawler.distributed.rmi.server.JobExecutor;
-import br.ufmg.dcc.vod.ncrawler.distributed.rmi.server.JobExecutorFactory;
+import br.ufmg.dcc.vod.ncrawler.distributed.rmi.server.JobExecutorBuilder;
 
 public class ServerIDTest {
 
-	private HashSet<JobExecutorFactory> serverFactories;
+	private HashSet<JobExecutorBuilder> serverFactories;
 
 	@Before
 	public void setUp() throws Exception {
-		serverFactories = new HashSet<JobExecutorFactory>();
+		serverFactories = new HashSet<JobExecutorBuilder>();
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		for (JobExecutorFactory f : serverFactories) {
+		for (JobExecutorBuilder f : serverFactories) {
 			f.shutdown();
 		}
 	}
@@ -46,7 +46,7 @@ public class ServerIDTest {
 		} catch (Exception e) {
 		}
 		
-		JobExecutorFactory f = new JobExecutorFactory(9090);
+		JobExecutorBuilder f = new JobExecutorBuilder(9090);
 		f.createAndBind();
 
 		resolve = sid.resolve();
