@@ -16,7 +16,7 @@ import br.ufmg.dcc.vod.ncrawler.common.LoggerInitiator;
 import br.ufmg.dcc.vod.ncrawler.evaluator.Evaluator;
 import br.ufmg.dcc.vod.ncrawler.evaluator.EvaluatorFactory;
 import br.ufmg.dcc.vod.ncrawler.queue.Serializer;
-import br.ufmg.dcc.vod.ncrawler.tracker.ThreadSafeTrackerFactory;
+import br.ufmg.dcc.vod.ncrawler.tracker.BloomFilterTrackerFactory;
 
 public class SingleMachine {
 	
@@ -112,7 +112,7 @@ public class SingleMachine {
 			
 			crawlerFactory.initiate(nThreads, saveFolder, sleepTime, seeds);
 			Evaluator<?, ?> evaluator = crawlerFactory.getEvaluator();
-			evaluator.setTrackerFactory(new ThreadSafeTrackerFactory());
+			evaluator.setTrackerFactory(new BloomFilterTrackerFactory<>());
 			
 			Serializer<?> serializer = crawlerFactory.getSerializer();
 			

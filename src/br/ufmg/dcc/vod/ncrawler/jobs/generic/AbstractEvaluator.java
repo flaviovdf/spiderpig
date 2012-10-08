@@ -69,7 +69,7 @@ public abstract class AbstractEvaluator<C> implements Evaluator<String, C> {
 	
 	@Override
 	public final void setTrackerFactory(TrackerFactory factory) {
-		this.tracker = factory.createTracker();
+		this.tracker = factory.createThreadSafeTracker(String.class);
 	}
 	
 	public Collection<CrawlJob> createJobs(Collection<String> next) {
@@ -77,11 +77,11 @@ public abstract class AbstractEvaluator<C> implements Evaluator<String, C> {
 		Map<String, Integer> incs = new HashMap<String, Integer>();
 		incs.put(DIS, 0);
 		for (String n : next) {
-			if (!tracker.contains(n)) {
+			if (!tracker.wasCrawled(n)) {
 				LOG.info("Discovered new ID " + n);
 				
 				CrawlJob createJob = createJob(n);
-				tracker.add(n);
+				tracker.crawled(n);
 				incs.put(DIS, incs.get(DIS) + 1);
 				rv.add(createJob);
 			}
@@ -125,7 +125,7 @@ public abstract class AbstractEvaluator<C> implements Evaluator<String, C> {
 	@Override
 	public void ignore(Collection<String> ignore) {
 		for (String i : ignore) {
-			this.tracker.add(i);
+			this.tracker.crawled(i);
 		}
 	}
 }

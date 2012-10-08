@@ -23,7 +23,7 @@ import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.ServerID;
 import br.ufmg.dcc.vod.ncrawler.evaluator.Evaluator;
 import br.ufmg.dcc.vod.ncrawler.evaluator.EvaluatorFactory;
 import br.ufmg.dcc.vod.ncrawler.queue.Serializer;
-import br.ufmg.dcc.vod.ncrawler.tracker.ThreadSafeTrackerFactory;
+import br.ufmg.dcc.vod.ncrawler.tracker.BloomFilterTrackerFactory;
 
 public class CollectClient {
 
@@ -156,7 +156,7 @@ public class CollectClient {
 			crawlerFactory.initiate(servers.size(), saveFolder, sleepTime, seeds);
 			
 			Evaluator<?, ?> evaluator = crawlerFactory.getEvaluator();
-			evaluator.setTrackerFactory(new ThreadSafeTrackerFactory());
+			evaluator.setTrackerFactory(new BloomFilterTrackerFactory<>());
 			
 			if (ignoreIDs != null)
 				evaluator.ignore(ignoreIDs);
