@@ -60,8 +60,8 @@ public class QueueService {
 	 * @throws IOException In case and io error occurs 
 	 * @throws FileNotFoundException  In case the file does not exist
 	 */
-	@SuppressWarnings("unchecked")
-	public QueueHandle createPersistentMessageQueue(File f, Serializer serializer, int bytes) throws FileNotFoundException, IOException {
+	public <T> QueueHandle createPersistentMessageQueue(File f, Serializer<T> serializer, int bytes) 
+					throws FileNotFoundException, IOException {
 		return createPersistentMessageQueue("", f, serializer, bytes);
 	}
 
