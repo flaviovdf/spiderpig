@@ -66,7 +66,7 @@ Ant build file for the vod-crawler
                 <fileset dir="${test.dir}">
                     <include name="**/*Test*.java"/>
                 </fileset>
-	        </batchtest>      
+	        </batchtest>
         </junit>    
     </target>  
 	<!-- END UNIT TESTS -->
