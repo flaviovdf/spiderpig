@@ -5,8 +5,8 @@ import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Random;
 import java.util.Map.Entry;
+import java.util.Random;
 
 import junit.framework.TestCase;
 
@@ -14,10 +14,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.EvaluatorClientFactory;
-import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.EvaluatorClientImpl;
+import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.EvaluatorProxyBuilder;
+import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.EvaluatorProxyImpl;
 import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.ServerID;
-import br.ufmg.dcc.vod.ncrawler.distributed.rmi.server.JobExecutorFactory;
+import br.ufmg.dcc.vod.ncrawler.distributed.rmi.server.JobExecutorBuilder;
 import br.ufmg.dcc.vod.ncrawler.jobs.test_evaluator.RandomizedSyncGraph;
 import br.ufmg.dcc.vod.ncrawler.jobs.test_evaluator.TestEvaluator;
 import br.ufmg.dcc.vod.ncrawler.jobs.test_evaluator.TestSerializer;
@@ -25,9 +25,9 @@ import br.ufmg.dcc.vod.ncrawler.jobs.test_evaluator.TestSerializer;
 public class DistributedCrawlerTest  extends TestCase {
 
 	private File myTempDir;
-	private HashSet<JobExecutorFactory> serverFactories;
-	private EvaluatorClientFactory<Integer, int[]> clientFactory;
-	private EvaluatorClientImpl<Integer, int[]> clientImpl;
+	private HashSet<JobExecutorBuilder> serverFactories;
+	private EvaluatorProxyBuilder<Integer, int[]> clientFactory;
+	private EvaluatorProxyImpl<Integer, int[]> clientImpl;
 	private HashSet<ServerID> ids;
 
 	@Before
@@ -38,10 +38,12 @@ public class DistributedCrawlerTest  extends TestCase {
 		} while (myTempDir.exists());
 		
 		myTempDir.mkdirs();
-		serverFactories = new HashSet<JobExecutorFactory>();
+		serverFactories = new HashSet<JobExecutorBuilder>();
 		ids = new HashSet<ServerID>();
-		clientFactory = new EvaluatorClientFactory<Integer, int[]>(6060);
-		clientImpl = clientFactory.createAndBind();
+		clientFactory = new EvaluatorProxyBuilder<Integer, int[]>(6060);
+		clientImpl = 
+				(EvaluatorProxyImpl<Integer, int[]>) 
+				clientFactory.createAndBind();
 	}
 
 	@After
@@ -53,7 +55,7 @@ public class DistributedCrawlerTest  extends TestCase {
 		myTempDir.delete();
 		myTempDir.deleteOnExit();
 		
-		for (JobExecutorFactory f : serverFactories) {
+		for (JobExecutorBuilder f : serverFactories) {
 			f.shutdown();
 		}
 		
@@ -62,7 +64,7 @@ public class DistributedCrawlerTest  extends TestCase {
 	
 	public void initiateServers(int numServers) throws RemoteException, AlreadyBoundException {
 		for (int i = 0; i < numServers; i++) {
-			JobExecutorFactory jef = new JobExecutorFactory(5000 + i);
+			JobExecutorBuilder jef = new JobExecutorBuilder(5000 + i);
 			jef.createAndBind();
 			ids.add(new ServerID("localhost", 5000+i));
 			serverFactories.add(jef);
