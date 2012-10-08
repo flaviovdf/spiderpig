@@ -4,7 +4,8 @@ import java.rmi.RemoteException;
 
 import br.ufmg.dcc.vod.ncrawler.distributed.rmi.AbstractRMIFactory;
 
-public class EvaluatorClientFactory<I, C> extends AbstractRMIFactory<EvaluatorClientImpl<I, C>> {
+public class EvaluatorClientFactory<I, C> 
+	extends AbstractRMIFactory<EvaluatorClientImpl<I, C>> {
 
 	public EvaluatorClientFactory(int port) throws RemoteException {
 		super(port);
