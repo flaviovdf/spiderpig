@@ -6,24 +6,24 @@ networks and social media content.
 
 Basically, I use this for my data collecting needs. It is ever-evolving.
 
-* THIS PACKAGE IS NOT READY FOR PRODUCTION USE. IT MAY NEVER BE *
+*THIS PACKAGE IS NOT READY FOR PRODUCTION USE. IT MAY NEVER BE*
 
 This package contains the common code for:
 
     * Distributed crawling
-      * Event based communication
-      * Failure detection (under work)
+        * Event based communication
+        * Failure detection (under work)
 
     * Journal Recovery
-      * Journal is implemented, still needs recovery code
+        * Journal is implemented, still needs recovery code
 
     * Different Schedulers
-      * Only BFS (Snowball) currently
-      * Others soon
-        * Random Walks
-        * Metropolis Hasting
+        * Only BFS (Snowball) currently
+        * Others soon
+            * Random Walks
+            * Metropolis Hasting
 
-To really crawl content individual _Jobs_ should be implemented.
+To really crawl content individual *Jobs* should be implemented.
 
 dependecies
 -----------
