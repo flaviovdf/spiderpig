@@ -13,7 +13,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.EvaluatorClientFactory;
 import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.ServerID;
 import br.ufmg.dcc.vod.ncrawler.distributed.rmi.server.JobExecutor;
 import br.ufmg.dcc.vod.ncrawler.distributed.rmi.server.JobExecutorFactory;
@@ -21,13 +20,10 @@ import br.ufmg.dcc.vod.ncrawler.distributed.rmi.server.JobExecutorFactory;
 public class ServerIDTest {
 
 	private HashSet<JobExecutorFactory> serverFactories;
-	private EvaluatorClientFactory<Integer, int[]> clientFactory;
-	private HashSet<ServerID> ids;
 
 	@Before
 	public void setUp() throws Exception {
 		serverFactories = new HashSet<JobExecutorFactory>();
-		ids = new HashSet<ServerID>();
 	}
 
 	@After
@@ -38,7 +34,9 @@ public class ServerIDTest {
 	}
 	
 	@Test
-	public void testAll() throws RemoteException, AlreadyBoundException, MalformedURLException, NotBoundException {
+	public void testAll() 
+			throws RemoteException, AlreadyBoundException, 
+			MalformedURLException, NotBoundException {
 		ServerID sid = new ServerID("localhost", 9090);
 		
 		JobExecutor resolve;
@@ -60,5 +58,4 @@ public class ServerIDTest {
 		
 		f.shutdown();
 	}
-	
 }
