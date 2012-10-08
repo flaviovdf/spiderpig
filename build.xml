@@ -33,7 +33,7 @@ Ant build file for the vod-crawler
 		<mkdir dir="${classes.dir}" />
 		<mkdir dir="${jar.dir}" />
 		
-        <javac srcdir="${src.dir}" destdir="${classes.dir}" 
+        <javac srcdir="${src.dir}:${test.dir}" destdir="${classes.dir}" 
             target="${build.target}" optimize="on" debug="on" 
             debuglevel="lines,vars,source" includeantruntime="false">
 		    <classpath>
@@ -51,10 +51,28 @@ Ant build file for the vod-crawler
 		</jar>
 	</target>
 	<!-- END BUILD -->
-
+    
+	<!-- UNIT TESTS -->
+    <target name="tests" depends="build">
+        <junit fork="true">
+            <classpath>
+                <pathelement location="${classes.dir}"/>
+                <fileset dir="${lib.dir}">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
+	                
+            <batchtest fork="yes">
+                <fileset dir="${test.dir}">
+                    <include name="**/*Test*.java"/>
+                </fileset>
+	        </batchtest>      
+        </junit>    
+    </target>  
+	<!-- END UNIT TESTS -->
+	
 	<!-- HELP -->    
     <target name="help" description="prints target descriptions">
-
 		<echo message="Tasks:" />
 		<echo message="" />
 		<echo message="ant build (default) : complete system build" />
@@ -62,9 +80,8 @@ Ant build file for the vod-crawler
 		<echo message="ant deps : download dependecies using ivy" />
 		<echo message="ant ivyclean : delete dependecies using ivy" />
 		<echo message="ant help : prints this help." />
+    	<echo message="ant tests : runs unit tests." />
 	</target>
 	<!-- END_HELP -->
-
-
 
 </project>
