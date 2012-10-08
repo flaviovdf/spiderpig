@@ -12,13 +12,13 @@ import java.util.Arrays;
 import org.junit.Test;
 
 import br.ufmg.dcc.vod.ncrawler.distributed.rmi.server.JobExecutor;
-import br.ufmg.dcc.vod.ncrawler.distributed.rmi.server.JobExecutorFactory;
+import br.ufmg.dcc.vod.ncrawler.distributed.rmi.server.JobExecutorBuilder;
 
-public class JobExecutorFactoryTest {
+public class JobExecutorBuilderTest {
 
 	@Test
 	public void testAll() throws RemoteException, AlreadyBoundException, MalformedURLException, NotBoundException {
-		JobExecutorFactory f = new JobExecutorFactory(9090);
+		JobExecutorBuilder f = new JobExecutorBuilder(9090);
 		
 		String[] list = Naming.list("rmi://localhost:9090");
 		System.out.println(Arrays.toString(list));

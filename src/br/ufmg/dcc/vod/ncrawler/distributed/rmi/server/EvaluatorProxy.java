@@ -13,13 +13,22 @@ import br.ufmg.dcc.vod.ncrawler.processor.Processor;
 import br.ufmg.dcc.vod.ncrawler.stats.StatsPrinter;
 import br.ufmg.dcc.vod.ncrawler.tracker.TrackerFactory;
 
-public class EvaluatorFake<I, C> implements Evaluator<I, C>, Serializable {
+/**
+ * Proxy object to contact remote evaluators. Only the {@code evaluteAndSave}
+ * and {@code error} methods are supported.
+ * 
+ * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
+ *
+ * @param <I> IDs of content to collect
+ * @param <C> Content to collect
+ */
+public class EvaluatorProxy<I, C> implements Evaluator<I, C>, Serializable {
 
 	private static final long serialVersionUID = Constants.SERIAL_UID;
 	
 	private final EvaluatorClient<I, C> client;
 
-	public EvaluatorFake(EvaluatorClient<I, C> client) {
+	public EvaluatorProxy(EvaluatorClient<I, C> client) {
 		this.client = client;
 	}
 	
@@ -44,7 +53,7 @@ public class EvaluatorFake<I, C> implements Evaluator<I, C>, Serializable {
 	
 	// Local Methods
 	@Override
-	public Collection<CrawlJob> getInitialCrawl() {
+	public Collection<CrawlJob<I, C>> getInitialCrawl() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -59,7 +68,7 @@ public class EvaluatorFake<I, C> implements Evaluator<I, C>, Serializable {
 	}
 
 	@Override
-	public void setTrackerFactory(TrackerFactory factory) {
+	public void setTrackerFactory(TrackerFactory<I> factory) {
 		throw new UnsupportedOperationException();
 	}
 
