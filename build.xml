@@ -5,17 +5,17 @@ Ant build file for the vod-crawler
 -->
 
 <project basedir="." default="build" name="vod-crawler" 
-    xmlns:ivy="antlib:org.apache.ivy.ant">
+	xmlns:ivy="antlib:org.apache.ivy.ant">
 
-	<property file="build.properties" />
-
-	<!-- CLEAN -->
-	<target name="clean">
-		<delete dir="${classes.dir}" />
-		<delete dir="${jar.dir}" />
-	</target>
-	<!-- END CLEAN -->
-
+    <property file="build.properties" />
+    
+    <!-- CLEAN -->
+    <target name="clean">
+        <delete dir="${classes.dir}" />
+        <delete dir="${jar.dir}" />
+    </target>
+    <!-- END CLEAN -->
+    
     <!-- IVY DEPS -->
     <target name="deps">
         <mkdir dir="${lib.dir}"/>
@@ -27,32 +27,32 @@ Ant build file for the vod-crawler
         <delete dir="${lib.dir}"/>
     </target>
     <!-- END IVY -->
-
-	<!-- BUILD -->
-	<target name="build" depends="clean,deps">
-		<mkdir dir="${classes.dir}" />
-		<mkdir dir="${jar.dir}" />
-		
+    
+    <!-- BUILD -->
+    <target name="build" depends="clean,deps">
+        <mkdir dir="${classes.dir}" />
+        <mkdir dir="${jar.dir}" />
+    
         <javac srcdir="${src.dir}:${test.dir}" destdir="${classes.dir}" 
             target="${build.target}" optimize="on" debug="on" 
             debuglevel="lines,vars,source" includeantruntime="false">
-		    <classpath>
-		    	<fileset dir="${lib.dir}">
-		        	<include name="**/*.jar"/>
-		    	</fileset>
-		    </classpath>
-			<include name="**" />
-		</javac>
-		
-		<jar destfile="${dist.jar}">
-			<fileset dir="${classes.dir}">
-				<include name="**/*.class" />
-			</fileset>
-		</jar>
-	</target>
-	<!-- END BUILD -->
+            <classpath>
+                <fileset dir="${lib.dir}">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
+            <include name="**" />
+        </javac>
     
-	<!-- UNIT TESTS -->
+        <jar destfile="${dist.jar}">
+            <fileset dir="${classes.dir}">
+                <include name="**/*.class" />
+            </fileset>
+        </jar>
+    </target>
+    <!-- END BUILD -->
+    
+    <!-- UNIT TESTS -->
     <target name="tests" depends="build">
         <junit fork="true">
             <classpath>
@@ -61,27 +61,27 @@ Ant build file for the vod-crawler
                     <include name="**/*.jar"/>
                 </fileset>
             </classpath>
-	                
+    
             <batchtest fork="yes">
                 <fileset dir="${test.dir}">
                     <include name="**/*Test*.java"/>
                 </fileset>
-	        </batchtest>
-        </junit>    
-    </target>  
-	<!-- END UNIT TESTS -->
-	
-	<!-- HELP -->    
+            </batchtest>
+        </junit>
+    </target>
+    <!-- END UNIT TESTS -->
+    
+    <!-- HELP -->
     <target name="help" description="prints target descriptions">
-		<echo message="Tasks:" />
-		<echo message="" />
-		<echo message="ant build (default) : complete system build" />
-		<echo message="ant clean : clean up a previous build" />
-		<echo message="ant deps : download dependecies using ivy" />
-		<echo message="ant ivyclean : delete dependecies using ivy" />
-		<echo message="ant help : prints this help." />
-    	<echo message="ant tests : runs unit tests." />
-	</target>
-	<!-- END_HELP -->
+        <echo message="Tasks:" />
+        <echo message="" />
+        <echo message="ant build (default) : complete system build" />
+        <echo message="ant clean : clean up a previous build" />
+        <echo message="ant deps : download dependecies using ivy" />
+        <echo message="ant ivyclean : delete dependecies using ivy" />
+        <echo message="ant help : prints this help." />
+        <echo message="ant tests : runs unit tests." />
+    </target>
+    <!-- END_HELP -->
 
 </project>
