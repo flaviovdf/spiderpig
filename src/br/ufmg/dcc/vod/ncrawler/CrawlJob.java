@@ -14,10 +14,24 @@ import br.ufmg.dcc.vod.ncrawler.evaluator.Evaluator;
  */
 public interface CrawlJob<I, C> extends Serializable {
 
+	/**
+	 * Performs the collection. After collection, the {@link Evaluator} should
+	 * be notified of results.
+	 * 
+	 * @return
+	 */
 	public void collect();
 
-	public void setEvaluator(Evaluator<I, C> e);
+	/**
+	 * Set's the evaluator to be notified by results.
+	 * 
+	 * @param evaluator {@link Evaluator} evaluator to receive results.
+	 */
+	public void setEvaluator(Evaluator<I, C> evaluator);
 
+	/**
+	 * @return The ID of the content which will be collected by this job.
+	 */
 	public I getID();
 	
 }
