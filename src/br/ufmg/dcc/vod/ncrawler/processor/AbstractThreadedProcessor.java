@@ -14,9 +14,23 @@ import br.ufmg.dcc.vod.ncrawler.queue.QueueProcessor;
 import br.ufmg.dcc.vod.ncrawler.queue.QueueService;
 import br.ufmg.dcc.vod.ncrawler.queue.Serializer;
 
-public abstract class AbstractProcessor implements Processor {
+/**
+ * This abstract class defines a threaded processor, where {@value n} threads
+ * will be started to dispatch {@link CrawlJob} jobs. Each thread will dispatch
+ * one job at a time.
+ * 
+ * TODO: Implement dynamic sleep time
+ * 
+ * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
+ *
+ * @param <I> Type of IDs to evaluate
+ * @param <C> Type of content being crawled
+ */
+public abstract class AbstractThreadedProcessor<I, C> 
+		implements Processor<I, C> {
 
-	private static final Logger LOG = Logger.getLogger(AbstractProcessor.class);
+	private static final Logger LOG = 
+			Logger.getLogger(AbstractThreadedProcessor.class);
 	
 	protected final long sleepTimePerExecution;
 	
@@ -24,17 +38,18 @@ public abstract class AbstractProcessor implements Processor {
 	private final QueueHandle myHandle;
 	private final QueueService service;
 	
-	@SuppressWarnings("unchecked")
-	protected final Evaluator eval;
+	protected final Evaluator<I, C> eval;
 
-	public <S, I, C> AbstractProcessor(int nThreads, long sleepTimePerExecution, QueueService service,
-			Serializer<S> serializer, File queueFile, int queueSize, Evaluator<I, C> eval) 
-			throws FileNotFoundException, IOException {
+	public AbstractThreadedProcessor(int nThreads, long sleepTimePerExecution, 
+			QueueService service, Serializer<I> serializer, File queueFile, 
+			int queueSize, Evaluator<I, C> eval) 
+					throws FileNotFoundException, IOException {
 		this.nThreads = nThreads;
 		this.sleepTimePerExecution = sleepTimePerExecution;
 		this.service = service;
 		this.eval = eval;
-		this.myHandle = service.createPersistentMessageQueue("Workers", queueFile, serializer, queueSize);
+		this.myHandle = service.createPersistentMessageQueue("Workers", 
+				queueFile, serializer, queueSize);
 	}
 	
 	public void start() {
@@ -42,14 +57,14 @@ public abstract class AbstractProcessor implements Processor {
 			service.startProcessor(myHandle, newQueueProcessor(i));
 		}
 		
-		Collection<CrawlJob> initialCrawl = eval.getInitialCrawl();
-		for (CrawlJob j : initialCrawl) {
+		Collection<CrawlJob<I, C>> initialCrawl = eval.getInitialCrawl();
+		for (CrawlJob<I, C> j : initialCrawl) {
 			dispatch(j);
 		}
 	}
 
 	@Override
-	public void dispatch(CrawlJob c) {
+	public void dispatch(CrawlJob<I, C> c) {
 		try {
 			service.sendObjectToQueue(myHandle, c);
 		} catch (InterruptedException e) {

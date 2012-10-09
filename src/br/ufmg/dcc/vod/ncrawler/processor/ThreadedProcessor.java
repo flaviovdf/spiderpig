@@ -10,12 +10,14 @@ import br.ufmg.dcc.vod.ncrawler.queue.QueueProcessor;
 import br.ufmg.dcc.vod.ncrawler.queue.QueueService;
 import br.ufmg.dcc.vod.ncrawler.queue.Serializer;
 
-public class ThreadedProcessor extends AbstractProcessor {
+public class ThreadedProcessor<I, C> extends AbstractThreadedProcessor<I, C> {
 	
-	public <S, I, C> ThreadedProcessor(int nThreads, long sleepTimePerExecution, QueueService service,
-			Serializer<S> serializer, File queueFile, int queueSize, Evaluator<I, C> eval) 
-			throws FileNotFoundException, IOException {
-		super(nThreads, sleepTimePerExecution, service, serializer, queueFile, queueSize, eval);
+	public ThreadedProcessor(int nThreads, long sleepTimePerExecution, 
+			QueueService service, Serializer<I> serializer, File queueFile, 
+			int queueSize, Evaluator<I, C> eval) 
+					throws FileNotFoundException, IOException {
+		super(nThreads, sleepTimePerExecution, service, serializer, queueFile, 
+				queueSize, eval);
 	}
 	
 	@Override
@@ -23,7 +25,7 @@ public class ThreadedProcessor extends AbstractProcessor {
 		return new CrawlProcessor(i);
 	}
 	
-	private class CrawlProcessor implements QueueProcessor<CrawlJob> {
+	private class CrawlProcessor implements QueueProcessor<CrawlJob<I, C>> {
 		private final int i;
 
 		public CrawlProcessor(int i) {
@@ -36,7 +38,7 @@ public class ThreadedProcessor extends AbstractProcessor {
 		}
 
 		@Override
-		public void process(CrawlJob t) {
+		public void process(CrawlJob<I, C> t) {
 			t.setEvaluator(eval);
 			t.collect();
 			

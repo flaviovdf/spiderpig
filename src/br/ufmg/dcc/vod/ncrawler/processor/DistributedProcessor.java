@@ -1,4 +1,4 @@
-package br.ufmg.dcc.vod.ncrawler.distributed.rmi.client;
+package br.ufmg.dcc.vod.ncrawler.processor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,17 +13,19 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import br.ufmg.dcc.vod.ncrawler.CrawlJob;
+import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.EvaluatorProxy;
+import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.ServerID;
 import br.ufmg.dcc.vod.ncrawler.distributed.rmi.server.EvaluatorAdapter;
 import br.ufmg.dcc.vod.ncrawler.distributed.rmi.server.JobExecutor;
 import br.ufmg.dcc.vod.ncrawler.evaluator.Evaluator;
-import br.ufmg.dcc.vod.ncrawler.processor.AbstractProcessor;
 import br.ufmg.dcc.vod.ncrawler.queue.QueueProcessor;
 import br.ufmg.dcc.vod.ncrawler.queue.QueueService;
 import br.ufmg.dcc.vod.ncrawler.queue.Serializer;
 
-public class DistributedProcessor extends AbstractProcessor {
+public class DistributedProcessor extends AbstractThreadedProcessor {
 
-	private static final Logger LOG = Logger.getLogger(DistributedProcessor.class);
+	private static final Logger LOG = 
+			Logger.getLogger(DistributedProcessor.class);
 	
 	private EvaluatorAdapter<?, ?> toSend;
 	

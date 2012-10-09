@@ -36,7 +36,8 @@ public class BloomFilterTrackerFactory<T> extends TrackerFactory<T> {
 					FUNNELS.keySet().toString())); 
 		}
 		
-		Funnel<T> funnel = (Funnel<T>) FUNNELS.get(clazz);
+		@SuppressWarnings("unchecked") Funnel<T> funnel =
+				(Funnel<T>) FUNNELS.get(clazz);
 		BloomFilter<T> bf = BloomFilter.create(funnel, TEN_MILLION);
 		return new BloomFilterTracker<>(bf);
 	}

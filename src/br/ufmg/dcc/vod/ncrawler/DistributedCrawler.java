@@ -7,11 +7,11 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.DistributedProcessor;
 import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.EvaluatorProxyImpl;
 import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.ServerID;
 import br.ufmg.dcc.vod.ncrawler.evaluator.Evaluator;
 import br.ufmg.dcc.vod.ncrawler.evaluator.ThreadSafeEvaluator;
+import br.ufmg.dcc.vod.ncrawler.processor.DistributedProcessor;
 import br.ufmg.dcc.vod.ncrawler.queue.QueueService;
 import br.ufmg.dcc.vod.ncrawler.queue.Serializer;
 import br.ufmg.dcc.vod.ncrawler.stats.StatsPrinter;
