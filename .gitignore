@@ -1,0 +1,14 @@
+settings/
+settings/*
+
+bin/
+bin/*
+classes/
+classes/*
+
+lib/
+lib/*
+
+.pydevproject
+.project
+.classpath
