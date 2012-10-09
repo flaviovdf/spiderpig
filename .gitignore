@@ -9,6 +9,9 @@ classes/*
 lib/
 lib/*
 
+out/
+out/*
+
 .pydevproject
 .project
 .classpath
