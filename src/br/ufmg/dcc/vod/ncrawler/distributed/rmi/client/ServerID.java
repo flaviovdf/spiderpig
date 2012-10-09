@@ -59,7 +59,7 @@ public class ServerID {
 	 * If a reference was already looked up, returns it. If you desire
 	 * to lookup reference again, call {@code reset}.
 	 * 
-	 * @return Remote ref
+	 * @return Remote reference
 	 * 
 	 * @throws RemoteException
 	 * @throws NotBoundException
