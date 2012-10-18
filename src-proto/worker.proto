@@ -1,0 +1,25 @@
+option optimize_for = SPEED;
+option java_package = "br.ufmg.dcc.vod.ncrawler.protocol_buffers";
+
+message CrawlRequest {
+    
+    required string id = 1;
+    
+    required string fileSaverHost = 2;
+    required int32 fileSaverPort = 3;
+    
+    required string callBackHost = 4;
+    required int32 callBackPort = 5;
+    
+}
+
+message BaseResult {
+
+    required bool isError = 1;
+    
+    required string id = 2;
+    repeated string toQueue = 3;
+    
+    optional string errorMessage = 4;
+    
+}

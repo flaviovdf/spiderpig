@@ -12,6 +12,7 @@ Ant build file for the vod-crawler
     <!-- CLEAN -->
     <target name="clean">
         <delete dir="${classes.dir}" />
+    	<delete dir="${src.gen.dir}" />
         <delete dir="${jar.dir}" />
     </target>
     <!-- END CLEAN -->
@@ -29,13 +30,14 @@ Ant build file for the vod-crawler
     <!-- END IVY -->
     
     <!-- BUILD -->
-    <target name="build" depends="clean,deps">
+    <target name="build" depends="proto">
         <mkdir dir="${classes.dir}" />
         <mkdir dir="${jar.dir}" />
     
-        <javac srcdir="${src.dir}:${test.dir}" destdir="${classes.dir}" 
-            target="${build.target}" optimize="on" debug="on" 
-            debuglevel="lines,vars,source" includeantruntime="false">
+        <javac srcdir="${src.dir}:${test.dir}:${src.gen.dir}"
+            destdir="${classes.dir}" target="${build.target}" optimize="on" 
+            debug="on" debuglevel="lines,vars,source" 
+            includeantruntime="false">
             <classpath>
                 <fileset dir="${lib.dir}">
                     <include name="**/*.jar"/>
@@ -51,7 +53,18 @@ Ant build file for the vod-crawler
         </jar>
     </target>
     <!-- END BUILD -->
-    
+
+    <!-- PROTOCOL BUFFERS -->
+	<target name="proto" depends="clean">
+		<mkdir dir="${src.gen.dir}" />
+		<exec executable="${protoc.cmd}">
+			<arg value="${src.proto.dir}/worker.proto"/>
+			<arg value="${src.proto.dir}/payload.proto"/>
+			<arg value="--java_out=${src.gen.dir}"/>
+		</exec>
+	</target>
+    <!-- END PROTOCOL BUFFERS -->
+
     <!-- UNIT TESTS -->
     <target name="tests" depends="build">
         <junit fork="true">
@@ -75,11 +88,12 @@ Ant build file for the vod-crawler
     <target name="help" description="prints target descriptions">
         <echo message="Tasks:" />
         <echo message="" />
-        <echo message="ant build (default) : complete system build" />
-        <echo message="ant clean : clean up a previous build" />
-        <echo message="ant deps : download dependecies using ivy" />
-        <echo message="ant ivyclean : delete dependecies using ivy" />
+        <echo message="ant build (default) : complete system build." />
+        <echo message="ant clean : clean up a previous build." />
+        <echo message="ant deps : download dependecies using ivy." />
+        <echo message="ant ivyclean : delete dependecies using ivy." />
         <echo message="ant help : prints this help." />
+    	<echo message="ant proto : compiles protocol buffers." />
         <echo message="ant tests : runs unit tests." />
     </target>
     <!-- END_HELP -->
