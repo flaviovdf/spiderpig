@@ -24,10 +24,12 @@ public class BloomFilterTracker<T> implements Tracker<T> {
 	}
 
 	@Override
-	public void crawled(T t) {
-		if (this.bloomFilter.put(t)) {
+	public boolean crawled(T t) {
+		boolean returnVal = this.bloomFilter.put(t);
+		if (returnVal) {
 			this.size++;
 		}
+		return returnVal;
 	}
 
 	@Override
