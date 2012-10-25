@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import br.ufmg.dcc.vod.ncrawler.master.Master;
+import br.ufmg.dcc.vod.ncrawler.master.StopCondition;
 import br.ufmg.dcc.vod.ncrawler.master.processor.ProcessorActor;
 import br.ufmg.dcc.vod.ncrawler.queue.QueueService;
 import br.ufmg.dcc.vod.ncrawler.stats.StatsActor;
@@ -17,25 +19,31 @@ public class ThreadedCrawler implements Crawler {
 	private final StatsActor statsActor;
 	private final QueueService service;
 	private final ProcessorActor processorActor;
+	private final Master master;
+	private final StopCondition stopCondition;
+
 
 	protected ThreadedCrawler(ProcessorActor processorActor, 
-			StatsActor statsActor, QueueService service) {
+			StatsActor statsActor, QueueService service, 
+			Master master) {
 		Preconditions.checkNotNull(processorActor);
 		Preconditions.checkNotNull(service);
 		
 		this.processorActor = processorActor;
 		this.statsActor = statsActor;
 		this.service = service;
+		this.master = master;
+		this.stopCondition = master.getStopCondition();
 	}
 	
 	public void dispatch(List<String> seed) {
 		for (String crawlID : seed)
-			this.processorActor.dispatch(crawlID);
+			this.master.dispatch(crawlID);
 	}
 
 	public void dispatch(String... seed) {
 		for (String crawlID : seed)
-			this.processorActor.dispatch(crawlID);
+			this.master.dispatch(crawlID);
 	}
 	
 	public void crawl() {
@@ -47,9 +55,9 @@ public class ThreadedCrawler implements Crawler {
 		processorActor.start();
 		
 		//Waiting until crawl ends
-		int wi = 10;
-		LOG.info("Waiting until crawl ends: waitInterval="+wi+"s");
-		this.service.waitUntilWorkIsDoneAndStop(wi);
+		LOG.info("Waiting until crawl ends");
+		this.stopCondition.await();
+		this.service.waitUntilWorkIsDoneAndStop(1);
 		
 		LOG.info("Done! Stopping");
 		System.out.println("Done! Stopping");

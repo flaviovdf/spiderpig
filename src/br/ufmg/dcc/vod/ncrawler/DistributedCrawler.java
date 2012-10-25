@@ -1,6 +1,7 @@
 package br.ufmg.dcc.vod.ncrawler;
 
 import br.ufmg.dcc.vod.ncrawler.distributed.nio.service.NIOServer;
+import br.ufmg.dcc.vod.ncrawler.master.Master;
 import br.ufmg.dcc.vod.ncrawler.master.processor.ProcessorActor;
 import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Payload.UploadMessage;
 import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Worker.BaseResult;
@@ -13,10 +14,10 @@ public class DistributedCrawler extends ThreadedCrawler {
 	private final NIOServer<UploadMessage> fileServer;
 
 	public DistributedCrawler(ProcessorActor processorActor, 
-			StatsActor statsActor, QueueService service, 
+			StatsActor statsActor, QueueService service, Master master, 
 			NIOServer<BaseResult> resultServer, 
 			NIOServer<UploadMessage> fileServer) {
-		super(processorActor, statsActor, service);
+		super(processorActor, statsActor, service, master);
 		this.resultServer = resultServer;
 		this.fileServer = fileServer;
 	}

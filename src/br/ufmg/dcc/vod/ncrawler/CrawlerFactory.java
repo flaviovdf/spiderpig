@@ -54,7 +54,8 @@ public class CrawlerFactory {
 		
 		workerInterested.setLoopBack(master);
 		
-		return new ThreadedCrawler(processorActor, null, service);
+		return new ThreadedCrawler(processorActor, null, service,
+				master);
 	}
 	
 	public static Crawler createDistributedCrawler(String callBackHost, 
@@ -90,6 +91,6 @@ public class CrawlerFactory {
 		NIOServer<UploadMessage> fileServer = new NIOServer<>(-1, 
 				fileSaverHost, fileSaverPort, uploadListener);
 		return new DistributedCrawler(processorActor, null, service, 
-				resultServer, fileServer);
+				master, resultServer, fileServer);
 	}
 }

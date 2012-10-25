@@ -20,6 +20,7 @@ public class Master implements WorkerInterested {
 	private final ProcessorActor processorActor;
 	private final StatsActor statsActor;
 	private final WorkerManager workerManager;
+	private final StopCondition stopCondition;
 	private final ReentrantLock lock;
 
 	public Master(TrackerFactory<String> trackerFactory, 
@@ -29,7 +30,13 @@ public class Master implements WorkerInterested {
 		this.processorActor = processorActor;
 		this.statsActor = statsActor;
 		this.workerManager = workerManager;
+		this.stopCondition = new StopCondition();
 		this.lock = new ReentrantLock();
+	}
+	
+	public void dispatch(String crawlID) {
+		this.processorActor.dispatch(crawlID);
+		this.stopCondition.dispatched();
 	}
 	
 	@Override
@@ -43,12 +50,13 @@ public class Master implements WorkerInterested {
 			for (String nextID : toQueue) {
 				//Returns true if obj is new to tracker, thus we dispatch it
 				if (this.tracker.crawled(nextID)) { 
-					this.processorActor.dispatch(nextID);
+					dispatch(nextID);
 				}
 			}
 		} finally {
 			this.lock.unlock();
 		}
+		this.stopCondition.resultReceived();
 	}
 
 	@Override
@@ -57,7 +65,7 @@ public class Master implements WorkerInterested {
 		
 		this.workerManager.freeExecutor(id);
 		if (workerSuspected) {
-			this.processorActor.dispatch(id);
+			this.processorActor.dispatch(id); //No need to increment stop cond
 		} else {
 			try {
 				this.lock.lock();
@@ -65,6 +73,11 @@ public class Master implements WorkerInterested {
 			} finally {
 				this.lock.unlock();
 			}
+			this.stopCondition.resultReceived();
 		}
+	}
+
+	public StopCondition getStopCondition() {
+		return stopCondition;
 	}
 }
