@@ -16,6 +16,6 @@ public interface Display {
 	 * 
 	 * @param map The map with update values.
 	 */
-	public void print(Map<String, Integer> map);
+	public void print(Map<?, Integer> map);
 	
 }

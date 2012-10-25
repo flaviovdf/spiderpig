@@ -3,7 +3,7 @@ package br.ufmg.dcc.vod.ncrawler.distributed.worker;
 import java.util.List;
 
 import br.ufmg.dcc.vod.ncrawler.distributed.nio.service.NIOMessageSender;
-import br.ufmg.dcc.vod.ncrawler.master.WorkerInterested;
+import br.ufmg.dcc.vod.ncrawler.jobs.WorkerInterested;
 import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Worker.BaseResult;
 import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Worker.BaseResult.Builder;
 
@@ -24,21 +24,18 @@ public class InterestedProxy implements WorkerInterested {
 	public void crawlDone(String id, List<String> toQueue) {
 		Builder builder = BaseResult.newBuilder();
 		builder.setIsError(false);
-		builder.setErrorMessage(null);
 		builder.setId(id);
-		
-		if (toQueue != null)
-			for (int i = 0; i < toQueue.size(); i++)
-				builder.setToQueue(i, toQueue.get(i));
+		builder.addAllToQueue(toQueue);
 		
 		sender.send(this.callBackHost, this.callBackPort, builder.build());
 	}
 	
 	@Override
-	public void crawlError(String id, String cause) {
+	public void crawlError(String id, String cause, boolean workerSuspected) {
 		Builder builder = BaseResult.newBuilder();
 		builder.setIsError(true);
 		builder.setErrorMessage(cause);
+		builder.setId(id);
 		
 		sender.send(this.callBackHost, this.callBackPort, builder.build());
 	}

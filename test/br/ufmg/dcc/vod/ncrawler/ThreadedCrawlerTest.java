@@ -1,19 +1,23 @@
 package br.ufmg.dcc.vod.ncrawler;
 
 import java.io.File;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.Map;
-import java.util.Random;
 import java.util.Map.Entry;
+import java.util.Random;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import br.ufmg.dcc.vod.ncrawler.jobs.JobExecutor;
 import br.ufmg.dcc.vod.ncrawler.jobs.test_evaluator.RandomizedSyncGraph;
-import br.ufmg.dcc.vod.ncrawler.jobs.test_evaluator.TestEvaluator;
-import br.ufmg.dcc.vod.ncrawler.jobs.test_evaluator.TestSerializer;
+import br.ufmg.dcc.vod.ncrawler.jobs.test_evaluator.TestFileSaver;
+import br.ufmg.dcc.vod.ncrawler.jobs.test_evaluator.TestJobExecutor;
 
 public class ThreadedCrawlerTest extends TestCase {
 
@@ -23,7 +27,8 @@ public class ThreadedCrawlerTest extends TestCase {
 	public void setUp() {
 		String tmpDir = System.getProperty("java.io.tmpdir");
 		do  {
-			myTempDir = new File(tmpDir + File.separator + new Random().nextInt());
+			int nextInt = new Random().nextInt();
+			myTempDir = new File(tmpDir + File.separator + nextInt);
 		} while (myTempDir.exists());
 		
 		myTempDir.mkdirs();
@@ -43,12 +48,17 @@ public class ThreadedCrawlerTest extends TestCase {
 	public void testCrawl1Thread() throws Exception {
 		RandomizedSyncGraph g = new RandomizedSyncGraph(100);
 		
-		TestEvaluator te = new TestEvaluator(g);
-		ThreadedCrawler tc = new ThreadedCrawler(1, 0, te, myTempDir, new TestSerializer(g) ,1024 * 1024);
+		TestFileSaver saver = new TestFileSaver();
+		JobExecutor jobExecutor = new TestJobExecutor(g);
 		
-		tc.crawl();
+		Crawler crawler = 
+				CrawlerFactory.createThreadedCrawler(1, myTempDir, saver, 
+						jobExecutor);
 		
-		Map<Integer, int[]> crawled = te.getCrawled();
+		crawler.dispatch("0");
+		crawler.crawl();
+		
+		Map<Integer, byte[]> crawled = saver.getCrawled();
 		doTheAsserts(crawled, g);
 	}
 
@@ -57,12 +67,17 @@ public class ThreadedCrawlerTest extends TestCase {
 	public void testCrawl2Thread() throws Exception {
 		RandomizedSyncGraph g = new RandomizedSyncGraph(100);
 		
-		TestEvaluator te = new TestEvaluator(g);
-		ThreadedCrawler tc = new ThreadedCrawler(1, 0, te, myTempDir, new TestSerializer(g) ,1024 * 1024);
+		TestFileSaver saver = new TestFileSaver();
+		JobExecutor jobExecutor = new TestJobExecutor(g);
 		
-		tc.crawl();
+		Crawler crawler = 
+				CrawlerFactory.createThreadedCrawler(2, myTempDir, saver, 
+						jobExecutor);
 		
-		Map<Integer, int[]> crawled = te.getCrawled();
+		crawler.dispatch("0");
+		crawler.crawl();
+		
+		Map<Integer, byte[]> crawled = saver.getCrawled();
 		doTheAsserts(crawled, g);
 	}
 	
@@ -70,28 +85,35 @@ public class ThreadedCrawlerTest extends TestCase {
 	public void testCrawl100Thread() throws Exception {
 		RandomizedSyncGraph g = new RandomizedSyncGraph(100);
 		
-		TestEvaluator te = new TestEvaluator(g);
-		ThreadedCrawler tc = new ThreadedCrawler(100, 0, te, myTempDir,new TestSerializer(g) ,1024 * 1024);
+		TestFileSaver saver = new TestFileSaver();
+		JobExecutor jobExecutor = new TestJobExecutor(g);
 		
-		tc.crawl();
+		Crawler crawler = 
+				CrawlerFactory.createThreadedCrawler(100, myTempDir, saver, 
+						jobExecutor);
 		
-		Map<Integer, int[]> crawled = te.getCrawled();
+		crawler.dispatch("0");
+		crawler.crawl();
+		
+		Map<Integer, byte[]> crawled = saver.getCrawled();
 		doTheAsserts(crawled, g);
 	}
 
 	
-	private void doTheAsserts(Map<Integer, int[]> crawled, RandomizedSyncGraph g) {
-		assertEquals(crawled.size(), g.getNumVertex());
+	private void doTheAsserts(Map<Integer, byte[]> crawled, 
+			RandomizedSyncGraph g) {
+		assertEquals(g.getNumVertex(), crawled.size());
 		
-		for (Entry<Integer, int[]> e: crawled.entrySet()) {
+		for (Entry<Integer, byte[]> e: crawled.entrySet()) {
 			
 			int[] neighbours = g.getNeighbours(e.getKey());
-			int[] value = e.getValue();
+			IntBuffer buff = ByteBuffer.wrap(e.getValue()).asIntBuffer();
+			buff.rewind();
 			
-			assertEquals(neighbours.length, value.length);
 			for (int i = 0; i < neighbours.length; i++) {
-				assertEquals(neighbours[i], value[i]);
+				assertEquals(neighbours[i], buff.get());
 			}
+			Assert.assertFalse(buff.hasRemaining());
 		}
 	}
 }

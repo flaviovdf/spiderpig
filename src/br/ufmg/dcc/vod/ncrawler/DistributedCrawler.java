@@ -1,69 +1,33 @@
 package br.ufmg.dcc.vod.ncrawler;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Set;
-
-import org.apache.log4j.Logger;
-
-import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.EvaluatorProxyImpl;
-import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.ServerID;
-import br.ufmg.dcc.vod.ncrawler.evaluator.Evaluator;
-import br.ufmg.dcc.vod.ncrawler.evaluator.ThreadSafeEvaluator;
-import br.ufmg.dcc.vod.ncrawler.processor.DistributedProcessor;
+import br.ufmg.dcc.vod.ncrawler.distributed.nio.service.NIOServer;
+import br.ufmg.dcc.vod.ncrawler.master.processor.ProcessorActor;
+import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Payload.UploadMessage;
+import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Worker.BaseResult;
 import br.ufmg.dcc.vod.ncrawler.queue.QueueService;
-import br.ufmg.dcc.vod.ncrawler.queue.Serializer;
-import br.ufmg.dcc.vod.ncrawler.stats.StatsPrinter;
+import br.ufmg.dcc.vod.ncrawler.stats.StatsActor;
 
-public class DistributedCrawler {
+public class DistributedCrawler extends ThreadedCrawler {
 
-	private static final Logger LOG = Logger.getLogger(DistributedCrawler.class);
-	
-	private final DistributedProcessor processor;
-	private final QueueService service;
-	
-	private final long sleep;
+	private final NIOServer<BaseResult> resultServer;
+	private final NIOServer<UploadMessage> fileServer;
 
-	private final StatsPrinter sp;
-	private final ThreadSafeEvaluator tEval;
-	private final Set<ServerID> workers;
-	private final EvaluatorProxyImpl evaluatorClient;
-
-	public <S> DistributedCrawler(Set<ServerID> workers, long sleep, EvaluatorProxyImpl evaluatorClient, 
-			Evaluator evaluator, File pQueueDir, Serializer<S> s, int fileSize) 
-		throws FileNotFoundException, IOException {
-		
-		this.workers =  workers;
-		this.sleep = sleep;
-		this.service = new QueueService();
-		
-		this.tEval = new ThreadSafeEvaluator(workers.size(), evaluator, service);
-		this.evaluatorClient = evaluatorClient;
-		this.evaluatorClient.wrap(tEval);
-		
-		this.processor = new DistributedProcessor(sleep, service, s, pQueueDir, fileSize, workers, evaluator, evaluatorClient);
-		this.sp = new StatsPrinter(service);
+	public DistributedCrawler(ProcessorActor processorActor, 
+			StatsActor statsActor, QueueService service, 
+			NIOServer<BaseResult> resultServer, 
+			NIOServer<UploadMessage> fileServer) {
+		super(processorActor, statsActor, service);
+		this.resultServer = resultServer;
+		this.fileServer = fileServer;
 	}
-	
-	public void crawl() throws Exception {
-		LOG.info("Starting Distributed: nWorkers=" + workers.size() + " , sleepTime="+sleep+"s");
 
-		tEval.setProcessor(processor);
-		tEval.setStatsKeeper(sp);
-		
-		//Starting
-		sp.start();
-		processor.start();
-		tEval.start();
-		
-		//Waiting until crawl ends
-		int wi = 10;
-		LOG.info("Waiting until crawl ends: waitInterval="+wi+"s");
-		this.service.waitUntilWorkIsDoneAndStop(wi);
-
-		LOG.info("Done! Stopping");
-		System.out.println("Done! Stopping");
-		LOG.info("Crawl done!");
+	@Override
+	public void crawl() {
+		this.resultServer.start(true);
+		this.fileServer.start(true);
+		super.crawl();
+		this.fileServer.shutdown();
+		this.resultServer.shutdown();
 	}
+
 }

@@ -1,34 +1,35 @@
 package br.ufmg.dcc.vod.ncrawler;
 
 import java.io.File;
-import java.rmi.AlreadyBoundException;
-import java.rmi.RemoteException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.EvaluatorProxyBuilder;
-import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.EvaluatorProxyImpl;
-import br.ufmg.dcc.vod.ncrawler.distributed.rmi.client.ServerID;
-import br.ufmg.dcc.vod.ncrawler.distributed.rmi.server.JobExecutorBuilder;
+import br.ufmg.dcc.vod.ncrawler.distributed.nio.service.NIOServer;
+import br.ufmg.dcc.vod.ncrawler.distributed.worker.JobExecutorListener;
+import br.ufmg.dcc.vod.ncrawler.jobs.JobExecutor;
 import br.ufmg.dcc.vod.ncrawler.jobs.test_evaluator.RandomizedSyncGraph;
-import br.ufmg.dcc.vod.ncrawler.jobs.test_evaluator.TestEvaluator;
-import br.ufmg.dcc.vod.ncrawler.jobs.test_evaluator.TestSerializer;
+import br.ufmg.dcc.vod.ncrawler.jobs.test_evaluator.TestFileSaver;
+import br.ufmg.dcc.vod.ncrawler.jobs.test_evaluator.TestJobExecutor;
+import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Worker.CrawlRequest;
 
 public class DistributedCrawlerTest  extends TestCase {
 
 	private File myTempDir;
-	private HashSet<JobExecutorBuilder> serverFactories;
-	private EvaluatorProxyBuilder<Integer, int[]> clientFactory;
-	private EvaluatorProxyImpl<Integer, int[]> clientImpl;
-	private HashSet<ServerID> ids;
+	private ArrayList<NIOServer<?>> servers;
 
 	@Before
 	public void setUp() throws Exception {
@@ -38,12 +39,7 @@ public class DistributedCrawlerTest  extends TestCase {
 		} while (myTempDir.exists());
 		
 		myTempDir.mkdirs();
-		serverFactories = new HashSet<JobExecutorBuilder>();
-		ids = new HashSet<ServerID>();
-		clientFactory = new EvaluatorProxyBuilder<Integer, int[]>(6060);
-		clientImpl = 
-				(EvaluatorProxyImpl<Integer, int[]>) 
-				clientFactory.createAndBind();
+		servers = new ArrayList<NIOServer<?>>();
 	}
 
 	@After
@@ -55,80 +51,103 @@ public class DistributedCrawlerTest  extends TestCase {
 		myTempDir.delete();
 		myTempDir.deleteOnExit();
 		
-		for (JobExecutorBuilder f : serverFactories) {
-			f.shutdown();
+		for (NIOServer<?> server : servers) {
+			server.shutdown();
 		}
-		
-		clientFactory.shutdown();
 	}
 	
-	public void initiateServers(int numServers) throws RemoteException, AlreadyBoundException {
+	public Set<InetSocketAddress> initiateServers(int numServers, 
+			RandomizedSyncGraph g) {
+		Set<InetSocketAddress> ids = new HashSet<>();
 		for (int i = 0; i < numServers; i++) {
-			JobExecutorBuilder jef = new JobExecutorBuilder(5000 + i);
-			jef.createAndBind();
-			ids.add(new ServerID("localhost", 5000+i));
-			serverFactories.add(jef);
+			JobExecutor jobExecutor = new TestJobExecutor(g);
+			JobExecutorListener listener = new JobExecutorListener(jobExecutor);
+			NIOServer<CrawlRequest> server = new NIOServer<>(1, "localhost", 
+					5000 + i, listener);
+			server.start(true);
+			ids.add(new InetSocketAddress("localhost", 5000 + i));
+			servers.add(server);
 		}
+		
+		return ids;
 	}
 	
 	@Test
 	public void testCrawl1Thread() throws Exception {
-		initiateServers(1);
 		
 		RandomizedSyncGraph g = new RandomizedSyncGraph(100);
+		Set<InetSocketAddress> workerAddrs = initiateServers(1, g);
 		
-		TestEvaluator te = new TestEvaluator(g);
-		DistributedCrawler dc = new DistributedCrawler(ids, 0, clientImpl, te, myTempDir, new TestSerializer(g) ,1024 * 1024);
+		TestFileSaver saver = new TestFileSaver();
 		
-		dc.crawl();
+		String host = "localhost";
+		Crawler crawler = 
+				CrawlerFactory.createDistributedCrawler(host, 4540, 
+						"localhost", 4541, workerAddrs, myTempDir, saver);
 		
-		Map<Integer, int[]> crawled = te.getCrawled();
+		crawler.dispatch("0");
+		crawler.crawl();
+		
+		Map<Integer, byte[]> crawled = saver.getCrawled();
 		doTheAsserts(crawled, g);
 	}
 
 
 	@Test
 	public void testCrawl2Thread() throws Exception {
-		initiateServers(2);
 		
 		RandomizedSyncGraph g = new RandomizedSyncGraph(100);
+		Set<InetSocketAddress> workerAddrs = initiateServers(2, g);
 		
-		TestEvaluator te = new TestEvaluator(g);
-		DistributedCrawler dc = new DistributedCrawler(ids, 0, clientImpl, te, myTempDir, new TestSerializer(g) ,1024 * 1024);
+		TestFileSaver saver = new TestFileSaver();
 		
-		dc.crawl();
+		String host = "localhost";
+		Crawler crawler = 
+				CrawlerFactory.createDistributedCrawler(host, 4540, 
+						"localhost", 4541, workerAddrs, myTempDir, saver);
 		
-		Map<Integer, int[]> crawled = te.getCrawled();
+		crawler.dispatch("0");
+		crawler.crawl();
+		
+		Map<Integer, byte[]> crawled = saver.getCrawled();
 		doTheAsserts(crawled, g);
 	}
 	
 	@Test
 	public void testCrawl100Thread() throws Exception {
-		initiateServers(100);
 		
 		RandomizedSyncGraph g = new RandomizedSyncGraph(100);
+		Set<InetSocketAddress> workerAddrs = initiateServers(100, g);
 		
-		TestEvaluator te = new TestEvaluator(g);
-		DistributedCrawler dc = new DistributedCrawler(ids, 0, clientImpl, te, myTempDir, new TestSerializer(g) ,1024 * 1024);
+		TestFileSaver saver = new TestFileSaver();
 		
-		dc.crawl();
+		String host = "localhost";
+		Crawler crawler = 
+				CrawlerFactory.createDistributedCrawler(host, 4540, 
+						"localhost", 4541, workerAddrs, myTempDir, saver);
 		
-		Map<Integer, int[]> crawled = te.getCrawled();
+		crawler.dispatch("0");
+		crawler.crawl();
+		
+		Map<Integer, byte[]> crawled = saver.getCrawled();
 		doTheAsserts(crawled, g);
 	}
 
-	private void doTheAsserts(Map<Integer, int[]> crawled, RandomizedSyncGraph g) {
-		assertEquals(crawled.size(), g.getNumVertex());
+	
+	private void doTheAsserts(Map<Integer, byte[]> crawled, 
+			RandomizedSyncGraph g) {
+		assertEquals(g.getNumVertex(), crawled.size());
 		
-		for (Entry<Integer, int[]> e: crawled.entrySet()) {
+		for (Entry<Integer, byte[]> e: crawled.entrySet()) {
 			
 			int[] neighbours = g.getNeighbours(e.getKey());
-			int[] value = e.getValue();
+			IntBuffer buff = ByteBuffer.wrap(e.getValue()).asIntBuffer();
+			buff.rewind();
 			
-			assertEquals(neighbours.length, value.length);
 			for (int i = 0; i < neighbours.length; i++) {
-				assertEquals(neighbours[i], value[i]);
+				assertEquals(neighbours[i], buff.get());
 			}
+			Assert.assertFalse(buff.hasRemaining());
 		}
 	}
 }

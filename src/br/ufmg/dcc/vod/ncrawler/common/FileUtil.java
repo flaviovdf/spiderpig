@@ -84,7 +84,6 @@ public class FileUtil {
 	    	}
 	    }
 	}
-
 	
 	/**
 	 * Reads the given file to a {@link LinkedHashSet} where each line is an 

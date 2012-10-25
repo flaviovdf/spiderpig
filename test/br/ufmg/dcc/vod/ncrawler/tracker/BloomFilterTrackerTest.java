@@ -12,9 +12,9 @@ public class BloomFilterTrackerTest {
 				new BloomFilterTrackerFactory<String>().createTracker(
 						String.class);
 		
-		bf.crawled("oi");
-		bf.crawled("tudo");
-		bf.crawled("bem");
+		Assert.assertTrue(bf.crawled("oi"));
+		Assert.assertTrue(bf.crawled("tudo"));
+		Assert.assertTrue(bf.crawled("bem"));
 		
 		Assert.assertEquals(3, bf.numCrawled());
 		Assert.assertTrue(bf.wasCrawled("oi"));
@@ -22,7 +22,7 @@ public class BloomFilterTrackerTest {
 		Assert.assertTrue(bf.wasCrawled("bem"));
 		Assert.assertFalse(bf.wasCrawled("bala"));
 		
-		bf.crawled("oi");
+		Assert.assertFalse(bf.crawled("oi"));
 		Assert.assertEquals(3, bf.numCrawled());
 	}
 

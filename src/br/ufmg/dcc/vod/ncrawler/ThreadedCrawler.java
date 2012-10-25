@@ -1,58 +1,56 @@
 package br.ufmg.dcc.vod.ncrawler;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import br.ufmg.dcc.vod.ncrawler.evaluator.Evaluator;
-import br.ufmg.dcc.vod.ncrawler.evaluator.ThreadSafeEvaluator;
-import br.ufmg.dcc.vod.ncrawler.processor.ThreadedProcessor;
+import br.ufmg.dcc.vod.ncrawler.master.processor.ProcessorActor;
 import br.ufmg.dcc.vod.ncrawler.queue.QueueService;
-import br.ufmg.dcc.vod.ncrawler.queue.Serializer;
-import br.ufmg.dcc.vod.ncrawler.stats.StatsPrinter;
+import br.ufmg.dcc.vod.ncrawler.stats.StatsActor;
 
-public class ThreadedCrawler {
+import com.google.common.base.Preconditions;
+
+public class ThreadedCrawler implements Crawler {
 
 	private static final Logger LOG = Logger.getLogger(ThreadedCrawler.class);
 	
-	private final ThreadedProcessor processor;
+	private final StatsActor statsActor;
 	private final QueueService service;
-	
-	private final int nThreads;
-	private final long sleep;
+	private final ProcessorActor processorActor;
 
-	private final StatsPrinter sp;
-	private final ThreadSafeEvaluator eval;
-
-	public <S> ThreadedCrawler(int nThreads, long sleep, Evaluator evaluator, File pQueueDir, Serializer<S> s, int fileSize) 
-		throws FileNotFoundException, IOException {
+	protected ThreadedCrawler(ProcessorActor processorActor, 
+			StatsActor statsActor, QueueService service) {
+		Preconditions.checkNotNull(processorActor);
+		Preconditions.checkNotNull(service);
 		
-		this.nThreads = nThreads;
-		this.sleep = sleep;
-		this.service = new QueueService();
-		this.sp = new StatsPrinter(service);
-		this.eval = new ThreadSafeEvaluator(nThreads, evaluator, service);
-		this.processor = new ThreadedProcessor(nThreads, sleep, service, s, pQueueDir, fileSize, eval);
+		this.processorActor = processorActor;
+		this.statsActor = statsActor;
+		this.service = service;
 	}
 	
-	public void crawl() throws Exception {
-		LOG.info("Starting ThreadedCrawler: nThreads="+nThreads + " , sleepTime="+sleep+"s");
+	public void dispatch(List<String> seed) {
+		for (String crawlID : seed)
+			this.processorActor.dispatch(crawlID);
+	}
 
-		eval.setProcessor(processor);
-		eval.setStatsKeeper(sp);
-		
+	public void dispatch(String... seed) {
+		for (String crawlID : seed)
+			this.processorActor.dispatch(crawlID);
+	}
+	
+	public void crawl() {
+		LOG.info("Starting Crawler");
+
 		//Starting
-		sp.start();
-		processor.start();
-		eval.start();
+		if (statsActor != null)
+			statsActor.start();
+		processorActor.start();
 		
 		//Waiting until crawl ends
 		int wi = 10;
 		LOG.info("Waiting until crawl ends: waitInterval="+wi+"s");
 		this.service.waitUntilWorkIsDoneAndStop(wi);
-
+		
 		LOG.info("Done! Stopping");
 		System.out.println("Done! Stopping");
 		LOG.info("Crawl done!");

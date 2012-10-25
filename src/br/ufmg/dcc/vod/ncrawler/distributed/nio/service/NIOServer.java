@@ -28,7 +28,7 @@ public class NIOServer<T extends MessageLite> extends AbstractNIOService
 	protected AsynchronousServerSocketChannel serverSocket;
 	private final MessageListener<T> listener;
 
-	public NIOServer(int nThreads, String hostname, int port, 
+	public NIOServer(int nThreads, String hostname, final int port, 
 			MessageListener<T> listener) {
 		super(nThreads);
 		this.hostname = hostname;

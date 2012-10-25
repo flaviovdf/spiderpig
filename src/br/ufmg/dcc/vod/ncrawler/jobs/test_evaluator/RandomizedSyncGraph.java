@@ -4,8 +4,12 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Random;
 
+import br.ufmg.dcc.vod.ncrawler.common.Constants;
+
 public class RandomizedSyncGraph implements Serializable {
 
+	private static final long serialVersionUID = Constants.SERIAL_UID;
+	
 	private final int numVertex;
 	private int[][] graph;
 	
