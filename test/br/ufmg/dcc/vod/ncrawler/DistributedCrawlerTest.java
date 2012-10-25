@@ -116,7 +116,7 @@ public class DistributedCrawlerTest  extends TestCase {
 	@Test
 	public void testCrawl100Thread() throws Exception {
 		
-		RandomizedSyncGraph g = new RandomizedSyncGraph(100);
+		RandomizedSyncGraph g = new RandomizedSyncGraph(200);
 		Set<InetSocketAddress> workerAddrs = initiateServers(100, g);
 		
 		TestFileSaver saver = new TestFileSaver();
