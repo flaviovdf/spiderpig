@@ -15,9 +15,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import br.ufmg.dcc.vod.ncrawler.jobs.JobExecutor;
-import br.ufmg.dcc.vod.ncrawler.jobs.test_evaluator.RandomizedSyncGraph;
-import br.ufmg.dcc.vod.ncrawler.jobs.test_evaluator.TestFileSaver;
-import br.ufmg.dcc.vod.ncrawler.jobs.test_evaluator.TestJobExecutor;
+import br.ufmg.dcc.vod.ncrawler.jobs.test.RandomizedSyncGraph;
+import br.ufmg.dcc.vod.ncrawler.jobs.test.TestFileSaver;
+import br.ufmg.dcc.vod.ncrawler.jobs.test.TestJobExecutor;
 
 public class ThreadedCrawlerTest extends TestCase {
 
