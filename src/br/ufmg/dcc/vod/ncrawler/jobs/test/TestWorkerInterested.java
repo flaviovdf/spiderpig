@@ -1,4 +1,4 @@
-package br.ufmg.dcc.vod.ncrawler.jobs.test_evaluator;
+package br.ufmg.dcc.vod.ncrawler.jobs.test;
 
 import java.util.ArrayList;
 import java.util.Collections;
