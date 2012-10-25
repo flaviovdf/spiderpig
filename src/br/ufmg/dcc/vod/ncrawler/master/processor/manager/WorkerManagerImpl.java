@@ -40,12 +40,12 @@ public class WorkerManagerImpl implements WorkerManager {
 		try {
 			this.lock.lock();
 		
-			while (this.allocMap.containsKey(crawlID))
+			if (this.allocMap.containsKey(crawlID))
 				return null;
 			
 			LinkedList<WorkerID> idle = (LinkedList<WorkerID>) 
 					this.stateMap.get(WorkerState.IDLE);
-			if (idle.size() == 0)
+			while (idle.size() == 0)
 				this.waitCondition.await();
 			
 			//Can only reach here with at least one element
@@ -66,7 +66,7 @@ public class WorkerManagerImpl implements WorkerManager {
 			WorkerID workerID = this.allocMap.remove(crawlID);
 			if (workerID != null) {
 				String remove = this.inverseAllocMap.remove(workerID);
-				assert remove == crawlID;
+				assert remove.equals(crawlID);
 				
 				this.stateMap.get(WorkerState.BUSY).remove(workerID);
 				this.stateMap.get(WorkerState.IDLE).add(workerID);
@@ -87,7 +87,7 @@ public class WorkerManagerImpl implements WorkerManager {
 			String crawlID = this.inverseAllocMap.remove(workerID);
 			if (crawlID != null) {
 				WorkerID remove = this.allocMap.remove(crawlID);
-				assert remove == workerID;
+				assert remove.equals(workerID);
 				this.stateMap.get(WorkerState.BUSY).remove(workerID);
 			} else {
 				this.stateMap.get(WorkerState.IDLE).remove(workerID);
