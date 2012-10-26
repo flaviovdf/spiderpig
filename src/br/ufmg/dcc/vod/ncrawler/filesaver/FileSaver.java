@@ -15,5 +15,12 @@ public interface FileSaver {
 	 * @param payload Content of the file
 	 */
 	public void save(String fileID, byte[] payload);
+
+	/**
+	 * Get's the number of saved files
+	 * 
+	 * @return number of saved files
+	 */
+	public int numSaved();
 	
 }

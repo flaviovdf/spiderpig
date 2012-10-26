@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.StandardOpenOption;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 
@@ -19,6 +20,7 @@ public class FileSaverImpl implements FileSaver {
 
 	private static final Logger LOG = Logger.getLogger(UploadListener.class);
 	private final String saveFolder;
+	private final AtomicInteger saved;
 	
 	/**
 	 * Creates a new file saver which will store files at the given folder.
@@ -27,6 +29,7 @@ public class FileSaverImpl implements FileSaver {
 	 */
 	public FileSaverImpl(String saveFolder){
 		this.saveFolder = saveFolder;
+		this.saved = new AtomicInteger(0);
 	}
 	
 	@Override
@@ -53,5 +56,12 @@ public class FileSaverImpl implements FileSaver {
 				}
 			}
 		}
+		
+		saved.incrementAndGet();
+	}
+
+	@Override
+	public int numSaved() {
+		return saved.get();
 	}
 }

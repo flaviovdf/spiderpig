@@ -23,4 +23,9 @@ public class FileSaverProxy implements FileSaver {
 		this.messageSender.send(fileSaverHost, fileSaverPort, msg);
 	}
 
+	@Override
+	public int numSaved() {
+		return 0;
+	}
+
 }
