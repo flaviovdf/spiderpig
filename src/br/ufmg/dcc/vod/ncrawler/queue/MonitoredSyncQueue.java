@@ -23,12 +23,12 @@ import br.ufmg.dcc.vod.ncrawler.common.Tuple;
  * When using queues for communication it is important to only add an element to a
  * communication queue after calling the <code>done</code> method on the queue
  * the current thread is consuming.
- * 
- * @param <T>
- *            Type of objects to store
  */
-class MonitoredSyncQueue<T> {
+class MonitoredSyncQueue {
 
+	public static final Object POISON = new Object();
+	private volatile boolean poisoned = false;
+	
 	//Stamps
 	private final AtomicInteger workHandle = new AtomicInteger(0);
 	private final AtomicInteger timeStamp = new AtomicInteger(0);
@@ -37,27 +37,21 @@ class MonitoredSyncQueue<T> {
 	//Get lock
 	private final ReentrantLock lock;
 	private final Condition getCondition;
-	private final Condition putCondition;
 	
 	private final String label;
-	private final EventQueue<T> e;
-	private final int maxSize;
+	
+	private final EventQueue<Object> e;
 
-	public MonitoredSyncQueue(String label, EventQueue<T> e) {
-		this(label, e, Integer.MAX_VALUE);
-	}
-
-	public MonitoredSyncQueue(String label, EventQueue<T> e, int maxSize) {
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	public MonitoredSyncQueue(String label, EventQueue e) {
 		this.label = label;
 		this.e = e;
-		this.maxSize = maxSize;
 		this.stampLock = new ReentrantReadWriteLock();
 		this.lock = new ReentrantLock();
 		this.getCondition = lock.newCondition();
-		this.putCondition = lock.newCondition();
 	}
 
-	public void put(T t) throws InterruptedException {
+	public void put(Object t) {
 		try {
 			stampLock.writeLock().lock();
 			this.workHandle.incrementAndGet();
@@ -67,38 +61,34 @@ class MonitoredSyncQueue<T> {
 		}
 		
 		try {
-			lock.lockInterruptibly();
-			while (e.size() == maxSize)
-				putCondition.await();
-			
+			lock.lock();
 			e.put(t);
 			getCondition.signal();
-		} catch (InterruptedException e) {
-			putCondition.signal(); //wake someone else for waiting
-			throw e;
 		} finally {
 			lock.unlock();
 		}
 	}
 
-	public T claim() throws InterruptedException {
+	public Object claim() {
 		try {
-			lock.lockInterruptibly();
-			while (e.size() == 0)
-				getCondition.await();
-			
-			T take = e.take();
-			putCondition.signal();
-			return take;
-		} catch (InterruptedException e) {
-			getCondition.signal(); //wake someone else for waiting
-			throw e;
+			lock.lock();
+			while (e.size() == 0 && !poisoned)
+				try {
+					getCondition.await();
+				} catch (InterruptedException e) {
+				}
+
+			if (!poisoned) {
+				Object take = e.take();
+				return take;
+			} else
+				return POISON;
 		} finally {
 			lock.unlock();
 		}
 	}
 
-	public void done(T claimed) {
+	public void done(Object claimed) {
 		try {
 			stampLock.writeLock().lock();
 			this.workHandle.decrementAndGet();
@@ -123,5 +113,12 @@ class MonitoredSyncQueue<T> {
 	@Override
 	public String toString() {
 		return label;
+	}
+
+	public void poison() {
+		lock.lock();
+		poisoned = true;
+		getCondition.signalAll();
+		lock.unlock();
 	}
 }

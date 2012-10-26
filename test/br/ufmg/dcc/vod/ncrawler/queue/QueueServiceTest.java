@@ -71,7 +71,7 @@ public class QueueServiceTest extends TestCase {
 	 */
 	public void testWaitUntilWorkIsDone1Queue() throws Exception {
 		QueueHandle handle = qs.createMessageQueue();
-		MonitoredSyncQueue<?> q = qs.getMessageQueue(handle);
+		MonitoredSyncQueue q = qs.getMessageQueue(handle);
 		
 		for (int i = 0 ; i < 10000; i++) {
 			qs.sendObjectToQueue(handle, i);
@@ -100,11 +100,11 @@ public class QueueServiceTest extends TestCase {
 	 */
 	public void testWaitUntilWorkIsDoneMultipleQueues() throws Exception {
 		QueueHandle handle1 = qs.createMessageQueue();
-		MonitoredSyncQueue<?> q1 = qs.getMessageQueue(handle1);
+		MonitoredSyncQueue q1 = qs.getMessageQueue(handle1);
 		QueueHandle handle2 = qs.createMessageQueue();
-		MonitoredSyncQueue<?> q2 = qs.getMessageQueue(handle2);
+		MonitoredSyncQueue q2 = qs.getMessageQueue(handle2);
 		QueueHandle handle3 = qs.createMessageQueue();
-		MonitoredSyncQueue<?> q3 = qs.getMessageQueue(handle3);
+		MonitoredSyncQueue q3 = qs.getMessageQueue(handle3);
 		
 		for (int i = 0 ; i < 30000; i++) {
 			qs.sendObjectToQueue(handle1, i);
@@ -154,11 +154,11 @@ public class QueueServiceTest extends TestCase {
 	 */
 	public void testWaitUntilWorkIsDoneExchangedQueueObjects() throws Exception {
 		QueueHandle handle1 = qs.createMessageQueue();
-		MonitoredSyncQueue<?> q1 = qs.getMessageQueue(handle1);
+		MonitoredSyncQueue q1 = qs.getMessageQueue(handle1);
 		QueueHandle handle2 = qs.createMessageQueue();
-		MonitoredSyncQueue<?> q2 = qs.getMessageQueue(handle2);
+		MonitoredSyncQueue q2 = qs.getMessageQueue(handle2);
 		QueueHandle handle3 = qs.createMessageQueue();
-		MonitoredSyncQueue<?> q3 = qs.getMessageQueue(handle3);
+		MonitoredSyncQueue q3 = qs.getMessageQueue(handle3);
 		
 		for (int i = 0 ; i < 10000; i++) {
 			qs.sendObjectToQueue(handle1, i);
@@ -198,11 +198,11 @@ public class QueueServiceTest extends TestCase {
 	 */
 	public void testWaitUntilWorkIsDoneExchangedQueueObjects100() throws Exception {
 		QueueHandle handle1 = qs.createMessageQueue();
-		MonitoredSyncQueue<?> q1 = qs.getMessageQueue(handle1);
+		MonitoredSyncQueue q1 = qs.getMessageQueue(handle1);
 		QueueHandle handle2 = qs.createMessageQueue();
-		MonitoredSyncQueue<?> q2 = qs.getMessageQueue(handle2);
+		MonitoredSyncQueue q2 = qs.getMessageQueue(handle2);
 		QueueHandle handle3 = qs.createMessageQueue();
-		MonitoredSyncQueue<?> q3 = qs.getMessageQueue(handle3);
+		MonitoredSyncQueue q3 = qs.getMessageQueue(handle3);
 		
 		for (int i = 0 ; i < 10000; i++) {
 			qs.sendObjectToQueue(handle1, i);
@@ -243,11 +243,11 @@ public class QueueServiceTest extends TestCase {
 	 */
 	public void testWaitUntilWorkIsDoneExchangedQueueObjects2TimesBounce() throws Exception {
 		QueueHandle handle1 = qs.createMessageQueue();
-		MonitoredSyncQueue<?> q1 = qs.getMessageQueue(handle1);
+		MonitoredSyncQueue q1 = qs.getMessageQueue(handle1);
 		QueueHandle handle2 = qs.createMessageQueue();
-		MonitoredSyncQueue<?> q2 = qs.getMessageQueue(handle2);
+		MonitoredSyncQueue q2 = qs.getMessageQueue(handle2);
 		QueueHandle handle3 = qs.createMessageQueue();
-		MonitoredSyncQueue<?> q3 = qs.getMessageQueue(handle3);
+		MonitoredSyncQueue q3 = qs.getMessageQueue(handle3);
 		
 		for (int i = 0 ; i < 10000; i++) {
 			qs.sendObjectToQueue(handle1, i);
@@ -287,7 +287,7 @@ public class QueueServiceTest extends TestCase {
 		SI si = new SI();
 		
 		QueueHandle handle = qs.createPersistentMessageQueue(f1, si, 1024 * 1024);
-		MonitoredSyncQueue<?> q = qs.getMessageQueue(handle);
+		MonitoredSyncQueue q = qs.getMessageQueue(handle);
 		
 		for (int i = 0 ; i < 10000; i++) {
 			qs.sendObjectToQueue(handle, i);
@@ -314,11 +314,11 @@ public class QueueServiceTest extends TestCase {
 		SI si = new SI();
 		
 		QueueHandle handle1 = qs.createPersistentMessageQueue(f1, si, 1024 * 1024);
-		MonitoredSyncQueue<?> q1 = qs.getMessageQueue(handle1);
+		MonitoredSyncQueue q1 = qs.getMessageQueue(handle1);
 		QueueHandle handle2 = qs.createPersistentMessageQueue(f2, si, 1024 * 1024);
-		MonitoredSyncQueue<?> q2 = qs.getMessageQueue(handle2);
+		MonitoredSyncQueue q2 = qs.getMessageQueue(handle2);
 		QueueHandle handle3 = qs.createPersistentMessageQueue(f3, si, 1024 * 1024);
-		MonitoredSyncQueue<?> q3 = qs.getMessageQueue(handle3);
+		MonitoredSyncQueue q3 = qs.getMessageQueue(handle3);
 		
 		for (int i = 0 ; i < 30000; i++) {
 			qs.sendObjectToQueue(handle1, i);
@@ -365,11 +365,11 @@ public class QueueServiceTest extends TestCase {
 		SI si = new SI();
 		
 		QueueHandle handle1 = qs.createPersistentMessageQueue(f1, si, 1024 * 1024);
-		MonitoredSyncQueue<?> q1 = qs.getMessageQueue(handle1);
+		MonitoredSyncQueue q1 = qs.getMessageQueue(handle1);
 		QueueHandle handle2 = qs.createPersistentMessageQueue(f2, si, 1024 * 1024);
-		MonitoredSyncQueue<?> q2 = qs.getMessageQueue(handle2);
+		MonitoredSyncQueue q2 = qs.getMessageQueue(handle2);
 		QueueHandle handle3 = qs.createPersistentMessageQueue(f3, si, 1024 * 1024);
-		MonitoredSyncQueue<?> q3 = qs.getMessageQueue(handle3);
+		MonitoredSyncQueue q3 = qs.getMessageQueue(handle3);
 		
 		for (int i = 0 ; i < 10000; i++) {
 			qs.sendObjectToQueue(handle1, i);
@@ -406,11 +406,11 @@ public class QueueServiceTest extends TestCase {
 		SI si = new SI();
 		
 		QueueHandle handle1 = qs.createPersistentMessageQueue(f1, si, 1024 * 1024);
-		MonitoredSyncQueue<?> q1 = qs.getMessageQueue(handle1);
+		MonitoredSyncQueue q1 = qs.getMessageQueue(handle1);
 		QueueHandle handle2 = qs.createPersistentMessageQueue(f2, si, 1024 * 1024);
-		MonitoredSyncQueue<?> q2 = qs.getMessageQueue(handle2);
+		MonitoredSyncQueue q2 = qs.getMessageQueue(handle2);
 		QueueHandle handle3 = qs.createPersistentMessageQueue(f3, si, 1024 * 1024);
-		MonitoredSyncQueue<?> q3 = qs.getMessageQueue(handle3);
+		MonitoredSyncQueue q3 = qs.getMessageQueue(handle3);
 		
 		for (int i = 0 ; i < 10000; i++) {
 			qs.sendObjectToQueue(handle1, i);
@@ -448,11 +448,11 @@ public class QueueServiceTest extends TestCase {
 		SI si = new SI();
 		
 		QueueHandle handle1 = qs.createPersistentMessageQueue(f1, si, 1024 * 1024);
-		MonitoredSyncQueue<?> q1 = qs.getMessageQueue(handle1);
+		MonitoredSyncQueue q1 = qs.getMessageQueue(handle1);
 		QueueHandle handle2 = qs.createPersistentMessageQueue(f2, si, 1024 * 1024);
-		MonitoredSyncQueue<?> q2 = qs.getMessageQueue(handle2);
+		MonitoredSyncQueue q2 = qs.getMessageQueue(handle2);
 		QueueHandle handle3 = qs.createPersistentMessageQueue(f3, si, 1024 * 1024);
-		MonitoredSyncQueue<?> q3 = qs.getMessageQueue(handle3);
+		MonitoredSyncQueue q3 = qs.getMessageQueue(handle3);
 		
 		for (int i = 0 ; i < 10000; i++) {
 			qs.sendObjectToQueue(handle1, i);
@@ -492,11 +492,11 @@ public class QueueServiceTest extends TestCase {
 		SI si = new SI();
 		
 		QueueHandle handle1 = qs.createPersistentMessageQueue(f1, si, 1024 * 1024);
-		MonitoredSyncQueue<?> q1 = qs.getMessageQueue(handle1);
+		MonitoredSyncQueue q1 = qs.getMessageQueue(handle1);
 		QueueHandle handle2 = qs.createPersistentMessageQueue(f2, si, 1024 * 1024);
-		MonitoredSyncQueue<?> q2 = qs.getMessageQueue(handle2);
+		MonitoredSyncQueue q2 = qs.getMessageQueue(handle2);
 		QueueHandle handle3 = qs.createMessageQueue();
-		MonitoredSyncQueue<?> q3 = qs.getMessageQueue(handle3);
+		MonitoredSyncQueue q3 = qs.getMessageQueue(handle3);
 		
 		for (int i = 0 ; i < 10000; i++) {
 			qs.sendObjectToQueue(handle1, i);
@@ -531,17 +531,15 @@ public class QueueServiceTest extends TestCase {
 	}
 	
 	
-	//OneHas LIMITS!!
-	
 	public void testWaitUntilWorkIsDoneExchangedQueueObjects2TimesBounceNDL() throws Exception {
 		SI si = new SI();
 		
 		QueueHandle handle1 = qs.createPersistentMessageQueue(f1, si, 1024 * 1024);
-		MonitoredSyncQueue<?> q1 = qs.getMessageQueue(handle1);
-		QueueHandle handle2 = qs.createLimitedBlockMessageQueue(2);
-		MonitoredSyncQueue<?> q2 = qs.getMessageQueue(handle2);
+		MonitoredSyncQueue q1 = qs.getMessageQueue(handle1);
+		QueueHandle handle2 = qs.createMessageQueue();
+		MonitoredSyncQueue q2 = qs.getMessageQueue(handle2);
 		QueueHandle handle3 = qs.createMessageQueue();
-		MonitoredSyncQueue<?> q3 = qs.getMessageQueue(handle3);
+		MonitoredSyncQueue q3 = qs.getMessageQueue(handle3);
 		
 		for (int i = 0 ; i < 10000; i++) {
 			qs.sendObjectToQueue(handle1, i);

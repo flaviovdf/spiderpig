@@ -3,11 +3,16 @@ package br.ufmg.dcc.vod.ncrawler.queue;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import br.ufmg.dcc.vod.ncrawler.common.Tuple;
@@ -21,7 +26,14 @@ import br.ufmg.dcc.vod.ncrawler.common.Tuple;
  */
 public class QueueService {
 
-	private final Map<QueueHandle, MonitoredSyncQueue<?>> ids = Collections.synchronizedMap(new HashMap<QueueHandle, MonitoredSyncQueue<?>>());
+	private final Map<QueueHandle, MonitoredSyncQueue> ids = 
+			Collections.synchronizedMap(
+					new HashMap<QueueHandle, MonitoredSyncQueue>());
+	
+	private final Map<QueueHandle, List<WorkerRunnable<?>>> runnables = 
+			Collections.synchronizedMap(
+					new HashMap<QueueHandle, List<WorkerRunnable<?>>>());
+	
 	private final ExecutorService executor = Executors.newCachedThreadPool();
 	private final AtomicInteger i = new AtomicInteger(0);
 
@@ -43,7 +55,8 @@ public class QueueService {
 	 */
 	public <T> QueueHandle createMessageQueue(String label) {
 		QueueHandle h = new QueueHandle(i.incrementAndGet());
-		this.ids.put(h, new MonitoredSyncQueue<T>(label, new SimpleEventQueue<T>()));
+		this.ids.put(h, new MonitoredSyncQueue(label, 
+				new SimpleEventQueue<T>()));
 		return h;
 	}
 	
@@ -60,7 +73,8 @@ public class QueueService {
 	 * @throws IOException In case and io error occurs 
 	 * @throws FileNotFoundException  In case the file does not exist
 	 */
-	public <T> QueueHandle createPersistentMessageQueue(File f, Serializer<T> serializer, int bytes) 
+	public <T> QueueHandle createPersistentMessageQueue(File f, 
+			Serializer<T> serializer, int bytes) 
 					throws FileNotFoundException, IOException {
 		return createPersistentMessageQueue("", f, serializer, bytes);
 	}
@@ -79,36 +93,13 @@ public class QueueService {
 	 * @throws IOException In case and io error occurs 
 	 * @throws FileNotFoundException  In case the file does not exist
 	 */
-	public <T> QueueHandle createPersistentMessageQueue(String label, File f, Serializer<T> serializer, int bytes) throws FileNotFoundException, IOException {
+	public <T> QueueHandle createPersistentMessageQueue(String label, File f, 
+			Serializer<T> serializer, int bytes) 
+					throws FileNotFoundException, IOException {
 		QueueHandle h = new QueueHandle(i.incrementAndGet());
-		MultiFileMMapFifoQueue<T> memoryMappedQueue = new MultiFileMMapFifoQueue<T>(f, serializer, bytes);
-		this.ids.put(h, new MonitoredSyncQueue<T>(label, memoryMappedQueue));
-		return h;
-	}
-	
-	/**
-	 * Creates a new message queue which can hold a limited number of objects
-	 * 
-	 * @param max Maximum number of elements 
-	 * 
-	 * @return A queue handle
-	 */
-	public QueueHandle createLimitedBlockMessageQueue(int max) {
-		return createLimitedBlockMessageQueue("", max);
-	}
-
-
-	/**
-	 * Creates a new message queue which can hold a limited number of objects
-	 *
-	 * @param label Label
-	 * @param max Maximum number of elements
-	 * 
-	 * @return A queue handle
-	 */
-	public <T> QueueHandle createLimitedBlockMessageQueue(String label, int max) {
-		QueueHandle h = new QueueHandle(i.incrementAndGet());
-		this.ids.put(h, new MonitoredSyncQueue<T>(label, new SimpleEventQueue<T>(), max));
+		MultiFileMMapFifoQueue<T> memoryMappedQueue = 
+				new MultiFileMMapFifoQueue<T>(f, serializer, bytes);
+		this.ids.put(h, new MonitoredSyncQueue(label, memoryMappedQueue));
 		return h;
 	}
 	
@@ -124,7 +115,12 @@ public class QueueService {
 			throw new QueueServiceException("Unknown handle");
 		}
 	
-		WorkerRunnable<T> runnable = new WorkerRunnable<T>((MonitoredSyncQueue<T>) this.ids.get(h), p);
+		WorkerRunnable<T> runnable = new WorkerRunnable<T>(this.ids.get(h), p);
+		List<WorkerRunnable<?>> list = runnables.get(h);
+		if (list == null)
+			list = new ArrayList<>();
+			runnables.put(h, list);
+		list.add(runnable);
 		executor.execute(runnable);
 	}
 
@@ -136,12 +132,13 @@ public class QueueService {
 	 * 
 	 * @throws InterruptedException 
 	 */
-	public <T> void sendObjectToQueue(QueueHandle h, T t) throws InterruptedException {
+	public <T> void sendObjectToQueue(QueueHandle h, T t) 
+			throws InterruptedException {
 		if (!this.ids.containsKey(h)) {
 			throw new QueueServiceException("Unknown handle");
 		}
 	
-		((MonitoredSyncQueue<T>) this.ids.get(h)).put(t);
+		this.ids.get(h).put(t);
 	}
 	
 	/**
@@ -169,7 +166,7 @@ public class QueueService {
 				//Acquiring time stamps
 				int[] stamps = new int[ids.size()];
 				int i = 0;
-				for (MonitoredSyncQueue<?> m : ids.values()) {
+				for (MonitoredSyncQueue m : ids.values()) {
 					Tuple<Integer, Integer> sizeAndTimeStamp = m.synchronizationData();
 					if (sizeAndTimeStamp.first != 0) {
 						someoneIsWorking = true;
@@ -183,7 +180,7 @@ public class QueueService {
 				//Verifying if stamps changed
 				i = 0;
 				if (!someoneIsWorking) {
-					for (MonitoredSyncQueue<?> m : ids.values()) {
+					for (MonitoredSyncQueue m : ids.values()) {
 						Tuple<Integer, Integer> sizeAndTimeStamp = m.synchronizationData();
 						if (sizeAndTimeStamp.first != 0 || stamps[i] != sizeAndTimeStamp.second) {
 							someoneIsWorking = true;
@@ -205,7 +202,21 @@ public class QueueService {
 	
 	public void waitUntilWorkIsDoneAndStop(int secondsBetweenChecks) {
 		waitUntilWorkIsDone(secondsBetweenChecks);
-		this.executor.shutdownNow();
+		
+		try {
+			for (Entry<QueueHandle, MonitoredSyncQueue> e : ids.entrySet()) {
+				QueueHandle h = e.getKey();
+				MonitoredSyncQueue m = e.getValue();
+				m.poison();
+				
+				for (WorkerRunnable<?> runnable : runnables.get(h))
+					runnable.awaitTermination();
+			}
+			this.executor.shutdown();
+			this.executor.awaitTermination(Long.MAX_VALUE, 
+					TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+		}
 	}
 	
 	/**
@@ -213,35 +224,42 @@ public class QueueService {
 	 */
 	private class WorkerRunnable<T> extends Thread {
 		
-		private final MonitoredSyncQueue<T> q;
+		private final MonitoredSyncQueue q;
 		private final QueueProcessor<T> p;
+		private final CountDownLatch latch;
 		
-		public WorkerRunnable(MonitoredSyncQueue<T> q, QueueProcessor<T> p) {
+		public WorkerRunnable(MonitoredSyncQueue q, QueueProcessor<T> p) {
 			super("WorkerRunnable: " + p.getName());
 			this.q = q;
 			this.p = p;
+			this.latch = new CountDownLatch(1);
 		}
 		
+
+		@SuppressWarnings("unchecked")
 		@Override
 		public void run() {
-			while (true) {
-				boolean interrupted = false;
-				T take = null;
-				try {
-					take = q.claim();
-					p.process(take);
-				} catch (InterruptedException e) {
+			boolean interrupted = false;
+			while (!interrupted) {
+				Object take = null;
+				take = q.claim();
+				
+				if (take != MonitoredSyncQueue.POISON) {
+					p.process((T) take);
+					q.done(take);
+				} else {
 					interrupted = true;
-				} catch (Exception e) {
-					e.printStackTrace();
-				} finally {
-					if (!interrupted) q.done(take);
 				}
 			}
+			latch.countDown();
+		}
+		
+		public void awaitTermination() throws InterruptedException {
+			latch.await();
 		}
 	}
 	
-	protected MonitoredSyncQueue<?> getMessageQueue(QueueHandle handle) {
+	protected MonitoredSyncQueue getMessageQueue(QueueHandle handle) {
 		return this.ids.get(handle);
 	}
 }
