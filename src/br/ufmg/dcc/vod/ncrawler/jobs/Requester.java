@@ -6,7 +6,7 @@ import com.google.common.base.Stopwatch;
 
 public abstract class Requester<T> {
 
-	private static final int MIN_DELTA = 1000;
+	private static final int MIN_DELTA = 100;
 	
 	private final Stopwatch stopwatch;
 	private final long timeBetweenRequests;
@@ -33,10 +33,9 @@ public abstract class Requester<T> {
 				} catch (InterruptedException e) {
 				}
 			}
-			this.stopwatch.stop();
+			this.stopwatch.reset();
 			return getAndStartWatch(url);
 		}
-			
 	}
 
 	public abstract T performRequest(URL url);
