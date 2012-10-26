@@ -1,6 +1,7 @@
 package br.ufmg.dcc.vod.ncrawler.ui;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -18,6 +19,7 @@ public class WorkerUP extends Command {
 	private static final String PORT = "p";
 	private static final String LOG_FILE = "l";
 	private static final String EXECUTOR_CLASS = "e";
+	private static final String SLEEP_TIME = "t";
 
 	@Override
 	@SuppressWarnings("static-access")
@@ -44,9 +46,17 @@ public class WorkerUP extends Command {
 				.withDescription("Executor class to use")
 				.create(EXECUTOR_CLASS);
 		
+		Option sleepTimeOpt = OptionBuilder
+				.withArgName("sleep-time")
+				.hasArg()
+				.isRequired()
+				.withDescription("Sleep time (seconds)")
+				.create(SLEEP_TIME);
+		
 		opts.addOption(portOpt);
 		opts.addOption(logFileOpt);
 		opts.addOption(executorOpt);
+		opts.addOption(sleepTimeOpt);
 		
 		return opts;
 	}
@@ -59,7 +69,9 @@ public class WorkerUP extends Command {
 		LoggerInitiator.initiateLog(cli.getOptionValue(LOG_FILE));
 		String cls = cli.getOptionValue(EXECUTOR_CLASS);
 		
-		JobExecutor executor = (JobExecutor) Class.forName(cls).newInstance();
+		Constructor<?> constructor = Class.forName(cls)
+				.getConstructor(Long.class);
+		JobExecutor executor = (JobExecutor) constructor.newInstance(sleepTime);
 		
 		JobExecutorListener jExec = new JobExecutorListener(executor);
 		NIOServer<CrawlRequest> server = new NIOServer<>(1, null, port, jExec);

@@ -1,6 +1,7 @@
 package br.ufmg.dcc.vod.ncrawler.ui;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
@@ -113,7 +114,9 @@ public class ThreadedUP extends Command {
 		List<String> seeds = FileUtil.readFileToList(seedFile);
 		
 		FileSaver saver = new FileSaverImpl(saveFolder.getAbsolutePath());
-		JobExecutor executor = (JobExecutor) Class.forName(cls).newInstance();
+		Constructor<?> constructor = Class.forName(cls)
+				.getConstructor(Long.class);
+		JobExecutor executor = (JobExecutor) constructor.newInstance(sleepTime);
 		Crawler crawler = CrawlerFactory.createThreadedCrawler(nThreads, 
 				workQueueFolder, saver, executor);
 		
