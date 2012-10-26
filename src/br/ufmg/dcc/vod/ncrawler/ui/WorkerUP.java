@@ -1,6 +1,5 @@
 package br.ufmg.dcc.vod.ncrawler.ui;
 
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 
 import org.apache.commons.cli.CommandLine;
@@ -62,9 +61,9 @@ public class WorkerUP extends Command {
 	}
 
 	@Override
-	public int exec(CommandLine cli) throws IOException, InstantiationException, 
-			IllegalAccessException, ClassNotFoundException {
+	public int exec(CommandLine cli) throws Exception {
 		
+		long sleepTime = Long.parseLong(cli.getOptionValue(SLEEP_TIME)) * 1000;
 		int port = Integer.parseInt(cli.getOptionValue(PORT));
 		LoggerInitiator.initiateLog(cli.getOptionValue(LOG_FILE));
 		String cls = cli.getOptionValue(EXECUTOR_CLASS);
