@@ -12,8 +12,8 @@ Ant build file for the vod-crawler
     <!-- CLEAN -->
     <target name="clean">
         <delete dir="${classes.dir}" />
-    	<delete dir="${src.gen.dir}" />
-        <delete dir="${jar.dir}" />
+        <delete dir="${src.gen.dir}" />
+        <delete file="${dist.jar}" />
     </target>
     <!-- END CLEAN -->
     
@@ -32,24 +32,35 @@ Ant build file for the vod-crawler
     <!-- BUILD -->
     <target name="build" depends="proto">
         <mkdir dir="${classes.dir}" />
-        <mkdir dir="${jar.dir}" />
-    
+
+        <path id="build.classpath">
+            <fileset dir="${lib.dir}">
+                <include name="**/*.jar"/>
+            </fileset>
+        </path>
+
         <javac srcdir="${src.dir}:${test.dir}:${src.gen.dir}"
             destdir="${classes.dir}" target="${build.target}" optimize="on" 
             debug="on" debuglevel="lines,vars,source" 
             includeantruntime="false">
-            <classpath>
-                <fileset dir="${lib.dir}">
-                    <include name="**/*.jar"/>
-                </fileset>
-            </classpath>
+            <classpath> <path refid="build.classpath"/> </classpath>
             <include name="**" />
         </javac>
-    
+
+        <manifestclasspath property="manifest.classpath" jarfile="${dist.jar}">
+            <classpath refid="build.classpath"/>
+        </manifestclasspath>
+
         <jar destfile="${dist.jar}">
             <fileset dir="${classes.dir}">
                 <include name="**/*.class" />
             </fileset>
+
+            <manifest>
+                <attribute name="Main-Class"
+                    value="br.ufmg.dcc.vod.ncrawler.ui.Command"/>
+                <attribute name="Class-Path" value="${manifest.classpath}" />
+            </manifest>
         </jar>
     </target>
     <!-- END BUILD -->
