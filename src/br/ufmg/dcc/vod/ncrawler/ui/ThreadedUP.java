@@ -91,7 +91,7 @@ public class ThreadedUP extends Command {
 	}
 	
 	@Override
-	public int exec(CommandLine cli) throws Exception {
+	public void exec(CommandLine cli) throws Exception {
 		
 		String cls = cli.getOptionValue(EXECUTOR_CLASS);
 		int nThreads = Integer.parseInt(cli.getOptionValue(NTHREADS));
@@ -115,15 +115,13 @@ public class ThreadedUP extends Command {
 		
 		FileSaver saver = new FileSaverImpl(saveFolder.getAbsolutePath());
 		Constructor<?> constructor = Class.forName(cls)
-				.getConstructor(Long.class);
+				.getConstructor(long.class);
 		JobExecutor executor = (JobExecutor) constructor.newInstance(sleepTime);
 		Crawler crawler = CrawlerFactory.createThreadedCrawler(nThreads, 
 				workQueueFolder, saver, executor);
 		
 		crawler.dispatch(seeds);
 		crawler.crawl();
-		
-		return EXIT_CODES.OK;
 		
 	}
 }

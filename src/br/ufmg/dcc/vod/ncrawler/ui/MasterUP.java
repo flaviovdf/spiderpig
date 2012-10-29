@@ -115,7 +115,7 @@ public class MasterUP extends Command {
 	}
 	
 	@Override
-	public int exec(CommandLine cli) throws Exception {
+	public void exec(CommandLine cli) throws Exception {
 		
 		String hostname = cli.getOptionValue(HOSTNAME);
 		int callBackPort = Integer.parseInt(cli.getOptionValue(CALL_BACK_PORT));
@@ -142,8 +142,6 @@ public class MasterUP extends Command {
 		List<String> seed = FileUtil.readFileToList(seedFile);
 		crawler.dispatch(seed);
 		crawler.crawl();
-		
-		return EXIT_CODES.OK;
 	}
 
 }

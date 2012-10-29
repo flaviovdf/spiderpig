@@ -1,6 +1,7 @@
 package br.ufmg.dcc.vod.ncrawler.ui;
 
 import java.lang.reflect.Constructor;
+import java.net.InetAddress;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -61,21 +62,21 @@ public class WorkerUP extends Command {
 	}
 
 	@Override
-	public int exec(CommandLine cli) throws Exception {
+	public void exec(CommandLine cli) throws Exception {
 		
 		long sleepTime = Long.parseLong(cli.getOptionValue(SLEEP_TIME)) * 1000;
 		int port = Integer.parseInt(cli.getOptionValue(PORT));
 		LoggerInitiator.initiateLog(cli.getOptionValue(LOG_FILE));
 		String cls = cli.getOptionValue(EXECUTOR_CLASS);
 		
+		String host = InetAddress.getLocalHost().getHostName();
+		
 		Constructor<?> constructor = Class.forName(cls)
-				.getConstructor(Long.class);
+				.getConstructor(long.class);
 		JobExecutor executor = (JobExecutor) constructor.newInstance(sleepTime);
 		
 		JobExecutorListener jExec = new JobExecutorListener(executor);
-		NIOServer<CrawlRequest> server = new NIOServer<>(1, null, port, jExec);
+		NIOServer<CrawlRequest> server = new NIOServer<>(1, host, port, jExec);
 		server.start(true);
-		
-		return EXIT_CODES.OK;
 	}
 }

@@ -25,7 +25,7 @@ public abstract class Command {
 	
 	public abstract Options getOptions();
 	
-	public abstract int exec(CommandLine cli) throws Exception;
+	public abstract void exec(CommandLine cli) throws Exception;
 	
 	private static String[] shift(String[] args) {
 		//Minor hack for shifting
@@ -77,7 +77,7 @@ public abstract class Command {
 		try {
 			GnuParser parser = new GnuParser();
 			CommandLine cli = parser.parse(opts, shifted);
-			System.exit(command.exec(cli));
+			command.exec(cli);
 		} catch (Exception e) {
 			HelpFormatter hf = new HelpFormatter();
 			hf.printHelp(Constants.CMD_LINE + " " + CMDS.keySet(), opts);
