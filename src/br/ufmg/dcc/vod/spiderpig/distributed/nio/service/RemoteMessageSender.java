@@ -46,7 +46,10 @@ public class RemoteMessageSender {
 			if (socket != null) {
 				try {
 					socket.close();
-				} catch (IOException e) { }
+				} catch (IOException e) { 
+					LOG.error("Failure at Message #" + attachment + " to " + 
+								serviceID, e);
+				}
 			}
 		}
 	}

@@ -38,10 +38,7 @@ public class ThroughputManager {
 			if (toSleep > MIN_DELTA) {
 				LOG.info("" +elapsedMillis + " ms ellapsed since last request."
 						 + " sleeping!");
-				try {
-					TimeUnit.MILLISECONDS.sleep(toSleep);
-				} catch (InterruptedException e) {
-				}
+				TimeUnit.MILLISECONDS.sleep(toSleep);
 			}
 			return getAndStartWatch(crawlID, requester);
 		}

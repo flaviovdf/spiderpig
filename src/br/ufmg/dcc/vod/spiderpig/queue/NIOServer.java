@@ -111,6 +111,11 @@ public class NIOServer
 		acceptNextConnection();
 		LOG.info("Accepted connection #" + attachment); 
 		ProtocolBufferUtils.readFromChannel(result, this.readHandler);
+		try {
+			result.close();
+		} catch (IOException e) {
+			failed(e, attachment);
+		}
 	}
 
 	@Override
