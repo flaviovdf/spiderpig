@@ -84,8 +84,10 @@ public class NIOServer
 	 * @throws IOException 
 	 */
 	public void start() throws IOException {
-		InetSocketAddress addr = new InetSocketAddress(hostname, port);
+		InetSocketAddress addr = 
+				new InetSocketAddress(hostname, port);
 		this.serverSocket = newServerSocket().bind(addr);
+		LOG.info("Accepting connections at " + addr + " " + hostname); 
 		acceptNextConnection();
 	}
 
@@ -107,7 +109,7 @@ public class NIOServer
 	@Override
 	public void completed(AsynchronousSocketChannel result, Integer attachment){
 		acceptNextConnection();
-		LOG.debug("Accepted connection #" + attachment); 
+		LOG.info("Accepted connection #" + attachment); 
 		ProtocolBufferUtils.readFromChannel(result, this.readHandler);
 	}
 

@@ -38,9 +38,10 @@ public class RemoteMessageSender {
 					ProtocolBufferUtils.msgToSizedByteBuffer(handle, msg);
 			Future<Integer> write = socket.write(buffer);
 			write.get();
-			LOG.debug("Message Sent #" + attachment);
+			LOG.debug("Message Sent #" + attachment + " to " + serviceID);
 		} catch (IOException | InterruptedException | ExecutionException e) {
-			LOG.error("Failure at Message #" + attachment, e);
+			LOG.error("Failure at Message #" + attachment + " to " + serviceID
+					, e);
 		} finally {
 			if (socket != null) {
 				try {

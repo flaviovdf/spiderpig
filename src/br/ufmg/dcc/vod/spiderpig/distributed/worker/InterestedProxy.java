@@ -24,7 +24,9 @@ public class InterestedProxy implements WorkerInterested {
 		Builder builder = BaseResult.newBuilder();
 		builder.setIsError(false);
 		builder.setId(id);
-		builder.addAllToQueue(toQueue);
+		
+		if (toQueue != null)
+			builder.addAllToQueue(toQueue);
 		
 		sender.send(callBackID, builder.build());
 	}
