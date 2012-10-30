@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Ant build file for the vod-crawler
+Ant build file for spiderpig
 -->
 
-<project basedir="." default="build" name="vod-crawler" 
+<project basedir="." default="build" name="spiderpig" 
 	xmlns:ivy="antlib:org.apache.ivy.ant">
 
     <property file="build.properties" />

@@ -1,5 +1,5 @@
 option optimize_for = SPEED;
-option java_package = "br.ufmg.dcc.vod.ncrawler.protocol_buffers";
+option java_package = "br.ufmg.dcc.vod.spiderpig.protocol_buffers";
 
 message CrawlID {
     required string id = 1;
