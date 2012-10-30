@@ -32,6 +32,7 @@ public class FileSaverImpl implements FileSaver {
 	
 	@Override
 	public void save(String fileID, byte[] payload) {
+		LOG.info("Received file " + fileID + " " + payload.length + " bytes ");
 		FileChannel fileChannel = null;
 		try {
 			File fpath = new File(this.saveFolder, fileID);
@@ -51,6 +52,7 @@ public class FileSaverImpl implements FileSaver {
 				try {
 					fileChannel.close();
 				} catch (IOException e) {
+					LOG.error("Unable to close channel" + fileID, e);
 				}
 			}
 		}
