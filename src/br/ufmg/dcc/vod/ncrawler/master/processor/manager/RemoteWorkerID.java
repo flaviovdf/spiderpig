@@ -3,40 +3,34 @@ package br.ufmg.dcc.vod.ncrawler.master.processor.manager;
 import java.util.Objects;
 
 import br.ufmg.dcc.vod.ncrawler.distributed.master.JobExecutorProxy;
+import br.ufmg.dcc.vod.ncrawler.distributed.nio.service.RemoteMessageSender;
 import br.ufmg.dcc.vod.ncrawler.jobs.JobExecutor;
+import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Ids.ServiceID;
 
 public class RemoteWorkerID implements WorkerID {
 
-	private final String receiverHost;
-	private final int receiverPort;
-	
-	private final String callBackHost;
-	private final int callBackPort;
-	
-	private final String fileSaverHost;
-	private final int fileSaverPort;
-	
-	public RemoteWorkerID(String receiverHost, int receiverPort,
-			String callBackHost, int callBackPort, String fileSaverHost,
-			int fileSaverPort) {
+	private final ServiceID workerID;
+	private final ServiceID callBackID;
+	private final ServiceID fileSaverID;
+	private final RemoteMessageSender sender;
+
+	public RemoteWorkerID(ServiceID workerID, ServiceID callBackID,
+			ServiceID fileSaverID, RemoteMessageSender sender) {
 		
-		this.receiverHost = receiverHost;
-		this.receiverPort = receiverPort;
-		this.callBackHost = callBackHost;
-		this.callBackPort = callBackPort;
-		this.fileSaverHost = fileSaverHost;
-		this.fileSaverPort = fileSaverPort;
+		this.workerID = workerID;
+		this.callBackID = callBackID;
+		this.fileSaverID = fileSaverID;
+		this.sender = sender;
 	}
 
 	@Override
 	public JobExecutor resolve() {
-		return new JobExecutorProxy(receiverHost, receiverPort, 
-				callBackHost, callBackPort, fileSaverHost, fileSaverPort);
+		return new JobExecutorProxy(workerID, callBackID, fileSaverID, sender);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.receiverHost, this.receiverPort);
+		return Objects.hash(this.workerID, this.workerID);
 	}
 	
 	@Override
@@ -45,7 +39,6 @@ public class RemoteWorkerID implements WorkerID {
 			return false;
 		
 		RemoteWorkerID other = (RemoteWorkerID) obj;
-		return Objects.equals(this.receiverHost, other.receiverHost) &&
-				Objects.equals(this.receiverPort, other.receiverPort);
+		return Objects.equals(this.workerID, other.workerID);
 	}	
 }

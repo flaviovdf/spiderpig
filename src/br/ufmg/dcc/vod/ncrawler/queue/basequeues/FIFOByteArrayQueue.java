@@ -1,4 +1,4 @@
-package br.ufmg.dcc.vod.ncrawler.queue;
+package br.ufmg.dcc.vod.ncrawler.queue.basequeues;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -8,6 +8,9 @@ import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
+
+import br.ufmg.dcc.vod.ncrawler.queue.QueueService;
+import br.ufmg.dcc.vod.ncrawler.queue.QueueServiceException;
 
 
 /**

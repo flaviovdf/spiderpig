@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import br.ufmg.dcc.vod.ncrawler.jobs.WorkerInterested;
 import br.ufmg.dcc.vod.ncrawler.master.processor.ProcessorActor;
 import br.ufmg.dcc.vod.ncrawler.master.processor.manager.WorkerManager;
+import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.ncrawler.stats.StatsActor;
 import br.ufmg.dcc.vod.ncrawler.tracker.Tracker;
 import br.ufmg.dcc.vod.ncrawler.tracker.TrackerFactory;
@@ -34,22 +35,22 @@ public class Master implements WorkerInterested {
 		this.lock = new ReentrantLock();
 	}
 	
-	public void dispatch(String crawlID) {
+	public void dispatch(CrawlID crawlID) {
 		this.processorActor.dispatch(crawlID);
 		this.stopCondition.dispatched();
 	}
 	
 	@Override
-	public void crawlDone(String id, List<String> toQueue) {
+	public void crawlDone(CrawlID id, List<CrawlID> toQueue) {
 		LOG.info("Received result for " + id);
 		
 		this.workerManager.freeExecutor(id);
 		try {
 			this.lock.lock();
-			this.tracker.crawled(id); //Necessary for initial crawl (seed)
-			for (String nextID : toQueue) {
+			this.tracker.crawled(id.getId()); //Necessary for initial crawl (seed)
+			for (CrawlID nextID : toQueue) {
 				//Returns true if obj is new to tracker, thus we dispatch it
-				if (this.tracker.crawled(nextID)) { 
+				if (this.tracker.crawled(nextID.getId())) { 
 					dispatch(nextID);
 				}
 			}
@@ -60,7 +61,7 @@ public class Master implements WorkerInterested {
 	}
 
 	@Override
-	public void crawlError(String id, String cause, boolean workerSuspected) {
+	public void crawlError(CrawlID id, String cause, boolean workerSuspected) {
 		LOG.info("Received error for " + id + " cause = " + cause);
 		
 		this.workerManager.freeExecutor(id);
@@ -69,7 +70,7 @@ public class Master implements WorkerInterested {
 		} else {
 			try {
 				this.lock.lock();
-				this.tracker.crawled(id); //Necessary for initial crawl (seed)
+				this.tracker.crawled(id.getId()); //Necessary for initial crawl (seed)
 			} finally {
 				this.lock.unlock();
 			}

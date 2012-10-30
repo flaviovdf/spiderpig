@@ -7,6 +7,7 @@ import java.util.List;
 import br.ufmg.dcc.vod.ncrawler.filesaver.FileSaver;
 import br.ufmg.dcc.vod.ncrawler.jobs.JobExecutor;
 import br.ufmg.dcc.vod.ncrawler.jobs.WorkerInterested;
+import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Ids.CrawlID;
 
 public class TestJobExecutor implements JobExecutor {
 
@@ -18,19 +19,19 @@ public class TestJobExecutor implements JobExecutor {
 	}
 
 	@Override
-	public void crawl(String id, WorkerInterested interested, FileSaver saver) {
-		int vertex = Integer.parseInt(id);
+	public void crawl(CrawlID id, WorkerInterested interested, FileSaver saver) {
+		int vertex = Integer.parseInt(id.getId());
 		int[] neighbours = g.getNeighbours(vertex);
 		
 		ByteBuffer buff = ByteBuffer.allocate(neighbours.length * INT_SIZE);
-		List<String> toQueue = new LinkedList<>();
+		List<CrawlID> toQueue = new LinkedList<>();
 		for (int n : neighbours) {
-			toQueue.add(""+n);
+			toQueue.add(CrawlID.newBuilder().setId(""+n).build());
 			buff.putInt(n);
 		}
 			
 		interested.crawlDone(id, toQueue);
 		buff.rewind();
-		saver.save(id, buff.array());
+		saver.save(id.getId(), buff.array());
 	}
 }

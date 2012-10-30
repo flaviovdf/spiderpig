@@ -1,0 +1,10 @@
+option optimize_for = SPEED;
+option java_package = "br.ufmg.dcc.vod.ncrawler.protocol_buffers";
+
+import "ids.proto";
+
+message PingPong {
+
+    required ServiceID callBackID = 1;
+
+}

@@ -1,4 +1,4 @@
-package br.ufmg.dcc.vod.ncrawler.queue;
+package br.ufmg.dcc.vod.ncrawler.queue.basequeues;
 
 public interface EventQueue<T> {
 

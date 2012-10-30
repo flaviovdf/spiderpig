@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import br.ufmg.dcc.vod.ncrawler.jobs.JobExecutor;
 import br.ufmg.dcc.vod.ncrawler.master.processor.manager.WorkerManagerImpl.WorkerState;
+import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Ids.CrawlID;
 
 public class WorkerManagerImplTest {
 
@@ -71,16 +72,16 @@ public class WorkerManagerImplTest {
 		Assert.assertEquals(0, susp.size());
 		Assert.assertEquals(10, idle.size());
 		
-		WorkerID wid = wmi.allocateAvailableExecutor("1");
+		WorkerID wid = wmi.allocateAvailableExecutor(build("1"));
 		
 		Assert.assertEquals(1, busy.size());
 		Assert.assertEquals(0, susp.size());
 		Assert.assertEquals(9, idle.size());
 		Assert.assertTrue(busy.contains(wid));
 		
-		Assert.assertNull(wmi.allocateAvailableExecutor("1"));
+		Assert.assertNull(wmi.allocateAvailableExecutor(build("1")));
 		
-		WorkerID wid2 = wmi.allocateAvailableExecutor("2");
+		WorkerID wid2 = wmi.allocateAvailableExecutor(build("2"));
 		
 		Assert.assertEquals(2, busy.size());
 		Assert.assertEquals(0, susp.size());
@@ -91,9 +92,9 @@ public class WorkerManagerImplTest {
 
 	private class Allocator extends Thread {
 		private final WorkerManager wm;
-		private final String id;
+		private final CrawlID id;
 
-		public Allocator(WorkerManager wm, String id) {
+		public Allocator(WorkerManager wm, CrawlID id) {
 			this.wm = wm;
 			this.id = id;
 		}
@@ -121,26 +122,26 @@ public class WorkerManagerImplTest {
 		Assert.assertEquals(0, susp.size());
 		Assert.assertEquals(10, idle.size());
 		
-		wmi.allocateAvailableExecutor("1");
-		wmi.allocateAvailableExecutor("2");
+		wmi.allocateAvailableExecutor(build("1"));
+		wmi.allocateAvailableExecutor(build("2"));
 		
 		Assert.assertEquals(2, busy.size());
 		Assert.assertEquals(0, susp.size());
 		Assert.assertEquals(8, idle.size());
 		
-		Assert.assertTrue(wmi.freeExecutor("2"));
+		Assert.assertTrue(wmi.freeExecutor(build("2")));
 		
 		Assert.assertEquals(1, busy.size());
 		Assert.assertEquals(0, susp.size());
 		Assert.assertEquals(9, idle.size());
 		
-		Assert.assertTrue(wmi.freeExecutor("1"));
+		Assert.assertTrue(wmi.freeExecutor(build("1")));
 		
 		Assert.assertEquals(0, busy.size());
 		Assert.assertEquals(0, susp.size());
 		Assert.assertEquals(10, idle.size());
 		
-		Assert.assertFalse(wmi.freeExecutor("1"));
+		Assert.assertFalse(wmi.freeExecutor(build("1")));
 		
 		Assert.assertEquals(0, busy.size());
 		Assert.assertEquals(0, susp.size());
@@ -154,18 +155,18 @@ public class WorkerManagerImplTest {
 
 		WorkerManagerImpl wmi = new WorkerManagerImpl(ids);
 		
-		wmi.allocateAvailableExecutor("1");
-		wmi.allocateAvailableExecutor("2");
+		wmi.allocateAvailableExecutor(build("1"));
+		wmi.allocateAvailableExecutor(build("2"));
 		
 		Collection<WorkerID> busy = wmi.getByState(WorkerState.BUSY);
 		Assert.assertEquals(2, busy.size());
 		
-		Allocator allocator = new Allocator(wmi, "3");
+		Allocator allocator = new Allocator(wmi, build("3"));
 		allocator.start();
 		
 		while(allocator.getState() != Thread.State.WAITING);
 		
-		wmi.freeExecutor("1");
+		wmi.freeExecutor(build("1"));
 		
 		Assert.assertEquals(1, busy.size());
 		
@@ -197,7 +198,7 @@ public class WorkerManagerImplTest {
 		Assert.assertTrue(susp.contains(new TestID(0)));
 		Assert.assertFalse(idle.contains(new TestID(0)));
 		
-		WorkerID wid = wmi.allocateAvailableExecutor("1");
+		WorkerID wid = wmi.allocateAvailableExecutor(build("1"));
 		
 		Assert.assertEquals(1, busy.size());
 		Assert.assertEquals(1, susp.size());
@@ -233,7 +234,7 @@ public class WorkerManagerImplTest {
 		
 		wmi.executorSuspected(new TestID(0));
 		
-		WorkerID wid = wmi.allocateAvailableExecutor("1");
+		WorkerID wid = wmi.allocateAvailableExecutor(build("1"));
 		
 		wmi.executorSuspected(wid);
 		
@@ -253,7 +254,7 @@ public class WorkerManagerImplTest {
 		Assert.assertEquals(1, susp.size());
 		Assert.assertEquals(9, idle.size());
 		
-		WorkerID wid2 = wmi.allocateAvailableExecutor("1");
+		WorkerID wid2 = wmi.allocateAvailableExecutor(build("1"));
 		Assert.assertEquals(1, busy.size());
 		
 		wmi.executorSuspected(wid2);
@@ -276,4 +277,8 @@ public class WorkerManagerImplTest {
 		Assert.assertEquals(10, idle.size());
 	}
 
+	private static CrawlID build(String i) {
+		CrawlID.Builder builder = CrawlID.newBuilder();
+		return builder.setId(i).build();
+	}
 }

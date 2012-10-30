@@ -3,6 +3,7 @@ package br.ufmg.dcc.vod.ncrawler.master.processor.manager;
 import java.util.concurrent.Semaphore;
 
 import br.ufmg.dcc.vod.ncrawler.jobs.JobExecutor;
+import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Ids.CrawlID;
 
 public class MultiCoreManager implements WorkerManager {
 	
@@ -15,14 +16,14 @@ public class MultiCoreManager implements WorkerManager {
 	}
 	
 	@Override
-	public WorkerID allocateAvailableExecutor(String crawlID)
+	public WorkerID allocateAvailableExecutor(CrawlID crawlID)
 			throws InterruptedException {
 		this.semaphore.acquire();
 		return new DumbID(this.jobExecutor);
 	}
 
 	@Override
-	public boolean freeExecutor(String crawlID) {
+	public boolean freeExecutor(CrawlID crawlID) {
 		this.semaphore.release();
 		return true;
 	}

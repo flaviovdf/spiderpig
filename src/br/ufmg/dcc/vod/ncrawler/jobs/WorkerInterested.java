@@ -2,6 +2,8 @@ package br.ufmg.dcc.vod.ncrawler.jobs;
 
 import java.util.List;
 
+import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Ids.CrawlID;
+
 /**
  * Common interface for objects interested in crawl results.
  * 
@@ -16,7 +18,7 @@ public interface WorkerInterested {
 	 * @param id ID crawled.
 	 * @param toQueue New ids discovered.
 	 */
-	public void crawlDone(String id, List<String> toQueue);
+	public void crawlDone(CrawlID id, List<CrawlID> toQueue);
 	
 	/**
 	 * Indicates that the given id failed to be crawled. The cause is given and
@@ -27,6 +29,6 @@ public interface WorkerInterested {
 	 * @param cause Cause of error.
 	 * @param workerSuspected Indicates if this was a worker error.
 	 */
-	public void crawlError(String id, String cause, boolean workerSuspected);
+	public void crawlError(CrawlID id, String cause, boolean workerSuspected);
 	
 }

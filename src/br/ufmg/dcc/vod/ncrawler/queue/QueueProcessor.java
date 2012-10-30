@@ -1,9 +1,9 @@
 package br.ufmg.dcc.vod.ncrawler.queue;
 
-public interface QueueProcessor<T> {
+import com.google.protobuf.MessageLite;
+
+public interface QueueProcessor<T extends MessageLite> {
 
 	public void process(T t);
 
-	public String getName();
-	
 }

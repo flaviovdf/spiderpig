@@ -9,8 +9,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 
-import br.ufmg.dcc.vod.ncrawler.distributed.filesaver.UploadListener;
-
 /**
  * Implementation for the file saver.
  *  
@@ -18,7 +16,7 @@ import br.ufmg.dcc.vod.ncrawler.distributed.filesaver.UploadListener;
  */
 public class FileSaverImpl implements FileSaver {
 
-	private static final Logger LOG = Logger.getLogger(UploadListener.class);
+	private static final Logger LOG = Logger.getLogger(FileSaverImpl.class);
 	private final String saveFolder;
 	private final AtomicInteger saved;
 	

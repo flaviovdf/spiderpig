@@ -1,0 +1,12 @@
+option optimize_for = SPEED;
+option java_package = "br.ufmg.dcc.vod.ncrawler.protocol_buffers";
+
+message CrawlID {
+    required string id = 1;
+}
+
+message ServiceID {
+    required string hostname = 1;
+    required int32 port = 2;
+    required string handle = 3;
+}

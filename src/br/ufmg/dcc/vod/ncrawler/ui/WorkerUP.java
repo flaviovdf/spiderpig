@@ -9,10 +9,10 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 
 import br.ufmg.dcc.vod.ncrawler.common.LoggerInitiator;
-import br.ufmg.dcc.vod.ncrawler.distributed.nio.service.NIOServer;
-import br.ufmg.dcc.vod.ncrawler.distributed.worker.JobExecutorListener;
+import br.ufmg.dcc.vod.ncrawler.distributed.nio.service.RemoteMessageSender;
+import br.ufmg.dcc.vod.ncrawler.distributed.worker.WorkerActor;
 import br.ufmg.dcc.vod.ncrawler.jobs.JobExecutor;
-import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Worker.CrawlRequest;
+import br.ufmg.dcc.vod.ncrawler.queue.QueueService;
 
 public class WorkerUP extends Command {
 
@@ -75,8 +75,9 @@ public class WorkerUP extends Command {
 				.getConstructor(long.class);
 		JobExecutor executor = (JobExecutor) constructor.newInstance(sleepTime);
 		
-		JobExecutorListener jExec = new JobExecutorListener(executor);
-		NIOServer<CrawlRequest> server = new NIOServer<>(1, host, port, jExec);
-		server.start(true);
+		WorkerActor actor = new WorkerActor(executor, 
+				new RemoteMessageSender());
+		QueueService service = new QueueService(host, port);
+		actor.withSimpleQueue(service).startProcessors(1);
 	}
 }

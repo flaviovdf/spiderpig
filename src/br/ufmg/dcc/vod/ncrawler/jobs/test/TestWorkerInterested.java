@@ -7,6 +7,7 @@ import java.util.List;
 import br.ufmg.dcc.vod.ncrawler.master.Master;
 import br.ufmg.dcc.vod.ncrawler.master.processor.ProcessorActor;
 import br.ufmg.dcc.vod.ncrawler.master.processor.manager.WorkerManager;
+import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.ncrawler.stats.StatsActor;
 import br.ufmg.dcc.vod.ncrawler.tracker.TrackerFactory;
 
@@ -22,9 +23,9 @@ public class TestWorkerInterested extends Master {
 	}
 
 	@Override
-	public void crawlDone(String id, List<String> toQueue) {
+	public void crawlDone(CrawlID id, List<CrawlID> toQueue) {
 		super.crawlDone(id, toQueue);
-		this.crawled.add(Integer.parseInt(id));
+		this.crawled.add(Integer.parseInt(id.getId()));
 	}
 	
 	public List<Integer> getCrawled() {

@@ -1,4 +1,4 @@
-package br.ufmg.dcc.vod.ncrawler.queue;
+package br.ufmg.dcc.vod.ncrawler.queue.basequeues;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,15 +10,19 @@ import junit.framework.TestCase;
 
 import org.junit.Test;
 
+import br.ufmg.dcc.vod.ncrawler.queue.QueueServiceException;
+import br.ufmg.dcc.vod.ncrawler.queue.basequeues.MemoryMappedFIFOQueue;
+import br.ufmg.dcc.vod.ncrawler.queue.serializer.StringSerializer;
 
 public class MemoryMappedQueueTest extends TestCase {
 
+	private StringSerializer ss = new StringSerializer();
+	
 	@Test
 	public void testQueuePutErrors() throws FileNotFoundException, IOException {
 		File f = File.createTempFile("temp", "test");
 		f.deleteOnExit();
 		
-		SS ss = new SS();
 		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 1024 * 1024);
 		
 		try {
@@ -55,7 +59,6 @@ public class MemoryMappedQueueTest extends TestCase {
 		File f = File.createTempFile("temp", "test");
 		f.deleteOnExit();
 		
-		SS ss = new SS();
 		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 1024 * 1024);
 		q.createAndOpen();
 		
@@ -73,7 +76,6 @@ public class MemoryMappedQueueTest extends TestCase {
 		File f = File.createTempFile("temp", "test");
 		f.deleteOnExit();
 		
-		SS ss = new SS();
 		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 1024 * 1024);
 		q.createAndOpen();
 		
@@ -92,7 +94,6 @@ public class MemoryMappedQueueTest extends TestCase {
 		File f = File.createTempFile("temp", "test");
 		f.deleteOnExit();
 		
-		SS ss = new SS();
 		try {
 			new MemoryMappedFIFOQueue<String>(f, ss, 12);
 			fail();
@@ -107,7 +108,6 @@ public class MemoryMappedQueueTest extends TestCase {
 		File f = File.createTempFile("temp", "test");
 		f.deleteOnExit();
 		
-		SS ss = new SS();
 		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 15);
 		q.createAndOpen();
 
@@ -126,7 +126,6 @@ public class MemoryMappedQueueTest extends TestCase {
 		File f = File.createTempFile("temp", "test");
 		f.deleteOnExit();
 		
-		SS ss = new SS();
 		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 18);
 		q.createAndOpen();
 
@@ -141,7 +140,6 @@ public class MemoryMappedQueueTest extends TestCase {
 		File f = File.createTempFile("temp", "test");
 		f.deleteOnExit();
 		
-		SS ss = new SS();
 		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 18);
 		q.createAndOpen();
 		
@@ -164,7 +162,6 @@ public class MemoryMappedQueueTest extends TestCase {
 		File f = File.createTempFile("temp", "test");
 		f.deleteOnExit();
 		
-		SS ss = new SS();
 		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 16);
 		q.createAndOpen();
 		
@@ -185,7 +182,6 @@ public class MemoryMappedQueueTest extends TestCase {
 		File f = File.createTempFile("temp", "test");
 		f.deleteOnExit();
 		
-		SS ss = new SS();
 		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 1024 * 1024);
 		q.createAndOpen();
 		
@@ -236,7 +232,6 @@ public class MemoryMappedQueueTest extends TestCase {
 		File f = File.createTempFile("temp", "test");
 		f.deleteOnExit();
 		
-		SS ss = new SS();
 		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 1024 * 1024);
 		q.createAndOpen();
 		
@@ -264,7 +259,6 @@ public class MemoryMappedQueueTest extends TestCase {
 		File f = File.createTempFile("temp", "test");
 		f.deleteOnExit();
 		
-		SS ss = new SS();
 		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 1024 * 1024);
 		q.createAndOpen();
 		
@@ -320,7 +314,6 @@ public class MemoryMappedQueueTest extends TestCase {
 		File f = File.createTempFile("temp", "test");
 		f.deleteOnExit();
 		
-		SS ss = new SS();
 		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 1024 * 1024);
 		q.createAndOpen();
 		
@@ -387,7 +380,6 @@ public class MemoryMappedQueueTest extends TestCase {
 		File f = File.createTempFile("temp", "test");
 		f.deleteOnExit();
 		
-		SS ss = new SS();
 		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 1024 * 1024);
 		q.createAndOpen();
 		
@@ -413,7 +405,6 @@ public class MemoryMappedQueueTest extends TestCase {
 		File f = File.createTempFile("temp", "test");
 		f.deleteOnExit();
 		
-		SS ss = new SS();
 		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 1024 * 1024);
 		q.createAndOpen();
 		
@@ -452,7 +443,6 @@ public class MemoryMappedQueueTest extends TestCase {
 		File f = File.createTempFile("temp", "test");
 		f.deleteOnExit();
 		
-		SS ss = new SS();
 		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 1024 * 1024);
 		q.createAndOpen();
 		
@@ -492,7 +482,6 @@ public class MemoryMappedQueueTest extends TestCase {
 		File f = File.createTempFile("temp", "test");
 		f.deleteOnExit();
 		
-		SS ss = new SS();
 		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 1024 * 1024);
 		q.createAndOpen();
 		
@@ -544,7 +533,6 @@ public class MemoryMappedQueueTest extends TestCase {
 		File f = File.createTempFile("temp", "test");
 		f.deleteOnExit();
 		
-		SS ss = new SS();
 		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 1024 * 1024);
 		q.createAndOpen();
 		
@@ -599,7 +587,6 @@ public class MemoryMappedQueueTest extends TestCase {
 		File f = File.createTempFile("temp", "test");
 		f.deleteOnExit();
 		
-		SS ss = new SS();
 		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 1024 * 1024);
 		q.createAndOpen();
 		
@@ -653,155 +640,5 @@ public class MemoryMappedQueueTest extends TestCase {
 			assertEquals(0, wrap.get());
 		
 		f.delete();
-	}
-	
-//	public void testAllCompact() throws Exception {
-//		File f = File.createTempFile("temp", "test");
-//		f.deleteOnExit();
-//		
-//		SS ss = new SS();
-//		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 1024 * 1024);
-//		q.createAndOpen();
-//		
-//		assertEquals(0, q.size());
-//		q.put("a");
-//		assertEquals(1, q.size());
-//		
-//		q.put("b");
-//		assertEquals(2, q.size());
-//		
-//		q.put("c");
-//		assertEquals(3, q.size());
-//		
-//		q.put("d");
-//		assertEquals(4, q.size());
-//		
-//		q.put("e");
-//		assertEquals(5, q.size());
-//		
-//		assertEquals("a", q.take());
-//		assertEquals(4, q.size());
-//		assertEquals("b", q.take());
-//		assertEquals(3, q.size());
-//		assertEquals("c", q.take());
-//		assertEquals(2, q.size());
-//		assertEquals("d", q.take());
-//		assertEquals(1, q.size());
-//		assertEquals("e", q.take());
-//		assertEquals(0, q.size());
-//		
-//		f.delete();
-//	}
-//	
-//	public void testLimitNoCompact() throws Exception {
-//		File f = File.createTempFile("temp", "test");
-//		f.deleteOnExit();
-//		
-//		SS ss = new SS();
-//		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 1024 * 1024);
-//		q.createAndOpen();
-//
-//		assertEquals(12, q.getStart());
-//		assertEquals(12, q.getEnd());
-//		
-//		String s = "";
-//		for (int i = 0; i < 256; i++) {
-//			s += "a";
-//		}
-//		
-//		try {
-//			q.put(s);
-//			fail();
-//		} catch (Exception e) {
-//			
-//		}
-//		
-//		f.delete();
-//	}
-//	
-//	public void testLimitCompact() throws Exception {
-//		File f = File.createTempFile("temp", "test");
-//		f.deleteOnExit();
-//		
-//		SS ss = new SS();
-//		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 1024 * 1024);
-//		q.createAndOpen();
-//
-//		assertEquals(12, q.getStart());
-//		assertEquals(12, q.getEnd());
-//		
-//		String s = "";
-//		for (int i = 0; i < 256; i++) {
-//			s += "a";
-//		}
-//		
-//		q.put(s);
-//		assertEquals(s, q.take());
-//		
-//		f.delete();
-//	}
-//	
-//	public void testLimitCompact2() throws Exception {
-//		File f = File.createTempFile("temp", "test");
-//		f.deleteOnExit();
-//		
-//		SS ss = new SS();
-//		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 1024 * 1024);
-//		q.createAndOpen();
-//
-//		assertEquals(12, q.getStart());
-//		assertEquals(12, q.getEnd());
-//		
-//		String s = "";
-//		for (int i = 0; i < 204; i++) { //204 limits exactly to 255bytes
-//			s += i;
-//		}
-//		
-//		q.put(s);
-//		assertEquals(s, q.take());
-//		
-//		f.delete();
-//	}
-//
-//	public void testLimitCompact3() throws Exception {
-//		File f = File.createTempFile("temp", "test");
-//		f.deleteOnExit();
-//		
-//		SS ss = new SS();
-//		MemoryMappedFIFOQueue<String> q = new MemoryMappedFIFOQueue<String>(f, ss, 1024 * 1024);
-//		q.createAndOpen();
-//
-//		assertEquals(12, q.getStart());
-//		assertEquals(12, q.getEnd());
-//		
-//		String s = "";
-//		for (int i = 0; i < 205; i++) { //204 limits exactly to 255bytes
-//			s += i;
-//		}
-//		
-//		try {
-//			q.put(s);
-//			fail();
-//		} catch (QueueServiceException e) {
-//			
-//		}
-//		
-//		f.delete();
-//	}
-	
-	public class SS implements Serializer<String> {
-		
-		public SS() {
-		}
-		
-		@Override
-		public byte[] checkpointData(String t) {
-			return t.getBytes();
-		}
-
-		@Override
-		public String interpret(byte[] checkpoint) {
-			return new String(checkpoint);
-		}
 	}
 }

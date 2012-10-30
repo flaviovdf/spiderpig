@@ -7,21 +7,22 @@ import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Set;
 
-import br.ufmg.dcc.vod.ncrawler.distributed.filesaver.UploadListener;
-import br.ufmg.dcc.vod.ncrawler.distributed.master.ResultListener;
-import br.ufmg.dcc.vod.ncrawler.distributed.nio.service.NIOServer;
+import br.ufmg.dcc.vod.ncrawler.common.ServiceIDUtils;
+import br.ufmg.dcc.vod.ncrawler.distributed.nio.service.RemoteMessageSender;
+import br.ufmg.dcc.vod.ncrawler.distributed.worker.WorkerActor;
 import br.ufmg.dcc.vod.ncrawler.filesaver.FileSaver;
+import br.ufmg.dcc.vod.ncrawler.filesaver.FileSaverActor;
 import br.ufmg.dcc.vod.ncrawler.jobs.JobExecutor;
-import br.ufmg.dcc.vod.ncrawler.master.LoopBackInterested;
+import br.ufmg.dcc.vod.ncrawler.master.DecoratorInterested;
 import br.ufmg.dcc.vod.ncrawler.master.Master;
+import br.ufmg.dcc.vod.ncrawler.master.ResultActor;
 import br.ufmg.dcc.vod.ncrawler.master.processor.ProcessorActor;
 import br.ufmg.dcc.vod.ncrawler.master.processor.manager.MultiCoreManager;
 import br.ufmg.dcc.vod.ncrawler.master.processor.manager.RemoteWorkerID;
 import br.ufmg.dcc.vod.ncrawler.master.processor.manager.WorkerID;
 import br.ufmg.dcc.vod.ncrawler.master.processor.manager.WorkerManager;
 import br.ufmg.dcc.vod.ncrawler.master.processor.manager.WorkerManagerImpl;
-import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Payload.UploadMessage;
-import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Worker.BaseResult;
+import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Ids.ServiceID;
 import br.ufmg.dcc.vod.ncrawler.queue.QueueService;
 import br.ufmg.dcc.vod.ncrawler.tracker.BloomFilterTrackerFactory;
 
@@ -32,8 +33,6 @@ import br.ufmg.dcc.vod.ncrawler.tracker.BloomFilterTrackerFactory;
  */
 public class CrawlerFactory {
 
-	private static final int DEFAULT_QUEUE_SIZE = 1024 * 1024;
-	
 	public static Crawler createThreadedCrawler(int numThreads,
 			File queueDir, FileSaver saver, JobExecutor jobExecutor) 
 					throws FileNotFoundException, IOException {
@@ -42,55 +41,62 @@ public class CrawlerFactory {
 		BloomFilterTrackerFactory<String> trackerFactory = 
 				new BloomFilterTrackerFactory<String>();
 		
-		LoopBackInterested workerInterested = new LoopBackInterested();
+		DecoratorInterested workerInterested = new DecoratorInterested();
 		WorkerManager workerManager = new MultiCoreManager(
 				numThreads, jobExecutor);
 		
-		ProcessorActor processorActor = new ProcessorActor(numThreads, 
-				workerManager, service, queueDir, DEFAULT_QUEUE_SIZE, 
-				workerInterested, saver);
+		ProcessorActor processorActor = new ProcessorActor(workerManager, 
+				service, workerInterested, saver);
 		Master master = new Master(trackerFactory, processorActor, null,
 				workerManager);
+		
+		processorActor.withFileQueue(service, queueDir);
 		
 		workerInterested.setLoopBack(master);
 		
 		return new ThreadedCrawler(processorActor, null, service,
-				master, saver);
+				master, saver, numThreads);
 	}
 	
-	public static Crawler createDistributedCrawler(String callBackHost, 
-			int callBackPort, String fileSaverHost, int fileSaverPort,
+	public static Crawler createDistributedCrawler(String hostname, int port, 
 			Set<InetSocketAddress> workerAddrs, File queueDir, FileSaver saver) 
 					throws FileNotFoundException, IOException {
 		
-		QueueService service = new QueueService();
+		QueueService service = new QueueService(hostname, port);
 		BloomFilterTrackerFactory<String> trackerFactory = 
 				new BloomFilterTrackerFactory<String>();
 
 		int numThreads = workerAddrs.size();
 		Set<WorkerID> workerIDs = new HashSet<>();
 		
-		for (InetSocketAddress socketAddr : workerAddrs)
-			workerIDs.add(new RemoteWorkerID(socketAddr.getHostString(),
-					socketAddr.getPort(), callBackHost, callBackPort, 
-					fileSaverHost, fileSaverPort));
+		ServiceID callBackID = ServiceIDUtils.toServiceID(hostname, port, 
+				ResultActor.HANDLE);
+		ServiceID fileSaverID = ServiceIDUtils.toServiceID(hostname, port, 
+				FileSaverActor.HANDLE);
+		RemoteMessageSender sender = new RemoteMessageSender();
+		
+		for (InetSocketAddress socketAddr : workerAddrs) {
+			ServiceID workerID = ServiceIDUtils.toServiceID(
+					socketAddr.getHostString(), socketAddr.getPort(), 
+					WorkerActor.HANDLE);
+			workerIDs.add(new RemoteWorkerID(workerID, callBackID, fileSaverID, 
+					sender));
+		}
 		
 		WorkerManager workerManager = new WorkerManagerImpl(workerIDs);
 		
-		ProcessorActor processorActor = new ProcessorActor(numThreads, 
-				workerManager, service, queueDir, DEFAULT_QUEUE_SIZE, null, 
-				null);
+		ProcessorActor processorActor = new ProcessorActor(workerManager, 
+				service, null, null);
 		Master master = new Master(trackerFactory, processorActor, null, 
 				workerManager);
+		ResultActor resultActor = new ResultActor(master);
+		FileSaverActor fileSaverActor = new FileSaverActor(saver);
 		
-		ResultListener resultListener = new ResultListener(master);
-		NIOServer<BaseResult> resultServer = new NIOServer<>(numThreads, 
-				callBackHost, callBackPort, resultListener);
+		processorActor.withFileQueue(service, queueDir);
+		fileSaverActor.withSimpleQueue(service);
+		resultActor.withSimpleQueue(service);
 		
-		UploadListener uploadListener = new UploadListener(saver);
-		NIOServer<UploadMessage> fileServer = new NIOServer<>(-1, 
-				fileSaverHost, fileSaverPort, uploadListener);
 		return new DistributedCrawler(processorActor, null, service, 
-				master, resultServer, fileServer, saver);
+				master, resultActor, fileSaverActor, saver, numThreads);
 	}
 }

@@ -1,17 +1,19 @@
 package br.ufmg.dcc.vod.ncrawler.stats;
 
-import br.ufmg.dcc.vod.ncrawler.queue.QueueHandle;
+import br.ufmg.dcc.vod.ncrawler.queue.Actor;
+import br.ufmg.dcc.vod.ncrawler.queue.QueueProcessor;
 import br.ufmg.dcc.vod.ncrawler.queue.QueueService;
-import br.ufmg.dcc.vod.ncrawler.queue.actor.AbstractActor;
+import br.ufmg.dcc.vod.ncrawler.queue.serializer.MessageLiteSerializer;
 
-public class StatsActor extends AbstractActor<StatUpdateMessage> {
+import com.google.protobuf.MessageLite;
 
-	private QueueHandle handle;
+public class StatsActor extends Actor<MessageLite> {
+
+	private static final String HANDLE = "StatsActor";
 	private Display display;
 	
 	public StatsActor(QueueService service) {
-		super(1, service);
-		this.handle = service.createMessageQueue("Stats");
+		super(HANDLE);
 	}
 
 	/**
@@ -22,17 +24,15 @@ public class StatsActor extends AbstractActor<StatUpdateMessage> {
 	}
 
 	@Override
-	public String getName() {
-		return "StatsPrinter";
+	public QueueProcessor<MessageLite> getQueueProcessor() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
-	public void process(StatUpdateMessage sum) {
-		display.print(sum.getMap());
+	public MessageLiteSerializer<MessageLite> newMsgSerializer() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
-	@Override
-	public QueueHandle getQueueHandle() {
-		return this.handle;
-	}
 }

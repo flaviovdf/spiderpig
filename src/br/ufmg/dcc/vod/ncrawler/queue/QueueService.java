@@ -3,142 +3,174 @@ package br.ufmg.dcc.vod.ncrawler.queue;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.nio.channels.AsynchronousChannelGroup;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import br.ufmg.dcc.vod.ncrawler.common.Tuple;
+import br.ufmg.dcc.vod.ncrawler.queue.basequeues.MultiFileMMapFifoQueue;
+import br.ufmg.dcc.vod.ncrawler.queue.basequeues.SimpleEventQueue;
+import br.ufmg.dcc.vod.ncrawler.queue.serializer.MessageLiteSerializer;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.google.protobuf.MessageLite;
 
 /**
  * QueueServices are used to create MonitoredSyncQueues, add objects to these
- * queues and register threads which will consume objects from queues. This
- * class is thread safe.
+ * queues and register threads which will consume objects from queues.
+ * 
+ * This class is thread safe
  * 
  * @param <T> Type of objects in a queue
  */
 public class QueueService {
 
-	private final Map<QueueHandle, MonitoredSyncQueue> ids = 
-			Collections.synchronizedMap(
-					new HashMap<QueueHandle, MonitoredSyncQueue>());
-	
-	private final Map<QueueHandle, List<WorkerRunnable<?>>> runnables = 
-			Collections.synchronizedMap(
-					new HashMap<QueueHandle, List<WorkerRunnable<?>>>());
-	
-	private final ExecutorService executor = Executors.newCachedThreadPool();
-	private final AtomicInteger i = new AtomicInteger(0);
-
-	/**
-	 * Creates a new message queue
-	 * 
-	 * @return A queue handle
-	 */
-	public QueueHandle createMessageQueue() {
-		return createMessageQueue("");
+	private class ServiceStruct<T extends MessageLite> {
+		final MonitoredSyncQueue queue;
+		final List<WorkerRunnable<?>> runnables;
+		final Actor<T> actor;
+		
+		public ServiceStruct(MonitoredSyncQueue queue, Actor<T> actor) {
+			this.queue = queue;
+			this.runnables = new ArrayList<>();
+			this.actor = actor;
+		}
 	}
+	
+	private final Map<String, ServiceStruct<?>> ids = new HashMap<>();
+	
+	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+	private final ExecutorService executor = Executors.newCachedThreadPool();
+	private final AsynchronousChannelGroup channelGroup;
+	private final NIOServer nioServer;
 
-
+	public QueueService() {
+		this.channelGroup = null;
+		this.nioServer = null;
+	}
+	
+	public QueueService(int port) throws IOException {
+		this(InetAddress.getLocalHost().getHostName(), port);
+	}
+	
+	public QueueService(String hostname, int port) throws IOException {
+		Preconditions.checkNotNull(hostname);
+		this.channelGroup = AsynchronousChannelGroup.withThreadPool(executor);
+		this.nioServer = new NIOServer(this.executor, this, hostname, port);
+		this.nioServer.start();
+	}
+	
 	/**
 	 * Creates a new message queue with a label
 	 *
 	 * @param label Label
-	 * @return A queue handle
 	 */
-	public <T> QueueHandle createMessageQueue(String label) {
-		QueueHandle h = new QueueHandle(i.incrementAndGet());
-		this.ids.put(h, new MonitoredSyncQueue(label, 
-				new SimpleEventQueue<T>()));
-		return h;
+	<T extends MessageLite> void createMessageQueue(Actor<T> actor) {
+		try {
+			lock.writeLock().lock();
+			if (this.ids.containsKey(actor.getHandle()))
+				throw new QueueServiceException("Label already exists in service");
+			
+			MonitoredSyncQueue queue = 
+					new MonitoredSyncQueue(new SimpleEventQueue<T>());
+			ServiceStruct<T> struct = new ServiceStruct<>(queue, actor);
+			this.ids.put(actor.getHandle(), struct);
+		} finally {
+			lock.writeLock().unlock();
+		}
 	}
 	
-	/**
-	 * Creates a new message queue that is stored on multiple files on a disk
-	 *
-	 * @param label Label
-	 * @param f Folder to use
-	 * @param serializer To serialize object
-	 * @param bytes amount of bytes to allocate on file
-	 * 
-	 * @return A queue handle
-	 * 
-	 * @throws IOException In case and io error occurs 
-	 * @throws FileNotFoundException  In case the file does not exist
-	 */
-	public <T> QueueHandle createPersistentMessageQueue(File f, 
-			Serializer<T> serializer, int bytes) 
-					throws FileNotFoundException, IOException {
-		return createPersistentMessageQueue("", f, serializer, bytes);
-	}
-
-
 	/**
 	 * Creates a new message queue that is stored on multiple files on disk
 	 *
 	 * @param label Label
-	 * @param f Folder to use
+	 * @param folder Folder to use
 	 * @param serializer To serialize object
 	 * @param bytes amount of bytes to allocate on file
-	 * 
-	 * @return A queue handle
 	 * 
 	 * @throws IOException In case and io error occurs 
 	 * @throws FileNotFoundException  In case the file does not exist
 	 */
-	public <T> QueueHandle createPersistentMessageQueue(String label, File f, 
-			Serializer<T> serializer, int bytes) 
+	<T extends MessageLite> void createPersistentMessageQueue(
+			Actor<T> actor, File folder, int bytes) 
 					throws FileNotFoundException, IOException {
-		QueueHandle h = new QueueHandle(i.incrementAndGet());
-		MultiFileMMapFifoQueue<T> memoryMappedQueue = 
-				new MultiFileMMapFifoQueue<T>(f, serializer, bytes);
-		this.ids.put(h, new MonitoredSyncQueue(label, memoryMappedQueue));
-		return h;
+		try {
+			lock.writeLock().lock();
+			if (this.ids.containsKey(actor.getHandle()))
+				throw new QueueServiceException("Label already exists in service");
+			
+			if (!folder.isDirectory())
+				throw new IOException("Not a folder");
+			
+			MessageLiteSerializer<T> serializer = actor.newMsgSerializer();
+			MultiFileMMapFifoQueue<T> memoryMappedQueue = 
+					new MultiFileMMapFifoQueue<T>(folder, serializer , bytes);
+			MonitoredSyncQueue queue = 
+					new MonitoredSyncQueue(memoryMappedQueue);
+			ServiceStruct<T> struct = new ServiceStruct<>(queue, actor);
+			this.ids.put(actor.getHandle(), struct);
+		} finally {
+			lock.writeLock().unlock();
+		}
 	}
 	
 	/**
 	 * Starts a QueueProcessor on a new Thread. It will consume the queue with
 	 * the given handle.
 	 * 
-	 * @param h Handle identifying the queue
+	 * @param l String identifying the queue
 	 * @param p QueueProcessor object which will process
 	 */
-	public <T> void startProcessor(QueueHandle h, QueueProcessor<T> p) {
-		if (!this.ids.containsKey(h)) {
-			throw new QueueServiceException("Unknown handle");
+	<T extends MessageLite> void startProcessor(String l, 
+			QueueProcessor<T> p) {
+		try {
+			lock.writeLock().lock();
+			if (!this.ids.containsKey(l)) {
+				throw new QueueServiceException("Unknown handle");
+			}
+			
+			ServiceStruct<?> serviceStruct = this.ids.get(l);
+			MonitoredSyncQueue queue = serviceStruct.queue;
+			List<WorkerRunnable<?>> runnables = serviceStruct.runnables;
+			WorkerRunnable<T> runnable = new WorkerRunnable<T>(queue, p);
+			runnables.add(runnable);
+			executor.execute(runnable);
+		} finally {
+			lock.writeLock().unlock();
 		}
-	
-		WorkerRunnable<T> runnable = new WorkerRunnable<T>(this.ids.get(h), p);
-		List<WorkerRunnable<?>> list = runnables.get(h);
-		if (list == null)
-			list = new ArrayList<>();
-			runnables.put(h, list);
-		list.add(runnable);
-		executor.execute(runnable);
 	}
 
 	/**
-	 * Insert an object to a given queue so it can be processed by a QueueProcessor.
+	 * Insert an object to a given queue so it can be processed by a 
+	 * QueueProcessor.
 	 * 
-	 * @param h The handle of the queue
+	 * @param l The label of the queue
 	 * @param t The object to insert
 	 * 
 	 * @throws InterruptedException 
 	 */
-	public <T> void sendObjectToQueue(QueueHandle h, T t) 
+	<T extends MessageLite> void sendObjectToQueue(String l, T t) 
 			throws InterruptedException {
-		if (!this.ids.containsKey(h)) {
-			throw new QueueServiceException("Unknown handle");
+		MonitoredSyncQueue monitoredSyncQueue;
+		try {
+			lock.readLock().lock();
+			if (!this.ids.containsKey(l)) {
+				throw new QueueServiceException("Unknown handle");
+			}
+			monitoredSyncQueue = this.ids.get(l).queue;
+		} finally {
+			lock.readLock().unlock();
 		}
-	
-		this.ids.get(h).put(t);
+		monitoredSyncQueue.put(t);
 	}
 	
 	/**
@@ -155,7 +187,8 @@ public class QueueService {
 	public void waitUntilWorkIsDone(int secondsBetweenChecks) {
 		boolean someoneIsWorking = false;
 		do {
-			synchronized (ids) {
+			try {
+				lock.readLock().lock();
 				someoneIsWorking = false;
 				
 				//System.err.println("-- debug " + new Date());
@@ -166,8 +199,10 @@ public class QueueService {
 				//Acquiring time stamps
 				int[] stamps = new int[ids.size()];
 				int i = 0;
-				for (MonitoredSyncQueue m : ids.values()) {
-					Tuple<Integer, Integer> sizeAndTimeStamp = m.synchronizationData();
+				for (ServiceStruct<?> struct : ids.values()) {
+					MonitoredSyncQueue queue = struct.queue;
+					Tuple<Integer, Integer> sizeAndTimeStamp = 
+							queue.synchronizationData();
 					if (sizeAndTimeStamp.first != 0) {
 						someoneIsWorking = true;
 						break;
@@ -180,8 +215,10 @@ public class QueueService {
 				//Verifying if stamps changed
 				i = 0;
 				if (!someoneIsWorking) {
-					for (MonitoredSyncQueue m : ids.values()) {
-						Tuple<Integer, Integer> sizeAndTimeStamp = m.synchronizationData();
+					for (ServiceStruct<?> struct : ids.values()) {
+						MonitoredSyncQueue queue = struct.queue;
+						Tuple<Integer, Integer> sizeAndTimeStamp = 
+								queue.synchronizationData();
 						if (sizeAndTimeStamp.first != 0 || stamps[i] != sizeAndTimeStamp.second) {
 							someoneIsWorking = true;
 							break;
@@ -189,6 +226,8 @@ public class QueueService {
 						i++;
 					}
 				}
+			} finally {
+				lock.readLock().unlock();
 			}
 			
 			if (someoneIsWorking) {
@@ -204,32 +243,34 @@ public class QueueService {
 		waitUntilWorkIsDone(secondsBetweenChecks);
 		
 		try {
-			for (Entry<QueueHandle, MonitoredSyncQueue> e : ids.entrySet()) {
-				QueueHandle h = e.getKey();
-				MonitoredSyncQueue m = e.getValue();
+			for (ServiceStruct<?> struct : ids.values()) {
+				MonitoredSyncQueue m = struct.queue;
 				m.poison();
 				
-				for (WorkerRunnable<?> runnable : runnables.get(h))
+				for (WorkerRunnable<?> runnable : struct.runnables)
 					runnable.awaitTermination();
 			}
 			this.executor.shutdown();
 			this.executor.awaitTermination(Long.MAX_VALUE, 
 					TimeUnit.MILLISECONDS);
+			
+			if (this.nioServer != null)
+				this.nioServer.shutdown();
 		} catch (InterruptedException e) {
+			throw new QueueServiceException(e);
 		}
 	}
 	
 	/**
 	 * A worker runnable guarantees that the done method of the queue is called. 
 	 */
-	private class WorkerRunnable<T> extends Thread {
+	private class WorkerRunnable<T extends MessageLite> implements Runnable {
 		
 		private final MonitoredSyncQueue q;
 		private final QueueProcessor<T> p;
 		private final CountDownLatch latch;
 		
 		public WorkerRunnable(MonitoredSyncQueue q, QueueProcessor<T> p) {
-			super("WorkerRunnable: " + p.getName());
 			this.q = q;
 			this.p = p;
 			this.latch = new CountDownLatch(1);
@@ -241,8 +282,7 @@ public class QueueService {
 		public void run() {
 			boolean interrupted = false;
 			while (!interrupted) {
-				Object take = null;
-				take = q.claim();
+				MessageLite take = q.take();
 				
 				if (take != MonitoredSyncQueue.POISON) {
 					p.process((T) take);
@@ -259,7 +299,17 @@ public class QueueService {
 		}
 	}
 	
-	protected MonitoredSyncQueue getMessageQueue(QueueHandle handle) {
-		return this.ids.get(handle);
+	MessageLiteSerializer<?> getSerializer(String handle) {
+		try {
+			this.lock.readLock().lock();
+			return this.ids.get(handle).actor.newMsgSerializer();
+		} finally {
+			this.lock.readLock().unlock();
+		}
 	}
+	
+	@VisibleForTesting MonitoredSyncQueue getMessageQueue(String label) {
+		return this.ids.get(label).queue;
+	}
+
 }

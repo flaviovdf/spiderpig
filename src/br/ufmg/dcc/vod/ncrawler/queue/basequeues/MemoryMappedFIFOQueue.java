@@ -1,10 +1,12 @@
-package br.ufmg.dcc.vod.ncrawler.queue;
+package br.ufmg.dcc.vod.ncrawler.queue.basequeues;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-class MemoryMappedFIFOQueue<T> implements EventQueue<T> {
+import br.ufmg.dcc.vod.ncrawler.queue.serializer.Serializer;
+
+public class MemoryMappedFIFOQueue<T> implements EventQueue<T> {
 
 	private FIFOByteArrayQueue queue;
 	private Serializer<T> s;
@@ -16,7 +18,7 @@ class MemoryMappedFIFOQueue<T> implements EventQueue<T> {
 
 	@Override
 	public void put(T t) {
-		byte[] checkpointData = s.checkpointData(t);
+		byte[] checkpointData = s.toByteArray(t);
 		queue.put(checkpointData);
 	}
 

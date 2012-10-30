@@ -1,6 +1,7 @@
 package br.ufmg.dcc.vod.ncrawler.master.processor.manager;
 
 import br.ufmg.dcc.vod.ncrawler.jobs.JobExecutor;
+import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Ids.CrawlID;
 
 /**
  * Common interface for worker managers. Implementers of this interface must
@@ -19,7 +20,7 @@ public interface WorkerManager {
 	 * @return a {@link WorkerID}
 	 * @throws InterruptedException Thrown if blocking fails 
 	 */
-	public WorkerID allocateAvailableExecutor(String crawlID) 
+	public WorkerID allocateAvailableExecutor(CrawlID crawlID) 
 			throws InterruptedException;
 	
 	/**
@@ -28,7 +29,7 @@ public interface WorkerManager {
 	 * 
 	 * @param crawlID The id of the crawl the worker was executing
 	 */
-	public boolean freeExecutor(String crawlID);
+	public boolean freeExecutor(CrawlID crawlID);
 	
 	/**
 	 * Mark's a {@link WorkerID} as suspected. Suspected executors will

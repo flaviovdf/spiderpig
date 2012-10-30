@@ -1,4 +1,4 @@
-package br.ufmg.dcc.vod.ncrawler.queue;
+package br.ufmg.dcc.vod.ncrawler.queue.basequeues;
 
 import java.util.LinkedList;
 

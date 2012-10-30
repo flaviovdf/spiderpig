@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Ids.CrawlID;
+
 import com.google.common.annotations.VisibleForTesting;
 
 public class WorkerManagerImpl implements WorkerManager {
@@ -15,8 +17,8 @@ public class WorkerManagerImpl implements WorkerManager {
 	public enum WorkerState {IDLE, BUSY, SUSPECTED}
 
 	private Map<WorkerState, Collection<WorkerID>> stateMap;
-	private Map<String, WorkerID> allocMap;
-	private Map<WorkerID, String> inverseAllocMap;
+	private Map<CrawlID, WorkerID> allocMap;
+	private Map<WorkerID, CrawlID> inverseAllocMap;
 	private ReentrantLock lock;
 	private Condition waitCondition;
 	
@@ -35,7 +37,7 @@ public class WorkerManagerImpl implements WorkerManager {
 	}
 	
 	@Override
-	public WorkerID allocateAvailableExecutor(String crawlID) 
+	public WorkerID allocateAvailableExecutor(CrawlID crawlID) 
 			throws InterruptedException {
 		try {
 			this.lock.lock();
@@ -60,12 +62,12 @@ public class WorkerManagerImpl implements WorkerManager {
 	}
 
 	@Override
-	public boolean freeExecutor(String crawlID) {
+	public boolean freeExecutor(CrawlID crawlID) {
 		try {
 			this.lock.lock();
 			WorkerID workerID = this.allocMap.remove(crawlID);
 			if (workerID != null) {
-				String remove = this.inverseAllocMap.remove(workerID);
+				CrawlID remove = this.inverseAllocMap.remove(workerID);
 				assert remove.equals(crawlID);
 				
 				this.stateMap.get(WorkerState.BUSY).remove(workerID);
@@ -84,7 +86,7 @@ public class WorkerManagerImpl implements WorkerManager {
 	public void executorSuspected(WorkerID workerID) {
 		try {
 			this.lock.lock();
-			String crawlID = this.inverseAllocMap.remove(workerID);
+			CrawlID crawlID = this.inverseAllocMap.remove(workerID);
 			if (crawlID != null) {
 				WorkerID remove = this.allocMap.remove(crawlID);
 				assert remove.equals(workerID);
@@ -110,7 +112,7 @@ public class WorkerManagerImpl implements WorkerManager {
 			}
 			
 			if (this.inverseAllocMap.containsKey(workerID)) {
-				String crawlID = this.inverseAllocMap.remove(workerID);
+				CrawlID crawlID = this.inverseAllocMap.remove(workerID);
 				
 				WorkerID removedID = this.allocMap.remove(crawlID);
 				assert removedID.equals(workerID);

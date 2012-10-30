@@ -15,6 +15,7 @@ import org.junit.Test;
 import br.ufmg.dcc.vod.ncrawler.common.Tuple;
 import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Payload.UploadMessage;
 import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Payload.UploadMessage.Builder;
+import br.ufmg.dcc.vod.ncrawler.queue.common.ProtocolBufferUtils;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -31,17 +32,26 @@ public class ProtocolBufferUtilsTest {
 				.setFileName("bah")
 				.setPayload(ByteString.copyFrom(new byte[]{1, 2, 3}));
 		
+		String handle = "JackTheKiller";
 		UploadMessage msg = newBuilder.build();
 		ByteBuffer buff = 
-				ProtocolBufferUtils.msgToSizedByteBuffer(msg);
-		buff.rewind();
+				ProtocolBufferUtils.msgToSizedByteBuffer(handle, msg);
 		
-		byte[] byteArray = msg.toByteArray();
-		Assert.assertEquals(byteArray.length + 4, buff.capacity());
-		Assert.assertEquals(byteArray.length, buff.getInt());
+		byte[] protoArray = msg.toByteArray();
+		byte[] handleArray = handle.getBytes();
 		
-		for (int i = 0; i < byteArray.length; i++)
-			Assert.assertEquals(byteArray[i], buff.get());
+		int msgSize = handleArray.length + protoArray.length;
+		Assert.assertEquals(msgSize + 12, buff.capacity());
+		
+		Assert.assertEquals(msgSize + 8, buff.getInt());
+		Assert.assertEquals(handleArray.length, buff.getInt());
+		for (int i = 0; i < handleArray.length; i++) {
+			Assert.assertEquals(handleArray[i], buff.get());
+		}
+	
+		Assert.assertEquals(protoArray.length, buff.getInt());
+		for (int i = 0; i < protoArray.length; i++)
+			Assert.assertEquals(protoArray[i], buff.get());
 		buff.rewind();
 		
 		InetSocketAddress addr = new InetSocketAddress(2222);
@@ -55,11 +65,17 @@ public class ProtocolBufferUtilsTest {
 		Tuple<Future<Integer>, ByteBuffer> tuple = 
 				ProtocolBufferUtils.readFromChannel(asch);
 		
-		Assert.assertEquals(tuple.first.get().intValue(), byteArray.length);
+		Assert.assertEquals(msgSize + 8, tuple.first.get().intValue());
 		ByteBuffer newBuff = tuple.second;
+		newBuff.rewind();
 		
-		UploadMessage newMsg = ProtocolBufferUtils.readFromBuffer(newBuff, 
-				UploadMessage.newBuilder(), null);
+		String newHandle = ProtocolBufferUtils.readHandleFromBuffer(newBuff);
+		Assert.assertTrue(newHandle != handle);
+		Assert.assertEquals(newHandle, handle);
+		
+		UploadMessage newMsg =
+				ProtocolBufferUtils.readFromBuffer(newBuff, 
+						UploadMessage.newBuilder(), null);
 		
 		Assert.assertTrue(newMsg != msg);
 		Assert.assertEquals(newMsg, msg);

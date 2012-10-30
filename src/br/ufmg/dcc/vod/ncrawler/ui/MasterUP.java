@@ -22,8 +22,7 @@ public class MasterUP extends Command {
 
 	private static final String LOG_FILE = "l";
 	private static final String HOSTNAME = "h";
-	private static final String CALL_BACK_PORT = "p";
-	private static final String FILE_SAVE_PORT = "f";
+	private static final String PORT = "p";
 	private static final String SERVER_FILE = "r";
 	private static final String SAVE_FOLDER = "o";
 	private static final String SEED_FILE = "s";
@@ -49,19 +48,12 @@ public class MasterUP extends Command {
 				.create(HOSTNAME));
 		
 		opts.addOption(OptionBuilder
-				.withArgName("callback-port")
+				.withArgName("port")
 				.hasArg()
 				.isRequired()
-				.withDescription("Port to bind callback socket")
-				.create(CALL_BACK_PORT));
+				.withDescription("Port to bind socket")
+				.create(PORT));
 
-		opts.addOption(OptionBuilder
-				.withArgName("filesaver-port")
-				.hasArg()
-				.isRequired()
-				.withDescription("Port to bind file saver socket")
-				.create(FILE_SAVE_PORT));
-		
 		opts.addOption(OptionBuilder
 				.withArgName("server-file")
 				.hasArg()
@@ -118,8 +110,7 @@ public class MasterUP extends Command {
 	public void exec(CommandLine cli) throws Exception {
 		
 		String hostname = cli.getOptionValue(HOSTNAME);
-		int callBackPort = Integer.parseInt(cli.getOptionValue(CALL_BACK_PORT));
-		int fileSavePort = Integer.parseInt(cli.getOptionValue(FILE_SAVE_PORT));
+		int port = Integer.parseInt(cli.getOptionValue(PORT));
 		
 		File serverFile = new File(cli.getOptionValue(SERVER_FILE));
 		File saveFolder = new File(cli.getOptionValue(SAVE_FOLDER));
@@ -135,9 +126,8 @@ public class MasterUP extends Command {
 		Set<InetSocketAddress> workerAddrs = interpret(serverFile);
 		FileSaver saver = new FileSaverImpl(saveFolder.getAbsolutePath());
 		Crawler crawler = 
-				CrawlerFactory.createDistributedCrawler(hostname, callBackPort, 
-					hostname, fileSavePort, workerAddrs, workQueueFolder, 
-					saver);
+				CrawlerFactory.createDistributedCrawler(hostname, port, 
+					workerAddrs, workQueueFolder, saver);
 		
 		List<String> seed = FileUtil.readFileToList(seedFile);
 		crawler.dispatch(seed);

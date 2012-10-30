@@ -1,9 +1,12 @@
-package br.ufmg.dcc.vod.ncrawler.queue;
+package br.ufmg.dcc.vod.ncrawler.queue.basequeues;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import br.ufmg.dcc.vod.ncrawler.queue.QueueServiceException;
+import br.ufmg.dcc.vod.ncrawler.queue.serializer.Serializer;
 
 /**
  * In order to surpass memory map limits, this class creates multiples {@link MemoryMappedFIFOQueue} inside
@@ -12,7 +15,7 @@ import java.util.List;
  *  
  * @param <T> Type of objects to be inserted
  */
-class MultiFileMMapFifoQueue<T> implements EventQueue<T> {
+public class MultiFileMMapFifoQueue<T> implements EventQueue<T> {
 
 	private List<FIFOByteArrayQueue> queues;
 	
@@ -90,7 +93,7 @@ class MultiFileMMapFifoQueue<T> implements EventQueue<T> {
 	
 	@Override
 	public void put(T t) {
-		byte[] checkpointData = s.checkpointData(t);
+		byte[] checkpointData = s.toByteArray(t);
 		updateWriteReference();
 		getWriteQueue().put(checkpointData);
 		size++;

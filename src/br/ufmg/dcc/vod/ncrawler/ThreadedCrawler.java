@@ -9,6 +9,7 @@ import br.ufmg.dcc.vod.ncrawler.master.Master;
 import br.ufmg.dcc.vod.ncrawler.master.StopCondition;
 import br.ufmg.dcc.vod.ncrawler.master.StopCondition.CounterType;
 import br.ufmg.dcc.vod.ncrawler.master.processor.ProcessorActor;
+import br.ufmg.dcc.vod.ncrawler.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.ncrawler.queue.QueueService;
 import br.ufmg.dcc.vod.ncrawler.stats.StatsActor;
 
@@ -24,11 +25,12 @@ public class ThreadedCrawler implements Crawler {
 	protected final Master master;
 	protected final StopCondition stopCondition;
 	protected final FileSaver saver;
+	protected final int numThreads;
 
 
 	protected ThreadedCrawler(ProcessorActor processorActor, 
 			StatsActor statsActor, QueueService service, 
-			Master master, FileSaver saver) {
+			Master master, FileSaver saver, int numThreads) {
 		Preconditions.checkNotNull(processorActor);
 		Preconditions.checkNotNull(service);
 		
@@ -38,16 +40,19 @@ public class ThreadedCrawler implements Crawler {
 		this.master = master;
 		this.saver = saver;
 		this.stopCondition = master.getStopCondition();
+		this.numThreads = numThreads;
 	}
 	
 	public void dispatch(List<String> seed) {
+		CrawlID.Builder builder = CrawlID.newBuilder();
 		for (String crawlID : seed)
-			this.master.dispatch(crawlID);
+			this.master.dispatch(builder.setId(crawlID).build());
 	}
 
 	public void dispatch(String... seed) {
+		CrawlID.Builder builder = CrawlID.newBuilder();
 		for (String crawlID : seed)
-			this.master.dispatch(crawlID);
+			this.master.dispatch(builder.setId(crawlID).build());
 	}
 	
 	public void crawl() {
@@ -56,8 +61,8 @@ public class ThreadedCrawler implements Crawler {
 
 		//Starting
 		if (statsActor != null)
-			statsActor.start();
-		processorActor.start();
+			statsActor.startProcessors(1);
+		processorActor.startProcessors(numThreads);
 		
 		//Waiting until crawl ends
 		LOG.info("Waiting until crawl ends");

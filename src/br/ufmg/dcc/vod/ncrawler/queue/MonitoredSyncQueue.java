@@ -5,7 +5,11 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import com.google.common.base.Preconditions;
+import com.google.protobuf.MessageLite;
+
 import br.ufmg.dcc.vod.ncrawler.common.Tuple;
+import br.ufmg.dcc.vod.ncrawler.queue.basequeues.EventQueue;
 
 /**
  * A synchronized queue of objects. This is a thread safe queue in which objects
@@ -24,9 +28,9 @@ import br.ufmg.dcc.vod.ncrawler.common.Tuple;
  * communication queue after calling the <code>done</code> method on the queue
  * the current thread is consuming.
  */
-class MonitoredSyncQueue {
+public class MonitoredSyncQueue implements EventQueue<MessageLite> {
 
-	public static final Object POISON = new Object();
+	public static final MessageLite POISON = new BogusMSG();
 	private volatile boolean poisoned = false;
 	
 	//Stamps
@@ -38,20 +42,20 @@ class MonitoredSyncQueue {
 	private final ReentrantLock lock;
 	private final Condition getCondition;
 	
-	private final String label;
-	
-	private final EventQueue<Object> e;
+	private final EventQueue<MessageLite> e;
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	public MonitoredSyncQueue(String label, EventQueue e) {
-		this.label = label;
+	public MonitoredSyncQueue(EventQueue e) {
 		this.e = e;
 		this.stampLock = new ReentrantReadWriteLock();
 		this.lock = new ReentrantLock();
 		this.getCondition = lock.newCondition();
 	}
 
-	public void put(Object t) {
+	@Override
+	public void put(MessageLite t) {
+		Preconditions.checkNotNull(t);
+		
 		try {
 			stampLock.writeLock().lock();
 			this.workHandle.incrementAndGet();
@@ -69,7 +73,8 @@ class MonitoredSyncQueue {
 		}
 	}
 
-	public Object claim() {
+	@Override
+	public MessageLite take() {
 		try {
 			lock.lock();
 			while (e.size() == 0 && !poisoned)
@@ -79,7 +84,7 @@ class MonitoredSyncQueue {
 				}
 
 			if (!poisoned) {
-				Object take = e.take();
+				MessageLite take = e.take();
 				return take;
 			} else
 				return POISON;
@@ -110,11 +115,6 @@ class MonitoredSyncQueue {
 		}
 	}
 	
-	@Override
-	public String toString() {
-		return label;
-	}
-
 	public void poison() {
 		lock.lock();
 		poisoned = true;

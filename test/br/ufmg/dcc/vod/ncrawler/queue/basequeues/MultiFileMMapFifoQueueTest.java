@@ -1,4 +1,4 @@
-package br.ufmg.dcc.vod.ncrawler.queue;
+package br.ufmg.dcc.vod.ncrawler.queue.basequeues;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,8 +11,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class MultiFileMMapFifoQueueTest extends TestCase {
+import br.ufmg.dcc.vod.ncrawler.queue.QueueServiceException;
+import br.ufmg.dcc.vod.ncrawler.queue.basequeues.MultiFileMMapFifoQueue;
+import br.ufmg.dcc.vod.ncrawler.queue.serializer.StringSerializer;
 
+public class MultiFileMMapFifoQueueTest extends TestCase {
+	
+	private StringSerializer ss = new StringSerializer();
 	private File myTempDir;
 
 	@Before
@@ -37,7 +42,6 @@ public class MultiFileMMapFifoQueueTest extends TestCase {
 	
 	@Test
 	public void testQueuePutErrors() throws FileNotFoundException, IOException {
-		SS ss = new SS();
 		MultiFileMMapFifoQueue<String> q = new MultiFileMMapFifoQueue<String>(myTempDir, ss, 1024 * 1024);
 		
 		try {
@@ -49,7 +53,6 @@ public class MultiFileMMapFifoQueueTest extends TestCase {
 	
 	@Test
 	public void testQueuePutGet() throws FileNotFoundException, IOException {
-		SS ss = new SS();
 		MultiFileMMapFifoQueue<String> q = new MultiFileMMapFifoQueue<String>(myTempDir, ss, 1024 * 1024);
 		
 		assertEquals(0, q.size());
@@ -68,7 +71,6 @@ public class MultiFileMMapFifoQueueTest extends TestCase {
 
 	@Test
 	public void testQueuePutGet2() throws FileNotFoundException, IOException {
-		SS ss = new SS();
 		MultiFileMMapFifoQueue<String> q = new MultiFileMMapFifoQueue<String>(myTempDir, ss, 15);
 		q.put("a"); //This will succeed!
 		assertEquals(2, myTempDir.listFiles().length);
@@ -102,7 +104,6 @@ public class MultiFileMMapFifoQueueTest extends TestCase {
 	
 	@Test
 	public void testQueuePutGet3() throws FileNotFoundException, IOException {
-		SS ss = new SS();
 		MultiFileMMapFifoQueue<String> q = new MultiFileMMapFifoQueue<String>(myTempDir, ss, 1024 * 1024);
 		assertEquals(1, myTempDir.listFiles().length);
 		
@@ -138,7 +139,6 @@ public class MultiFileMMapFifoQueueTest extends TestCase {
 	
 	@Test
 	public void testQueuePutGet4() throws FileNotFoundException, IOException {
-		SS ss = new SS();
 		MultiFileMMapFifoQueue<String> q = new MultiFileMMapFifoQueue<String>(myTempDir, ss, 1024 * 1024);
 		
 		try {
@@ -160,7 +160,6 @@ public class MultiFileMMapFifoQueueTest extends TestCase {
 	
 	@Test
 	public void testQueuePutGet5() throws FileNotFoundException, IOException {
-		SS ss = new SS();
 		MultiFileMMapFifoQueue<String> q = new MultiFileMMapFifoQueue<String>(myTempDir, ss, 1024 * 1024);
 		
 		assertEquals(0, q.size());
@@ -198,7 +197,6 @@ public class MultiFileMMapFifoQueueTest extends TestCase {
 
 	@Test
 	public void testQueuePutGet6() throws FileNotFoundException, IOException {
-		SS ss = new SS();
 		//12 header + 512 of data
 		MultiFileMMapFifoQueue<String> q = new MultiFileMMapFifoQueue<String>(myTempDir, ss, 12 + 512);
 		
@@ -214,7 +212,6 @@ public class MultiFileMMapFifoQueueTest extends TestCase {
 	
 	@Test
 	public void testQueuePutGet7() throws FileNotFoundException, IOException {
-		SS ss = new SS();
 		//12 header + 512 of data
 		MultiFileMMapFifoQueue<String> q = new MultiFileMMapFifoQueue<String>(myTempDir, ss, 12 + 512);
 		
@@ -230,7 +227,6 @@ public class MultiFileMMapFifoQueueTest extends TestCase {
 	
 	@Test
 	public void testQueuePutGet8() throws FileNotFoundException, IOException {
-		SS ss = new SS();
 		//12 header + 512 of data
 		MultiFileMMapFifoQueue<String> q = new MultiFileMMapFifoQueue<String>(myTempDir, ss, 12 + 512);
 		
@@ -246,7 +242,6 @@ public class MultiFileMMapFifoQueueTest extends TestCase {
 	
 	@Test
 	public void testQueuePutGet9() throws FileNotFoundException, IOException {
-		SS ss = new SS();
 		//12 header + 512 of data
 		MultiFileMMapFifoQueue<String> q = new MultiFileMMapFifoQueue<String>(myTempDir, ss, 20);
 		assertEquals(1, myTempDir.listFiles().length);
@@ -261,21 +256,5 @@ public class MultiFileMMapFifoQueueTest extends TestCase {
 		
 		assertEquals(512+"", q.take());
 		assertEquals(0, q.size());
-	}
-	
-	public class SS implements Serializer<String> {
-		
-		public SS() {
-		}
-		
-		@Override
-		public byte[] checkpointData(String t) {
-			return t.getBytes();
-		}
-
-		@Override
-		public String interpret(byte[] checkpoint) {
-			return new String(checkpoint);
-		}
 	}
 }

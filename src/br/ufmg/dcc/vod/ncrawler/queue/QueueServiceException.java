@@ -10,7 +10,7 @@ public class QueueServiceException extends RuntimeException {
 		super(string);
 	}
 
-	public QueueServiceException(InterruptedException e) {
+	public QueueServiceException(Exception e) {
 		super(e);
 	}
 
