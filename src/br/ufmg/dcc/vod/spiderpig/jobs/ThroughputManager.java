@@ -37,7 +37,7 @@ public class ThroughputManager {
 			long toSleep = timeBetweenRequests - elapsedMillis;
 			if (toSleep > MIN_DELTA) {
 				LOG.info("" +elapsedMillis + " ms ellapsed since last request."
-						 + " sleeping!");
+						 + " sleeping for " + toSleep + " ms");
 				TimeUnit.MILLISECONDS.sleep(toSleep);
 			}
 			return getAndStartWatch(crawlID, requester);

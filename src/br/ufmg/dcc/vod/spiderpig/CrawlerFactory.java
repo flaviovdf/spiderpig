@@ -9,7 +9,9 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
+import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDClientActor;
 import br.ufmg.dcc.vod.spiderpig.distributed.nio.service.RemoteMessageSender;
+import br.ufmg.dcc.vod.spiderpig.distributed.worker.FDServerActor;
 import br.ufmg.dcc.vod.spiderpig.distributed.worker.WorkerActor;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaverActor;
@@ -18,14 +20,14 @@ import br.ufmg.dcc.vod.spiderpig.master.DecoratorInterested;
 import br.ufmg.dcc.vod.spiderpig.master.Master;
 import br.ufmg.dcc.vod.spiderpig.master.ResultActor;
 import br.ufmg.dcc.vod.spiderpig.master.processor.ProcessorActor;
+import br.ufmg.dcc.vod.spiderpig.master.processor.manager.LoopbackResolver;
 import br.ufmg.dcc.vod.spiderpig.master.processor.manager.MultiCoreManager;
-import br.ufmg.dcc.vod.spiderpig.master.processor.manager.RemoteWorkerID;
-import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerID;
+import br.ufmg.dcc.vod.spiderpig.master.processor.manager.RemoteResolver;
+import br.ufmg.dcc.vod.spiderpig.master.processor.manager.Resolver;
 import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerManager;
 import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerManagerImpl;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
 import br.ufmg.dcc.vod.spiderpig.queue.QueueService;
-import br.ufmg.dcc.vod.spiderpig.queue.fd.FailureDetector;
 import br.ufmg.dcc.vod.spiderpig.tracker.BloomFilterTrackerFactory;
 
 /**
@@ -44,11 +46,11 @@ public class CrawlerFactory {
 				new BloomFilterTrackerFactory<String>();
 		
 		DecoratorInterested workerInterested = new DecoratorInterested();
-		WorkerManager workerManager = new MultiCoreManager(
-				numThreads, jobExecutor);
+		WorkerManager workerManager = new MultiCoreManager(numThreads);
 		
+		Resolver resolver = new LoopbackResolver(jobExecutor);
 		ProcessorActor processorActor = new ProcessorActor(workerManager, 
-				service, workerInterested, saver);
+				service, resolver, workerInterested, saver);
 		Master master = new Master(trackerFactory, processorActor, null,
 				workerManager);
 		
@@ -69,37 +71,41 @@ public class CrawlerFactory {
 				new BloomFilterTrackerFactory<String>();
 
 		int numThreads = workerAddrs.size();
-		Set<WorkerID> workerIDs = new HashSet<>();
+		Set<ServiceID> workerIDs = new HashSet<>();
 		
 		ServiceID callBackID = ServiceIDUtils.toServiceID(hostname, port, 
 				ResultActor.HANDLE);
 		ServiceID fileSaverID = ServiceIDUtils.toServiceID(hostname, port, 
 				FileSaverActor.HANDLE);
-		RemoteMessageSender sender = new RemoteMessageSender();
 		
 		for (InetSocketAddress socketAddr : workerAddrs) {
 			ServiceID workerID = ServiceIDUtils.toServiceID(
 					socketAddr.getHostString(), socketAddr.getPort(), 
 					WorkerActor.HANDLE);
-			workerIDs.add(new RemoteWorkerID(workerID, callBackID, fileSaverID, 
-					sender));
+			workerIDs.add(workerID);
 		}
 		
+		RemoteMessageSender sender = new RemoteMessageSender();
 		WorkerManager workerManager = new WorkerManagerImpl(workerIDs);
-		
+		Resolver resolver = new RemoteResolver(callBackID, fileSaverID, sender);
 		ProcessorActor processorActor = new ProcessorActor(workerManager, 
-				service, null, null);
+				service, resolver, null, null);
 		Master master = new Master(trackerFactory, processorActor, null, 
 				workerManager);
 		
 		ResultActor resultActor = new ResultActor(master);
 		FileSaverActor fileSaverActor = new FileSaverActor(saver);
-		FailureDetector fd = new FailureDetector(1, TimeUnit.MINUTES, sender);
+		FDClientActor fd = new FDClientActor(30, 5, TimeUnit.SECONDS, 
+				master, sender);
 		
 		fd.withSimpleQueue(service);
 		processorActor.withFileQueue(service, queueDir);
 		fileSaverActor.withSimpleQueue(service);
 		resultActor.withSimpleQueue(service);
+		
+		for (ServiceID sid : workerIDs)
+			fd.watch(ServiceIDUtils.toServiceID(sid.getHostname(), sid.getPort(), 
+					 FDServerActor.HANDLE));
 		
 		return new DistributedCrawler(processorActor, null, service, 
 				master, resultActor, fileSaverActor, fd, 

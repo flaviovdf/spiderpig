@@ -18,10 +18,10 @@ public interface WorkerManager {
 	 * 
 	 * @param crawlID The id of the crawl the worker will execute
 	 * 
-	 * @return a {@link Resolver} which proxies message to remote server
+	 * @return a {@link ServiceID}
 	 * @throws InterruptedException Thrown if blocking fails 
 	 */
-	public Resolver allocateAvailableExecutor(CrawlID crawlID) 
+	public ServiceID allocateAvailableExecutor(CrawlID crawlID) 
 			throws InterruptedException;
 	
 	/**

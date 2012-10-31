@@ -1,6 +1,5 @@
-package br.ufmg.dcc.vod.spiderpig.queue.fd;
+package br.ufmg.dcc.vod.spiderpig.distributed.fd;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -18,42 +17,45 @@ import com.google.common.base.Stopwatch;
 /**
  * A really basic failure detector. I just considers services as dead if a
  * time out has passed.
+ * 
+ * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
-public class FailureDetector extends Actor<PingPong> 
+public class FDClientActor extends Actor<PingPong> 
 		implements QueueProcessor<PingPong>, Runnable {
 
 	private class FDStruct {
 		
 		final Stopwatch stopwatch;
-		final ArrayList<FDListener> listeners;
 		boolean down;
 
 		public FDStruct(Stopwatch stopwatch) {
 			this.stopwatch = stopwatch;
-			this.listeners = new ArrayList<>();
-			this.down = false;
+			this.down = true;
 		}
 		
 	}
 
 	public static final String HANDLE = "FDClient";
-	private static final long DELTA_MILLI = 500;
 	
 	private final ReentrantLock lock;
 	private final HashMap<ServiceID, FDStruct> monitoring;
 	private final long timeout;
+	private final long pingTime;
 	private final TimeUnit unit;
 	private final RemoteMessageSender sender;
 	private final AtomicBoolean shutdown;
+	private final FDListener listener;
 	
 	private PingPong ping;
 	private Thread thread;
 
-	public FailureDetector(long timeout, TimeUnit unit, 
-			RemoteMessageSender sender) {
+	public FDClientActor(long timeout, long pingTime, TimeUnit unit, 
+			FDListener listener, RemoteMessageSender sender) {
 		super(HANDLE);
 		this.timeout = timeout;
+		this.pingTime = pingTime;
 		this.unit = unit;
+		this.listener = listener;
 		this.sender = sender;
 		this.lock = new ReentrantLock();
 		this.monitoring = new HashMap<>();
@@ -68,7 +70,7 @@ public class FailureDetector extends Actor<PingPong>
 		return ping;
 	}
 	
-	public void addListener(ServiceID serviceID, FDListener listener) {
+	public void watch(ServiceID serviceID) {
 		try {
 			this.lock.lock();
 			FDStruct struct = this.monitoring.get(serviceID);
@@ -78,7 +80,6 @@ public class FailureDetector extends Actor<PingPong>
 				this.monitoring.put(serviceID, struct);
 				stopwatch.start();
 			}
-			struct.listeners.add(listener);
 			this.sender.send(serviceID, getMsg());
 		} finally {
 			this.lock.unlock();
@@ -87,29 +88,27 @@ public class FailureDetector extends Actor<PingPong>
 
 	@Override
 	public void run() {
-		if (this.shutdown.get())
-			return;
-		
-		try {
-			this.lock.lock();
-			for (ServiceID sid : this.monitoring.keySet()) {
-				FDStruct struct = this.monitoring.get(sid);
-				long elapsedMillis = struct.stopwatch.elapsedMillis();
-				if (!struct.down && elapsedMillis > unit.toMillis(timeout)) {
-					struct.stopwatch.stop();
-					struct.down = true;
-					for (FDListener listener : struct.listeners)
+		while(!this.shutdown.get()) {
+			try {
+				this.lock.lock();
+				for (ServiceID sid : this.monitoring.keySet()) {
+					FDStruct struct = this.monitoring.get(sid);
+					long elapsedMillis = struct.stopwatch.elapsedMillis();
+					if (!struct.down && elapsedMillis > unit.toMillis(timeout)) {
+						struct.stopwatch.stop();
+						struct.down = true;
 						listener.isSuspected(sid);
+					}
+					this.sender.send(sid, getMsg());
 				}
-				this.sender.send(sid, getMsg());
+			} finally {
+				this.lock.unlock();
 			}
-		} finally {
-			this.lock.unlock();
-		}
-		
-		try {
-			TimeUnit.MILLISECONDS.sleep(DELTA_MILLI);
-		} catch (InterruptedException e) {
+			
+			try {
+				unit.sleep(pingTime);
+			} catch (InterruptedException e) {
+			}
 		}
 	}
 
@@ -133,11 +132,9 @@ public class FailureDetector extends Actor<PingPong>
 				if (struct.down) {
 					struct.down = false;
 					struct.stopwatch.reset();
-					for (FDListener listener : struct.listeners) {
-						listener.isUp(t.getCallBackID());
-					}
+					struct.stopwatch.start();
+					listener.isUp(t.getCallBackID());
 				}
-				this.sender.send(t.getCallBackID(), getMsg());
 			}
 		} finally {
 			this.lock.unlock();
@@ -152,13 +149,14 @@ public class FailureDetector extends Actor<PingPong>
 				return;
 			
 			this.thread = new Thread(this);
-			this.thread.run();
+			this.thread.start();
 		} finally {
 			this.lock.unlock();
 		}
 	}
 	
-	public void stopTimer() {
+	public void stopTimer() throws InterruptedException {
 		this.shutdown.set(true);
+		this.thread.join();
 	}	
 }

@@ -2,25 +2,26 @@ package br.ufmg.dcc.vod.spiderpig.master.processor.manager;
 
 import java.util.concurrent.Semaphore;
 
-import br.ufmg.dcc.vod.spiderpig.jobs.JobExecutor;
+import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
+import br.ufmg.dcc.vod.spiderpig.distributed.worker.WorkerActor;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
 
 public class MultiCoreManager implements WorkerManager {
 	
+	private static final ServiceID NULL_ID = 
+			ServiceIDUtils.toServiceID("localhost", 0, WorkerActor.HANDLE);
 	private final Semaphore semaphore;
-	private final JobExecutor jobExecutor;
 
-	public MultiCoreManager(int numThreads, JobExecutor jobExecutor) {
-		this.jobExecutor = jobExecutor;
+	public MultiCoreManager(int numThreads) {
 		this.semaphore = new Semaphore(numThreads);
 	}
 	
 	@Override
-	public Resolver allocateAvailableExecutor(CrawlID crawlID)
+	public ServiceID allocateAvailableExecutor(CrawlID crawlID)
 			throws InterruptedException {
 		this.semaphore.acquire();
-		return new DumbID(this.jobExecutor);
+		return NULL_ID;
 	}
 
 	@Override

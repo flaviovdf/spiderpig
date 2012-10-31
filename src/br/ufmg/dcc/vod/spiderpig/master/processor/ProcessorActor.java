@@ -10,6 +10,7 @@ import br.ufmg.dcc.vod.spiderpig.jobs.WorkerInterested;
 import br.ufmg.dcc.vod.spiderpig.master.processor.manager.Resolver;
 import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerManager;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
 import br.ufmg.dcc.vod.spiderpig.queue.Actor;
 import br.ufmg.dcc.vod.spiderpig.queue.QueueProcessor;
 import br.ufmg.dcc.vod.spiderpig.queue.QueueService;
@@ -31,14 +32,17 @@ public class ProcessorActor extends Actor<CrawlID>
 			Logger.getLogger(ProcessorActor.class);
 	
 	private final WorkerManager manager;
+	private final Resolver resolver;
 	private final WorkerInterested interested;
 	private final FileSaver saver;
 
+
 	public ProcessorActor(WorkerManager manager, QueueService service, 
-			WorkerInterested interested, FileSaver saver) 
+			Resolver resolver, WorkerInterested interested, FileSaver saver) 
 					throws FileNotFoundException, IOException {
 		super(HANDLE);
 		this.manager = manager;
+		this.resolver = resolver;
 		this.interested = interested;
 		this.saver = saver;
 	}
@@ -46,9 +50,9 @@ public class ProcessorActor extends Actor<CrawlID>
 	@Override
 	public void process(CrawlID crawlID) {
 		try {
-			Resolver res = this.manager.allocateAvailableExecutor(crawlID);
-			LOG.info("Sending " + crawlID + " to worker " + res.getWorkerID());
-			res.resolve().crawl(crawlID, interested, saver);
+			ServiceID sid = this.manager.allocateAvailableExecutor(crawlID);
+			LOG.info("Sending " + crawlID + " to worker " + sid);
+			resolver.resolve(sid).crawl(crawlID, interested, saver);
 		} catch (InterruptedException e) {
 			LOG.error("Unexcpected interruption", e);
 		}

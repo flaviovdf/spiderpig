@@ -9,28 +9,26 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
 
 public class RemoteResolver implements Resolver {
 
-	private final ServiceID workerID;
 	private final ServiceID callBackID;
 	private final ServiceID fileSaverID;
 	private final RemoteMessageSender sender;
 
-	public RemoteResolver(ServiceID workerID, ServiceID callBackID,
+	public RemoteResolver(ServiceID callBackID,
 			ServiceID fileSaverID, RemoteMessageSender sender) {
 		
-		this.workerID = workerID;
 		this.callBackID = callBackID;
 		this.fileSaverID = fileSaverID;
 		this.sender = sender;
 	}
 
 	@Override
-	public JobExecutor resolve() {
+	public JobExecutor resolve(ServiceID workerID) {
 		return new JobExecutorProxy(workerID, callBackID, fileSaverID, sender);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.workerID, this.workerID);
+		return Objects.hash(this.callBackID, this.fileSaverID);
 	}
 	
 	@Override
@@ -39,11 +37,7 @@ public class RemoteResolver implements Resolver {
 			return false;
 		
 		RemoteResolver other = (RemoteResolver) obj;
-		return Objects.equals(this.workerID, other.workerID);
+		return Objects.equals(this.callBackID, other.callBackID) &&
+				Objects.equals(this.fileSaverID, other.fileSaverID);
 	}
-
-	@Override
-	public ServiceID getWorkerID() {
-		return this.workerID;
-	}	
 }

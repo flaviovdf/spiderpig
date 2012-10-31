@@ -14,14 +14,10 @@ public interface Resolver {
 	/**
 	 * Resolves this id to an executor.
 	 * 
+	 * @param {@link ServiceID} a service ID to resolve
+	 *  
 	 * @return a {@link JobExecutor} object
 	 */
-	public JobExecutor resolve();
+	public JobExecutor resolve(ServiceID serviceID);
 	
-	/**
-	 * Get's the service id to resolve
-	 * 
-	 * @return service id
-	 */
-	public ServiceID getWorkerID();
 }

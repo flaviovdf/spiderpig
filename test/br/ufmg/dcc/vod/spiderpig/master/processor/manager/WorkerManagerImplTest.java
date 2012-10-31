@@ -7,53 +7,31 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import br.ufmg.dcc.vod.spiderpig.jobs.JobExecutor;
-import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerID;
-import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerManager;
-import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerManagerImpl;
+import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
 import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerManagerImpl.WorkerState;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
 
 public class WorkerManagerImplTest {
 
-	class TestID implements WorkerID {
-
-		private int id;
-
-		public TestID(int id) {
-			this.id = id;
-		}
-		
-		@Override
-		public JobExecutor resolve() {
-			return null;
-		}
-		
-		@Override
-		public int hashCode() {
-			return id;
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-			return id == ((TestID) obj).id;
-		}
-	}
-	
-	private Collection<WorkerID> createIDs(int n) {
-		HashSet<WorkerID> set = new HashSet<>();
+	private Collection<ServiceID> createIDs(int n) {
+		HashSet<ServiceID> set = new HashSet<>();
 		for (int i = 0; i < n; i++)
-			set.add(new TestID(i));
+			set.add(buildSID(i));
 		return set;
+	}
+
+	private ServiceID buildSID(int i) {
+		return ServiceIDUtils.toServiceID("", i, ""+i);
 	}
 	
 	@Test
 	public void testCreation() {
-		Collection<WorkerID> ids = createIDs(10);
-		WorkerManagerImpl wmi = new WorkerManagerImpl(ids);
-		Collection<WorkerID> idle = wmi.getByState(WorkerState.IDLE);
-		Collection<WorkerID> busy = wmi.getByState(WorkerState.BUSY);
-		Collection<WorkerID> susp = wmi.getByState(WorkerState.SUSPECTED);
+		Collection<ServiceID> ids = createIDs(10);
+		WorkerManagerImpl wmi = new WorkerManagerImpl(ids, WorkerState.IDLE);
+		Collection<ServiceID> idle = wmi.getByState(WorkerState.IDLE);
+		Collection<ServiceID> busy = wmi.getByState(WorkerState.BUSY);
+		Collection<ServiceID> susp = wmi.getByState(WorkerState.SUSPECTED);
 		
 		Assert.assertEquals(0, busy.size());
 		Assert.assertEquals(0, susp.size());
@@ -63,19 +41,19 @@ public class WorkerManagerImplTest {
 	
 	@Test
 	public void testAllocateAvailableExecutor() throws InterruptedException {
-		Collection<WorkerID> ids = createIDs(10);
+		Collection<ServiceID> ids = createIDs(10);
 		
-		WorkerManagerImpl wmi = new WorkerManagerImpl(ids);
+		WorkerManagerImpl wmi = new WorkerManagerImpl(ids, WorkerState.IDLE);
 		
-		Collection<WorkerID> idle = wmi.getByState(WorkerState.IDLE);
-		Collection<WorkerID> busy = wmi.getByState(WorkerState.BUSY);
-		Collection<WorkerID> susp = wmi.getByState(WorkerState.SUSPECTED);
+		Collection<ServiceID> idle = wmi.getByState(WorkerState.IDLE);
+		Collection<ServiceID> busy = wmi.getByState(WorkerState.BUSY);
+		Collection<ServiceID> susp = wmi.getByState(WorkerState.SUSPECTED);
 		
 		Assert.assertEquals(0, busy.size());
 		Assert.assertEquals(0, susp.size());
 		Assert.assertEquals(10, idle.size());
 		
-		WorkerID wid = wmi.allocateAvailableExecutor(build("1"));
+		ServiceID wid = wmi.allocateAvailableExecutor(build("1"));
 		
 		Assert.assertEquals(1, busy.size());
 		Assert.assertEquals(0, susp.size());
@@ -84,7 +62,7 @@ public class WorkerManagerImplTest {
 		
 		Assert.assertNull(wmi.allocateAvailableExecutor(build("1")));
 		
-		WorkerID wid2 = wmi.allocateAvailableExecutor(build("2"));
+		ServiceID wid2 = wmi.allocateAvailableExecutor(build("2"));
 		
 		Assert.assertEquals(2, busy.size());
 		Assert.assertEquals(0, susp.size());
@@ -113,13 +91,13 @@ public class WorkerManagerImplTest {
 	
 	@Test
 	public void testFreeExecutor() throws InterruptedException {
-		Collection<WorkerID> ids = createIDs(10);
+		Collection<ServiceID> ids = createIDs(10);
 		
-		WorkerManagerImpl wmi = new WorkerManagerImpl(ids);
+		WorkerManagerImpl wmi = new WorkerManagerImpl(ids, WorkerState.IDLE);
 		
-		Collection<WorkerID> idle = wmi.getByState(WorkerState.IDLE);
-		Collection<WorkerID> busy = wmi.getByState(WorkerState.BUSY);
-		Collection<WorkerID> susp = wmi.getByState(WorkerState.SUSPECTED);
+		Collection<ServiceID> idle = wmi.getByState(WorkerState.IDLE);
+		Collection<ServiceID> busy = wmi.getByState(WorkerState.BUSY);
+		Collection<ServiceID> susp = wmi.getByState(WorkerState.SUSPECTED);
 		
 		Assert.assertEquals(0, busy.size());
 		Assert.assertEquals(0, susp.size());
@@ -154,14 +132,14 @@ public class WorkerManagerImplTest {
 
 	@Test
 	public void testThreadSafety1() throws InterruptedException {
-		Collection<WorkerID> ids = createIDs(2);
+		Collection<ServiceID> ids = createIDs(2);
 
-		WorkerManagerImpl wmi = new WorkerManagerImpl(ids);
+		WorkerManagerImpl wmi = new WorkerManagerImpl(ids, WorkerState.IDLE);
 		
 		wmi.allocateAvailableExecutor(build("1"));
 		wmi.allocateAvailableExecutor(build("2"));
 		
-		Collection<WorkerID> busy = wmi.getByState(WorkerState.BUSY);
+		Collection<ServiceID> busy = wmi.getByState(WorkerState.BUSY);
 		Assert.assertEquals(2, busy.size());
 		
 		Allocator allocator = new Allocator(wmi, build("3"));
@@ -180,35 +158,35 @@ public class WorkerManagerImplTest {
 	
 	@Test
 	public void testExecutorSuspected() throws InterruptedException {
-		Collection<WorkerID> ids = createIDs(10);
+		Collection<ServiceID> ids = createIDs(10);
 		
-		WorkerManagerImpl wmi = new WorkerManagerImpl(ids);
+		WorkerManagerImpl wmi = new WorkerManagerImpl(ids, WorkerState.IDLE);
 		
-		Collection<WorkerID> idle = wmi.getByState(WorkerState.IDLE);
-		Collection<WorkerID> busy = wmi.getByState(WorkerState.BUSY);
-		Collection<WorkerID> susp = wmi.getByState(WorkerState.SUSPECTED);
+		Collection<ServiceID> idle = wmi.getByState(WorkerState.IDLE);
+		Collection<ServiceID> busy = wmi.getByState(WorkerState.BUSY);
+		Collection<ServiceID> susp = wmi.getByState(WorkerState.SUSPECTED);
 		
 		Assert.assertEquals(0, busy.size());
 		Assert.assertEquals(0, susp.size());
 		Assert.assertEquals(10, idle.size());
 		
-		wmi.executorSuspected(new TestID(0));
+		wmi.executorSuspected(buildSID(0));
 		
 		Assert.assertEquals(0, busy.size());
 		Assert.assertEquals(1, susp.size());
 		Assert.assertEquals(9, idle.size());
 		
-		Assert.assertTrue(susp.contains(new TestID(0)));
-		Assert.assertFalse(idle.contains(new TestID(0)));
+		Assert.assertTrue(susp.contains(buildSID(0)));
+		Assert.assertFalse(idle.contains(buildSID(0)));
 		
-		WorkerID wid = wmi.allocateAvailableExecutor(build("1"));
+		ServiceID wid = wmi.allocateAvailableExecutor(build("1"));
 		
 		Assert.assertEquals(1, busy.size());
 		Assert.assertEquals(1, susp.size());
 		Assert.assertEquals(8, idle.size());
 		
-		Assert.assertTrue(susp.contains(new TestID(0)));
-		Assert.assertFalse(idle.contains(new TestID(0)));
+		Assert.assertTrue(susp.contains(buildSID(0)));
+		Assert.assertFalse(idle.contains(buildSID(0)));
 		
 		wmi.executorSuspected(wid);
 		
@@ -227,17 +205,17 @@ public class WorkerManagerImplTest {
 
 	@Test
 	public void testMarkAvailable() throws InterruptedException {
-		Collection<WorkerID> ids = createIDs(10);
+		Collection<ServiceID> ids = createIDs(10);
 		
-		WorkerManagerImpl wmi = new WorkerManagerImpl(ids);
+		WorkerManagerImpl wmi = new WorkerManagerImpl(ids, WorkerState.IDLE);
 		
-		Collection<WorkerID> idle = wmi.getByState(WorkerState.IDLE);
-		Collection<WorkerID> busy = wmi.getByState(WorkerState.BUSY);
-		Collection<WorkerID> susp = wmi.getByState(WorkerState.SUSPECTED);
+		Collection<ServiceID> idle = wmi.getByState(WorkerState.IDLE);
+		Collection<ServiceID> busy = wmi.getByState(WorkerState.BUSY);
+		Collection<ServiceID> susp = wmi.getByState(WorkerState.SUSPECTED);
 		
-		wmi.executorSuspected(new TestID(0));
+		wmi.executorSuspected(buildSID(0));
 		
-		WorkerID wid = wmi.allocateAvailableExecutor(build("1"));
+		ServiceID wid = wmi.allocateAvailableExecutor(build("1"));
 		
 		wmi.executorSuspected(wid);
 		
@@ -245,19 +223,19 @@ public class WorkerManagerImplTest {
 		Assert.assertEquals(2, susp.size());
 		Assert.assertEquals(8, idle.size());
 		
-		wmi.markAvailable(new TestID(0));
+		wmi.markAvailable(buildSID(0));
 		
 		Assert.assertEquals(0, busy.size());
 		Assert.assertEquals(1, susp.size());
 		Assert.assertEquals(9, idle.size());
 		
-		wmi.markAvailable(new TestID(0));
+		wmi.markAvailable(buildSID(0));
 		
 		Assert.assertEquals(0, busy.size());
 		Assert.assertEquals(1, susp.size());
 		Assert.assertEquals(9, idle.size());
 		
-		WorkerID wid2 = wmi.allocateAvailableExecutor(build("1"));
+		ServiceID wid2 = wmi.allocateAvailableExecutor(build("1"));
 		Assert.assertEquals(1, busy.size());
 		
 		wmi.executorSuspected(wid2);

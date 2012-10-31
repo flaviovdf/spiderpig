@@ -5,12 +5,13 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Logger;
 
+import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDListener;
+import br.ufmg.dcc.vod.spiderpig.distributed.worker.WorkerActor;
 import br.ufmg.dcc.vod.spiderpig.jobs.WorkerInterested;
 import br.ufmg.dcc.vod.spiderpig.master.processor.ProcessorActor;
 import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerManager;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
-import br.ufmg.dcc.vod.spiderpig.queue.fd.FDListener;
 import br.ufmg.dcc.vod.spiderpig.stats.StatsActor;
 import br.ufmg.dcc.vod.spiderpig.tracker.Tracker;
 import br.ufmg.dcc.vod.spiderpig.tracker.TrackerFactory;
@@ -83,11 +84,15 @@ public class Master implements WorkerInterested, FDListener {
 
 	@Override
 	public void isUp(ServiceID serviceID) {
-		this.workerManager.markAvailable(serviceID);
+		ServiceID workerID = ServiceID.newBuilder(serviceID)
+				.setHandle(WorkerActor.HANDLE).build();
+		this.workerManager.markAvailable(workerID);
 	}
 
 	@Override
 	public void isSuspected(ServiceID serviceID) {
-		this.workerManager.executorSuspected(serviceID);
+		ServiceID workerID = ServiceID.newBuilder(serviceID)
+				.setHandle(WorkerActor.HANDLE).build();
+		this.workerManager.executorSuspected(workerID);
 	}
 }

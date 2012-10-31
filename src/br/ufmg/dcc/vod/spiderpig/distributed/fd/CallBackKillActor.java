@@ -1,4 +1,4 @@
-package br.ufmg.dcc.vod.spiderpig.queue.fd;
+package br.ufmg.dcc.vod.spiderpig.distributed.fd;
 
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Fd.KillResult;
 import br.ufmg.dcc.vod.spiderpig.queue.Actor;

@@ -61,7 +61,6 @@ public class NIOServer
 							ProtocolBufferUtils.readFromBuffer(buff,
 										serializer.getBuilder(), 
 										serializer.getRegistry());
-					
 					NIOServer.this.queueService.sendObjectToQueue(handle, msg);
 				} catch (InvalidProtocolBufferException | 
 						InterruptedException e) {

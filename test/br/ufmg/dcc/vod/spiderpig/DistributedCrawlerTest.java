@@ -22,6 +22,7 @@ import org.junit.Test;
 import br.ufmg.dcc.vod.spiderpig.Crawler;
 import br.ufmg.dcc.vod.spiderpig.CrawlerFactory;
 import br.ufmg.dcc.vod.spiderpig.distributed.nio.service.RemoteMessageSender;
+import br.ufmg.dcc.vod.spiderpig.distributed.worker.FDServerActor;
 import br.ufmg.dcc.vod.spiderpig.distributed.worker.WorkerActor;
 import br.ufmg.dcc.vod.spiderpig.jobs.JobExecutor;
 import br.ufmg.dcc.vod.spiderpig.jobs.test.RandomizedSyncGraph;
@@ -65,9 +66,14 @@ public class DistributedCrawlerTest  extends TestCase {
 		RemoteMessageSender sender = new RemoteMessageSender();
 		for (int i = 0; i < numServers; i++) {
 			JobExecutor jobExecutor = new TestJobExecutor(g);
-			WorkerActor actor = new WorkerActor(jobExecutor, sender);
 			QueueService service = new QueueService("localhost", basePort + i);
+			
+			WorkerActor actor = new WorkerActor(jobExecutor, sender);
 			actor.withSimpleQueue(service).startProcessors(1);
+			
+			FDServerActor fdactor = new FDServerActor(sender);
+			fdactor.withSimpleQueue(service).startProcessors(1);
+			
 			ids.add(new InetSocketAddress("localhost", basePort + i));
 			workerServices.add(service);
 		}

@@ -42,7 +42,7 @@ public class WorkerManagerImpl implements WorkerManager {
 	}
 	
 	@Override
-	public Resolver allocateAvailableExecutor(CrawlID crawlID) 
+	public ServiceID allocateAvailableExecutor(CrawlID crawlID) 
 			throws InterruptedException {
 		try {
 			this.lock.lock();
