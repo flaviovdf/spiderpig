@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.nio.channels.AsynchronousChannelGroup;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +49,6 @@ public class QueueService {
 	
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
 	private final ExecutorService executor = Executors.newCachedThreadPool();
-	private final AsynchronousChannelGroup channelGroup;
 	private final NIOServer nioServer;
 
 	private final String hostname;
@@ -59,7 +57,6 @@ public class QueueService {
 	public QueueService() throws IOException {
 		this.hostname = InetAddress.getLocalHost().getHostName();
 		this.port = -1;
-		this.channelGroup = null;
 		this.nioServer = null;
 	}
 	
@@ -71,7 +68,6 @@ public class QueueService {
 		Preconditions.checkNotNull(hostname);
 		this.hostname = hostname;
 		this.port = port;
-		this.channelGroup = AsynchronousChannelGroup.withThreadPool(executor);
 		this.nioServer = new NIOServer(this.executor, this, hostname, port);
 		this.nioServer.start();
 	}
