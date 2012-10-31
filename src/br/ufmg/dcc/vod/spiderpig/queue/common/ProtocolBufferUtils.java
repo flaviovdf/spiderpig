@@ -82,6 +82,7 @@ public class ProtocolBufferUtils {
 	 * 
 	 * @throws IOException
 	 */
+	@SuppressWarnings("unchecked")
 	public static <T extends MessageLite> T readFromStream(
 			InputStream inputStream, Builder builder, 
 					ExtensionRegistryLite registry) 
