@@ -1,5 +1,5 @@
-vod-crawler
------------
+spiderpig
+---------
 
 A customizable distributed web crawler taylored for researching online social 
 networks and social media content.
@@ -14,7 +14,7 @@ This package contains the common code for:
 
     * Distributed crawling
         * Event based communication
-        * Failure detection (under work)
+        * Failure detection
 
     * Journal Recovery
         * Journal is implemented, still needs recovery code
