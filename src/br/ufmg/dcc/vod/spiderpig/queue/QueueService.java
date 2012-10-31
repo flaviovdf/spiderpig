@@ -257,13 +257,13 @@ public class QueueService {
 				for (WorkerRunnable<?> runnable : struct.runnables)
 					runnable.awaitTermination();
 			}
-			this.executor.shutdown();
-			this.executor.awaitTermination(Long.MAX_VALUE, 
-					TimeUnit.MILLISECONDS);
 			
 			if (this.nioServer != null)
 				this.nioServer.shutdown();
-		} catch (InterruptedException e) {
+			this.executor.shutdown();
+			this.executor.awaitTermination(Long.MAX_VALUE, 
+					TimeUnit.MILLISECONDS);
+		} catch (InterruptedException | IOException e) {
 			throw new QueueServiceException(e);
 		}
 	}

@@ -1,16 +1,11 @@
 package br.ufmg.dcc.vod.spiderpig.queue.common;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.AsynchronousSocketChannel;
-import java.nio.channels.CompletionHandler;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
-import br.ufmg.dcc.vod.spiderpig.common.Tuple;
-
-import com.google.protobuf.ByteString;
 import com.google.protobuf.ExtensionRegistryLite;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 import com.google.protobuf.MessageLite.Builder;
 
@@ -24,140 +19,75 @@ public class ProtocolBufferUtils {
 	private static final int INT_SIZE_BYTES = Integer.SIZE / 8;
 
 	/**
-	 * Converts the {@link MessageLite} to a ByteBuffer. The buffer will have
-	 * the following format:
-	 * - (int - 4bytes) message size (without these first 4bytes)
+	 * Sends the {@link MessageLite} to the stream. Before the actual message
+	 * an int (4 bytes) and a string handle will be written.
+	 * 
 	 * - (int - 4bytes) handle size
 	 * - (string - handle size bytes) handle
-	 * - (int - 4bytes) byte buffer size
 	 * - (byte[] - byte buffer size) byte buffer
 	 * 
 	 * @param handle Label of object which will receive the message
 	 * @param msg Message to convert
+	 * @param stream Stream to write to
+	 * 
 	 * @return A {@link ByteBuffer} containing an integer (handle size), 
 	 * 			a handle (string) another integer (msg size) and the message 
 	 * 			itself.
+	 * @throws IOException 
 	 */
-	public static ByteBuffer msgToSizedByteBuffer(String toHandle, 
-			MessageLite msg) {
+	public static void msgToStream(String toHandle, MessageLite msg, 
+			OutputStream stream) throws IOException {
 		
-		byte[] msgAsBytes = msg.toByteArray();
+		ByteBuffer intBuffer = ByteBuffer.allocate(INT_SIZE_BYTES);
 		byte[] handleBytes = toHandle.getBytes();
-		int fullMsgSize = handleBytes.length + msgAsBytes.length + 
-                			3 * INT_SIZE_BYTES;
 		
-		ByteBuffer buffer = ByteBuffer.allocate(fullMsgSize);
-		buffer.putInt(handleBytes.length + msgAsBytes.length 
-				+ 2 * INT_SIZE_BYTES);
-		buffer.putInt(handleBytes.length);
-		buffer.put(handleBytes);
-		buffer.putInt(msgAsBytes.length);
-		buffer.put(msgAsBytes);
-		buffer.rewind();
-		
-		return buffer;
-	}
-	
-	/**
-	 * Reads a {@link MessageLite} from a {@link AsynchronousSocketChannel}
-	 * The object handle which will receive the message, plus the message size
-	 * must preceed the message in the handle.
-	 * 
-	 * @param asch The channel to read the message from
-	 * @param builder The builder to create the message from raw bytes
-	 * @param extensionRegistry A registry for any extensions the message
-	 * 							may contain
-	 * 
-	 * @return A tuple with a future to wait for the read and the buffer which
-	 * will contain the message (without the header).
-	 * 
-	 * @throws InterruptedException
-	 * @throws ExecutionException
-	 * @throws InvalidProtocolBufferException
-	 */
-	public static Tuple<Future<Integer>, ByteBuffer> 
-			readFromChannel(AsynchronousSocketChannel asch) 
-					throws InterruptedException, ExecutionException, 
-							InvalidProtocolBufferException {
-
-		ByteBuffer intBuffer = ByteBuffer.allocate(INT_SIZE_BYTES);
-		asch.read(intBuffer).get();
-
+		intBuffer.putInt(handleBytes.length);
 		intBuffer.rewind();
-		int msgSize = intBuffer.getInt();
-		
-		ByteBuffer messageBuffer = ByteBuffer.allocate(msgSize);
-		Future<Integer> read = asch.read(messageBuffer);
-		
-		return new Tuple<>(read, messageBuffer);
-	}
-
-	/**
-	 * Reads a {@link MessageLite} from a {@link AsynchronousSocketChannel}
-	 * The object handle which will receive the message, plus the message size
-	 * must preceed the message in the handle.
-	 * 
-	 * @param asch The channel to read the message from
-	 * @param builder The builder to create the message from raw bytes
-	 * @param extensionRegistry A registry for any extensions the message
-	 * 							may contain
-	 * 
-	 * @return A tuple with a future to wait for the read and the buffer which
-	 * will contain the message (without the int header).
-	 * 
-	 * @throws InterruptedException
-	 * @throws ExecutionException
-	 * @throws InvalidProtocolBufferException
-	 */
-	public static void readFromChannel(AsynchronousSocketChannel asch,
-			CompletionHandler<Integer, ByteBuffer> handler) {
-
-		ByteBuffer intBuffer = ByteBuffer.allocate(INT_SIZE_BYTES);
-		try {
-			asch.read(intBuffer).get();
-			intBuffer.rewind();
-			ByteBuffer messageBuffer = ByteBuffer.allocate(intBuffer.getInt());
-			asch.read(messageBuffer, messageBuffer, handler);
-		} catch (InterruptedException | ExecutionException e) {
-			handler.failed(e, intBuffer);
-		}
+		stream.write(intBuffer.array());
+		stream.write(handleBytes);
+		msg.writeTo(stream);
+		stream.flush();
 	}
 	
 	/**
-	 * Reads a string corresponding to the object handle from this buffer
+	 * Reads a string corresponding to the object handle from this buffer.
+	 * The size of the string as a 4 byte int must precede it.
 	 * 
-	 * @param buffer Buffer to read from
+	 * @param inputStream Stream to read from
 	 * 
 	 * @return object handle
 	 */
-	public static String readHandleFromBuffer(ByteBuffer buffer) {
-		int handleSize = buffer.getInt();
-		byte[] strBytes = new byte[handleSize];
-		buffer.get(strBytes);
-		return new String(strBytes);
+	public static String readHandleFromStream(InputStream inputStream) 
+			throws IOException {
+		ByteBuffer intBuffer = ByteBuffer.allocate(INT_SIZE_BYTES);
+		inputStream.read(intBuffer.array());
+		
+		intBuffer.rewind();
+		ByteBuffer handleBuffer = ByteBuffer.allocate(intBuffer.getInt());
+		
+		inputStream.read(handleBuffer.array());
+		handleBuffer.rewind();
+		
+		return new String(handleBuffer.array());
 	}
-	
+
 	/**
-	 * Converts the {@link ByteBuffer} to a protocol buffer using the given
-	 * builder and registry.
+	 * Reads a message from the stream using the given builder and registry.
 	 * 
-	 * @param buffer Buffer to read bytes from
+	 * @param inputStream stream to read bytes from
 	 * @param builder The message builder
 	 * @param extensionRegistry The extension registry
 	 * 
 	 * @return A new {@link MessageLite} object.
 	 * 
-	 * @throws InvalidProtocolBufferException
+	 * @throws IOException
 	 */
-	public static <T extends MessageLite> T 
-			readFromBuffer(ByteBuffer buffer, Builder builder, 
-					ExtensionRegistryLite extensionRegistry) 
-							throws InvalidProtocolBufferException {
+	public static <T extends MessageLite> T readFromStream(
+			InputStream inputStream, Builder builder, 
+					ExtensionRegistryLite registry) 
+							throws IOException {
 		
-		buffer.getInt();
-		Builder merged = 
-				builder.mergeFrom(ByteString.copyFrom(buffer), 
-						extensionRegistry);
+		Builder merged = builder.mergeFrom(inputStream, registry);
 		MessageLite build = merged.build();
 		
 		return (T) build;
