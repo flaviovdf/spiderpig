@@ -7,8 +7,5 @@ findself
 
 shopt -s huponexit #Makes sure doesn't get killed on exit, usefull for ssh
 cd $SELF
-    java -jar spiderpig.jar $*
-    excode=$?
+    java -jar spiderpig.jar $* > out 2> err &
 cd - > /dev/null
-
-exit $excode
