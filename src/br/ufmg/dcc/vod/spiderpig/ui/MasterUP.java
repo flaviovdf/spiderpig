@@ -15,6 +15,7 @@ import org.apache.commons.cli.Options;
 import br.ufmg.dcc.vod.spiderpig.Crawler;
 import br.ufmg.dcc.vod.spiderpig.CrawlerFactory;
 import br.ufmg.dcc.vod.spiderpig.common.FileUtil;
+import br.ufmg.dcc.vod.spiderpig.common.LoggerInitiator;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaverImpl;
 
@@ -122,6 +123,8 @@ public class MasterUP extends Command {
 						workQueueFolder.list().length != 0)) {
 			throw new Exception("work queue folder exists and is not empty");
 		}
+		
+		LoggerInitiator.initiateLog(cli.getOptionValue(LOG_FILE));
 		
 		Set<InetSocketAddress> workerAddrs = interpret(serverFile);
 		FileSaver saver = new FileSaverImpl(saveFolder.getAbsolutePath());

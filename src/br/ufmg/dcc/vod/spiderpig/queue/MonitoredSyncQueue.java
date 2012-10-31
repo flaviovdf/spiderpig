@@ -47,7 +47,7 @@ public class MonitoredSyncQueue implements EventQueue<MessageLite> {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public MonitoredSyncQueue(EventQueue e) {
 		this.e = e;
-		this.stampLock = new ReentrantReadWriteLock();
+		this.stampLock = new ReentrantReadWriteLock(true);
 		this.lock = new ReentrantLock();
 		this.getCondition = lock.newCondition();
 	}

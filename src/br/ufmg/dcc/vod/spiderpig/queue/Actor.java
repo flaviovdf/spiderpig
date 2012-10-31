@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
 import br.ufmg.dcc.vod.spiderpig.queue.serializer.MessageLiteSerializer;
 
 import com.google.protobuf.MessageLite;
@@ -11,8 +13,7 @@ import com.google.protobuf.MessageLite;
 public abstract class Actor<T extends MessageLite> {
 
 	private final String handle;
-	
-	private QueueService service;
+	protected QueueService service;
 
 	public Actor(String label) {
 		this.handle = label;
@@ -62,6 +63,11 @@ public abstract class Actor<T extends MessageLite> {
 	
 	public final String getHandle() {
 		return handle;
+	}
+	
+	public final ServiceID getServiceID() {
+		return ServiceIDUtils.toServiceID(service.getHostname(), 
+				service.getPort(), getHandle());
 	}
 	
 	public abstract QueueProcessor<T> getQueueProcessor();

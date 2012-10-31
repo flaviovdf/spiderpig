@@ -21,14 +21,11 @@ public interface WorkerInterested {
 	public void crawlDone(CrawlID id, List<CrawlID> toQueue);
 	
 	/**
-	 * Indicates that the given id failed to be crawled. The cause is given and
-	 * the {@code workerSuspected} indicates if the error was caused by the
-	 * worker (e.g., it may have failed during the crawl).
+	 * Indicates that the given id failed to be crawled. The cause is given.
 	 * 
 	 * @param id ID crawled.
 	 * @param cause Cause of error.
-	 * @param workerSuspected Indicates if this was a worker error.
 	 */
-	public void crawlError(CrawlID id, String cause, boolean workerSuspected);
+	public void crawlError(CrawlID id, String cause);
 	
 }

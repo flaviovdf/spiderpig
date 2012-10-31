@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
 import br.ufmg.dcc.vod.spiderpig.jobs.WorkerInterested;
-import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerID;
+import br.ufmg.dcc.vod.spiderpig.master.processor.manager.Resolver;
 import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerManager;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.queue.Actor;
@@ -46,9 +46,9 @@ public class ProcessorActor extends Actor<CrawlID>
 	@Override
 	public void process(CrawlID crawlID) {
 		try {
-			WorkerID id = this.manager.allocateAvailableExecutor(crawlID);
-			LOG.info("Dispacthing " + crawlID + " to worker " + id);
-			id.resolve().crawl(crawlID, interested, saver);
+			Resolver res = this.manager.allocateAvailableExecutor(crawlID);
+			LOG.info("Sending " + crawlID + " to worker " + res.getWorkerID());
+			res.resolve().crawl(crawlID, interested, saver);
 		} catch (InterruptedException e) {
 			LOG.error("Unexcpected interruption", e);
 		}

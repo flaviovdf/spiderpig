@@ -7,14 +7,14 @@ import br.ufmg.dcc.vod.spiderpig.distributed.nio.service.RemoteMessageSender;
 import br.ufmg.dcc.vod.spiderpig.jobs.JobExecutor;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
 
-public class RemoteWorkerID implements WorkerID {
+public class RemoteResolver implements Resolver {
 
 	private final ServiceID workerID;
 	private final ServiceID callBackID;
 	private final ServiceID fileSaverID;
 	private final RemoteMessageSender sender;
 
-	public RemoteWorkerID(ServiceID workerID, ServiceID callBackID,
+	public RemoteResolver(ServiceID workerID, ServiceID callBackID,
 			ServiceID fileSaverID, RemoteMessageSender sender) {
 		
 		this.workerID = workerID;
@@ -35,10 +35,15 @@ public class RemoteWorkerID implements WorkerID {
 	
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof RemoteWorkerID))
+		if (!(obj instanceof RemoteResolver))
 			return false;
 		
-		RemoteWorkerID other = (RemoteWorkerID) obj;
+		RemoteResolver other = (RemoteResolver) obj;
 		return Objects.equals(this.workerID, other.workerID);
+	}
+
+	@Override
+	public ServiceID getWorkerID() {
+		return this.workerID;
 	}	
 }

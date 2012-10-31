@@ -48,12 +48,17 @@ public class QueueService {
 	
 	private final Map<String, ServiceStruct<?>> ids = new HashMap<>();
 	
-	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
 	private final ExecutorService executor = Executors.newCachedThreadPool();
 	private final AsynchronousChannelGroup channelGroup;
 	private final NIOServer nioServer;
 
-	public QueueService() {
+	private final String hostname;
+	private final int port;
+
+	public QueueService() throws IOException {
+		this.hostname = InetAddress.getLocalHost().getHostName();
+		this.port = -1;
 		this.channelGroup = null;
 		this.nioServer = null;
 	}
@@ -64,6 +69,8 @@ public class QueueService {
 	
 	public QueueService(String hostname, int port) throws IOException {
 		Preconditions.checkNotNull(hostname);
+		this.hostname = hostname;
+		this.port = port;
 		this.channelGroup = AsynchronousChannelGroup.withThreadPool(executor);
 		this.nioServer = new NIOServer(this.executor, this, hostname, port);
 		this.nioServer.start();
@@ -312,4 +319,11 @@ public class QueueService {
 		return this.ids.get(label).queue;
 	}
 
+	public String getHostname() {
+		return hostname;
+	}
+
+	public int getPort() {
+		return port;
+	}
 }

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
 import br.ufmg.dcc.vod.spiderpig.distributed.nio.service.RemoteMessageSender;
@@ -24,6 +25,7 @@ import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerManager;
 import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerManagerImpl;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
 import br.ufmg.dcc.vod.spiderpig.queue.QueueService;
+import br.ufmg.dcc.vod.spiderpig.queue.fd.FailureDetector;
 import br.ufmg.dcc.vod.spiderpig.tracker.BloomFilterTrackerFactory;
 
 /**
@@ -89,14 +91,18 @@ public class CrawlerFactory {
 				service, null, null);
 		Master master = new Master(trackerFactory, processorActor, null, 
 				workerManager);
+		
 		ResultActor resultActor = new ResultActor(master);
 		FileSaverActor fileSaverActor = new FileSaverActor(saver);
+		FailureDetector fd = new FailureDetector(1, TimeUnit.MINUTES, sender);
 		
+		fd.withSimpleQueue(service);
 		processorActor.withFileQueue(service, queueDir);
 		fileSaverActor.withSimpleQueue(service);
 		resultActor.withSimpleQueue(service);
 		
 		return new DistributedCrawler(processorActor, null, service, 
-				master, resultActor, fileSaverActor, saver, numThreads);
+				master, resultActor, fileSaverActor, fd, 
+				saver, numThreads);
 	}
 }

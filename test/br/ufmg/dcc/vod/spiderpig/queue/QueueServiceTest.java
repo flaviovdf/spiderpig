@@ -1,6 +1,7 @@
 package br.ufmg.dcc.vod.spiderpig.queue;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +23,7 @@ public class QueueServiceTest extends TestCase {
 	private File f1;
 	private File f2;
 	private File f3;
-	private QueueService qs = new QueueService();
+	private QueueService qs;
 
 	private static CrawlID build(int i) {
 		CrawlID.Builder builder = CrawlID.newBuilder();
@@ -51,7 +52,7 @@ public class QueueServiceTest extends TestCase {
 	}
 	
 	@Before
-	public void setUp() {
+	public void setUp() throws IOException {
 		String tmpDir = System.getProperty("java.io.tmpdir");
 		do  {
 			f1 = new File(tmpDir + File.separator + new Random().nextInt());
@@ -69,6 +70,7 @@ public class QueueServiceTest extends TestCase {
 		f1.mkdirs();
 		f2.mkdirs();
 		f3.mkdirs();
+		qs = new QueueService();
 	}
 
 	@After

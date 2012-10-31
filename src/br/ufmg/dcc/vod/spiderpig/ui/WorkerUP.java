@@ -1,7 +1,6 @@
 package br.ufmg.dcc.vod.spiderpig.ui;
 
 import java.lang.reflect.Constructor;
-import java.net.InetAddress;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -16,6 +15,7 @@ import br.ufmg.dcc.vod.spiderpig.queue.QueueService;
 
 public class WorkerUP extends Command {
 
+	private static final String HOSTNAME = "h";
 	private static final String PORT = "p";
 	private static final String LOG_FILE = "l";
 	private static final String EXECUTOR_CLASS = "e";
@@ -53,6 +53,13 @@ public class WorkerUP extends Command {
 				.withDescription("Sleep time (seconds)")
 				.create(SLEEP_TIME);
 		
+		opts.addOption(OptionBuilder
+				.withArgName("hostname")
+				.hasArg()
+				.isRequired()
+				.withDescription("A resolvable hostname for callbacks")
+				.create(HOSTNAME));
+		
 		opts.addOption(portOpt);
 		opts.addOption(logFileOpt);
 		opts.addOption(executorOpt);
@@ -64,12 +71,11 @@ public class WorkerUP extends Command {
 	@Override
 	public void exec(CommandLine cli) throws Exception {
 		
+		String hostname = cli.getOptionValue(HOSTNAME);
 		long sleepTime = Long.parseLong(cli.getOptionValue(SLEEP_TIME)) * 1000;
 		int port = Integer.parseInt(cli.getOptionValue(PORT));
 		LoggerInitiator.initiateLog(cli.getOptionValue(LOG_FILE));
 		String cls = cli.getOptionValue(EXECUTOR_CLASS);
-		
-		String host = InetAddress.getLocalHost().getHostName();
 		
 		Constructor<?> constructor = Class.forName(cls)
 				.getConstructor(long.class);
@@ -77,7 +83,7 @@ public class WorkerUP extends Command {
 		
 		WorkerActor actor = new WorkerActor(executor, 
 				new RemoteMessageSender());
-		QueueService service = new QueueService(host, port);
+		QueueService service = new QueueService(hostname, port);
 		actor.withSimpleQueue(service).startProcessors(1);
 	}
 }

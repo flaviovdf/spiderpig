@@ -8,3 +8,9 @@ message PingPong {
     required ServiceID callBackID = 1;
 
 }
+
+message KillResult {
+
+    required int32 exitcode = 1;
+
+}

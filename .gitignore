@@ -16,3 +16,4 @@ out/*
 .project
 .classpath
 /vod-crawler.jar
+/spiderpig.jar

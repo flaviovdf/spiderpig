@@ -9,6 +9,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -16,28 +17,32 @@ public class WorkerManagerImpl implements WorkerManager {
 
 	public enum WorkerState {IDLE, BUSY, SUSPECTED}
 
-	private Map<WorkerState, Collection<WorkerID>> stateMap;
-	private Map<CrawlID, WorkerID> allocMap;
-	private Map<WorkerID, CrawlID> inverseAllocMap;
+	private Map<WorkerState, Collection<ServiceID>> stateMap;
+	private Map<CrawlID, ServiceID> allocMap;
+	private Map<ServiceID, CrawlID> inverseAllocMap;
 	private ReentrantLock lock;
 	private Condition waitCondition;
 	
-	public WorkerManagerImpl(Collection<WorkerID> workerIDs) {
+	WorkerManagerImpl(Collection<ServiceID> workerIDs, WorkerState initial) {
 		this.stateMap = new HashMap<>();
 		
-		this.stateMap.put(WorkerState.IDLE, new LinkedList<WorkerID>());
-		this.stateMap.put(WorkerState.BUSY, new HashSet<WorkerID>());
-		this.stateMap.put(WorkerState.SUSPECTED, new HashSet<WorkerID>());
+		this.stateMap.put(WorkerState.IDLE, new LinkedList<ServiceID>());
+		this.stateMap.put(WorkerState.BUSY, new HashSet<ServiceID>());
+		this.stateMap.put(WorkerState.SUSPECTED, new HashSet<ServiceID>());
 		
-		this.stateMap.get(WorkerState.IDLE).addAll(workerIDs);
+		this.stateMap.get(initial).addAll(workerIDs);
 		this.allocMap = new HashMap<>();
 		this.inverseAllocMap = new HashMap<>();
 		this.lock = new ReentrantLock();
 		this.waitCondition = this.lock.newCondition();
 	}
 	
+	public WorkerManagerImpl(Collection<ServiceID> workerIDs) {
+		this(workerIDs, WorkerState.SUSPECTED);
+	}
+	
 	@Override
-	public WorkerID allocateAvailableExecutor(CrawlID crawlID) 
+	public Resolver allocateAvailableExecutor(CrawlID crawlID) 
 			throws InterruptedException {
 		try {
 			this.lock.lock();
@@ -45,13 +50,13 @@ public class WorkerManagerImpl implements WorkerManager {
 			if (this.allocMap.containsKey(crawlID))
 				return null;
 			
-			LinkedList<WorkerID> idle = (LinkedList<WorkerID>) 
+			LinkedList<ServiceID> idle = (LinkedList<ServiceID>) 
 					this.stateMap.get(WorkerState.IDLE);
 			while (idle.size() == 0)
 				this.waitCondition.await();
 			
 			//Can only reach here with at least one element
-			WorkerID workerID = idle.remove(0);
+			ServiceID workerID = idle.remove(0);
 			this.stateMap.get(WorkerState.BUSY).add(workerID);
 			this.allocMap.put(crawlID, workerID);
 			this.inverseAllocMap.put(workerID, crawlID);
@@ -65,7 +70,7 @@ public class WorkerManagerImpl implements WorkerManager {
 	public boolean freeExecutor(CrawlID crawlID) {
 		try {
 			this.lock.lock();
-			WorkerID workerID = this.allocMap.remove(crawlID);
+			ServiceID workerID = this.allocMap.remove(crawlID);
 			if (workerID != null) {
 				CrawlID remove = this.inverseAllocMap.remove(workerID);
 				assert remove.equals(crawlID);
@@ -83,12 +88,12 @@ public class WorkerManagerImpl implements WorkerManager {
 	}
 
 	@Override
-	public void executorSuspected(WorkerID workerID) {
+	public void executorSuspected(ServiceID workerID) {
 		try {
 			this.lock.lock();
 			CrawlID crawlID = this.inverseAllocMap.remove(workerID);
 			if (crawlID != null) {
-				WorkerID remove = this.allocMap.remove(crawlID);
+				ServiceID remove = this.allocMap.remove(crawlID);
 				assert remove.equals(workerID);
 				this.stateMap.get(WorkerState.BUSY).remove(workerID);
 			} else {
@@ -103,7 +108,7 @@ public class WorkerManagerImpl implements WorkerManager {
 	}
 
 	@Override
-	public void markAvailable(WorkerID workerID) {
+	public void markAvailable(ServiceID workerID) {
 		try {
 			this.lock.lock();
 			
@@ -114,7 +119,7 @@ public class WorkerManagerImpl implements WorkerManager {
 			if (this.inverseAllocMap.containsKey(workerID)) {
 				CrawlID crawlID = this.inverseAllocMap.remove(workerID);
 				
-				WorkerID removedID = this.allocMap.remove(crawlID);
+				ServiceID removedID = this.allocMap.remove(crawlID);
 				assert removedID.equals(workerID);
 				boolean removedBusy = 
 						this.stateMap.get(WorkerState.BUSY).remove(workerID);
@@ -135,7 +140,7 @@ public class WorkerManagerImpl implements WorkerManager {
 		}
 	}
 
-	@VisibleForTesting Collection<WorkerID> getByState(WorkerState state) {
+	@VisibleForTesting Collection<ServiceID> getByState(WorkerState state) {
 		return this.stateMap.get(state);
 	}
 }

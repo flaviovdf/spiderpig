@@ -9,11 +9,13 @@ import br.ufmg.dcc.vod.spiderpig.jobs.WorkerInterested;
 import br.ufmg.dcc.vod.spiderpig.master.processor.ProcessorActor;
 import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerManager;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
+import br.ufmg.dcc.vod.spiderpig.queue.fd.FDListener;
 import br.ufmg.dcc.vod.spiderpig.stats.StatsActor;
 import br.ufmg.dcc.vod.spiderpig.tracker.Tracker;
 import br.ufmg.dcc.vod.spiderpig.tracker.TrackerFactory;
 
-public class Master implements WorkerInterested {
+public class Master implements WorkerInterested, FDListener {
 
 	private static final Logger LOG = Logger.getLogger(Master.class);
 	
@@ -61,24 +63,31 @@ public class Master implements WorkerInterested {
 	}
 
 	@Override
-	public void crawlError(CrawlID id, String cause, boolean workerSuspected) {
+	public void crawlError(CrawlID id, String cause) {
 		LOG.info("Received error for " + id + " cause = " + cause);
 		
 		this.workerManager.freeExecutor(id);
-		if (workerSuspected) {
-			this.processorActor.dispatch(id); //No need to increment stop cond
-		} else {
-			try {
-				this.lock.lock();
-				this.tracker.crawled(id.getId()); //Necessary for initial crawl (seed)
-			} finally {
-				this.lock.unlock();
-			}
-			this.stopCondition.resultReceived();
+		try {
+			this.lock.lock();
+			//Necessary for initial crawl (seed)
+			this.tracker.crawled(id.getId());
+		} finally {
+			this.lock.unlock();
 		}
+		this.stopCondition.resultReceived();
 	}
 
 	public StopCondition getStopCondition() {
 		return stopCondition;
+	}
+
+	@Override
+	public void isUp(ServiceID serviceID) {
+		this.workerManager.markAvailable(serviceID);
+	}
+
+	@Override
+	public void isSuspected(ServiceID serviceID) {
+		this.workerManager.executorSuspected(serviceID);
 	}
 }

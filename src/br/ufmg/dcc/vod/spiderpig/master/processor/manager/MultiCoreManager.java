@@ -4,6 +4,7 @@ import java.util.concurrent.Semaphore;
 
 import br.ufmg.dcc.vod.spiderpig.jobs.JobExecutor;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
 
 public class MultiCoreManager implements WorkerManager {
 	
@@ -16,7 +17,7 @@ public class MultiCoreManager implements WorkerManager {
 	}
 	
 	@Override
-	public WorkerID allocateAvailableExecutor(CrawlID crawlID)
+	public Resolver allocateAvailableExecutor(CrawlID crawlID)
 			throws InterruptedException {
 		this.semaphore.acquire();
 		return new DumbID(this.jobExecutor);
@@ -29,11 +30,11 @@ public class MultiCoreManager implements WorkerManager {
 	}
 
 	@Override
-	public void executorSuspected(WorkerID jobExecutor) {
+	public void executorSuspected(ServiceID jobExecutor) {
 	}
 
 	@Override
-	public void markAvailable(WorkerID jobExecutor) {
+	public void markAvailable(ServiceID jobExecutor) {
 	}
 
 }

@@ -15,8 +15,8 @@ public class DecoratorInterested implements WorkerInterested {
 	}
 
 	@Override
-	public void crawlError(CrawlID id, String cause, boolean workerSuspected) {
-		wi.crawlError(id, cause, workerSuspected);
+	public void crawlError(CrawlID id, String cause) {
+		wi.crawlError(id, cause);
 	}
 	
 	public void setLoopBack(WorkerInterested wi) {

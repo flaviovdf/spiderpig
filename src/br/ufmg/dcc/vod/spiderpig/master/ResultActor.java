@@ -30,8 +30,7 @@ public class ResultActor extends Actor<BaseResult>
 	@Override
 	public void process(BaseResult msg) {
 		if (msg.getIsError()) {
-			workerInterested.crawlError(msg.getId(), msg.getErrorMessage(), 
-					false);
+			workerInterested.crawlError(msg.getId(), msg.getErrorMessage());
 		} else {
 			workerInterested.crawlDone(msg.getId(), msg.getToQueueList());
 		}	
