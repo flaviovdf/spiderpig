@@ -21,8 +21,9 @@ public class FDServerActor extends Actor<PingPong>
 	@Override
 	public void process(PingPong t) {
 		ServiceID callBackID = t.getCallBackID();
-		sender.send(callBackID, 
-				PingPong.newBuilder().setCallBackID(getServiceID()).build());
+		PingPong build = PingPong.newBuilder().
+				setCallBackID(getServiceID()).build();
+		sender.send(callBackID, build);
 	}
 
 	@Override

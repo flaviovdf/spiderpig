@@ -66,7 +66,7 @@ public class QueueService {
 	
 	public QueueService(String hostname, int port) throws IOException {
 		Preconditions.checkNotNull(hostname);
-		this.hostname = hostname;
+		this.hostname = InetAddress.getByName(hostname).getHostAddress();
 		this.port = port;
 		this.nioServer = new NIOServer(this.executor, this, hostname, port);
 		this.nioServer.start();

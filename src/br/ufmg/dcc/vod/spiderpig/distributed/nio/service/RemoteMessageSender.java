@@ -1,6 +1,7 @@
 package br.ufmg.dcc.vod.spiderpig.distributed.nio.service;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
@@ -16,29 +17,37 @@ public class RemoteMessageSender {
 	private static final Logger LOG = Logger.getLogger(RemoteMessageSender.class);
 	
 	public void send(ServiceID serviceID, MessageLite msg) {
+		if (LOG.isDebugEnabled())
+			LOG.debug("Sending " + msg + " to " + serviceID);
 		String receiverHost = serviceID.getHostname();
 		int receiverPort = serviceID.getPort();
 		String handle = serviceID.getHandle();
 		
 		InetSocketAddress remoteAddr = 
 				new InetSocketAddress(receiverHost, receiverPort);
+		OutputStream outputStream = null;
 		Socket socket = null;
 		try {
 			socket = new Socket();
 			socket.connect(remoteAddr);
 			
+			outputStream = socket.getOutputStream();
 			ProtocolBufferUtils.msgToStream(handle, msg, 
-					socket.getOutputStream());
-			LOG.debug("Message Sent " + msg + " to " + serviceID);
+					outputStream);
+			if (LOG.isDebugEnabled())
+				LOG.debug("Message Sent " + msg + " to " + serviceID);
 		} catch (IOException e) {
-			LOG.error("Failure at Message " + msg + " to " + serviceID, e);
+			if (LOG.isDebugEnabled())
+				LOG.debug("Failure at Message " + msg + " to " + serviceID, e);
 		} finally {
-			if (socket != null) {
-				try {
+			try {
+				if (outputStream != null)
+					outputStream.close();
+				if (socket != null)
 					socket.close();
-				} catch (IOException e) { 
-					LOG.error("Unable to close socket", e);
-				}
+			} catch (IOException e) { 
+				if (LOG.isDebugEnabled())
+					LOG.debug("Unable to close socket", e);
 			}
 		}
 	}

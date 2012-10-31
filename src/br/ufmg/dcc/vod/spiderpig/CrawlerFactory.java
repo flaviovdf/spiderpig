@@ -80,8 +80,8 @@ public class CrawlerFactory {
 		
 		for (InetSocketAddress socketAddr : workerAddrs) {
 			ServiceID workerID = ServiceIDUtils.toServiceID(
-					socketAddr.getHostString(), socketAddr.getPort(), 
-					WorkerActor.HANDLE);
+					socketAddr.getAddress().getHostAddress(), 
+					socketAddr.getPort(), WorkerActor.HANDLE);
 			workerIDs.add(workerID);
 		}
 		
