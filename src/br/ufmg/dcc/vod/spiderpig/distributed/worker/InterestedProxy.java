@@ -2,7 +2,7 @@ package br.ufmg.dcc.vod.spiderpig.distributed.worker;
 
 import java.util.List;
 
-import br.ufmg.dcc.vod.spiderpig.distributed.nio.service.RemoteMessageSender;
+import br.ufmg.dcc.vod.spiderpig.distributed.RemoteMessageSender;
 import br.ufmg.dcc.vod.spiderpig.jobs.WorkerInterested;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;

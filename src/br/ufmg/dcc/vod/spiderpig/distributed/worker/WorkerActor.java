@@ -1,6 +1,6 @@
 package br.ufmg.dcc.vod.spiderpig.distributed.worker;
 
-import br.ufmg.dcc.vod.spiderpig.distributed.nio.service.RemoteMessageSender;
+import br.ufmg.dcc.vod.spiderpig.distributed.RemoteMessageSender;
 import br.ufmg.dcc.vod.spiderpig.jobs.JobExecutor;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlRequest;
 import br.ufmg.dcc.vod.spiderpig.queue.Actor;

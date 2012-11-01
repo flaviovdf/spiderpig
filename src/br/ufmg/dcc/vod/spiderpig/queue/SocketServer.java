@@ -20,9 +20,9 @@ import com.google.protobuf.MessageLite;
  *  
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
-public class NIOServer {
+public class SocketServer {
 
-	private static final Logger LOG = Logger.getLogger(NIOServer.class);
+	private static final Logger LOG = Logger.getLogger(SocketServer.class);
 	
 	private final ExecutorService executor;
 	private final String hostname;
@@ -31,7 +31,7 @@ public class NIOServer {
 	
 	private ServerSocket serverSocket;
 
-	public NIOServer(ExecutorService executor, QueueService queueService, 
+	public SocketServer(ExecutorService executor, QueueService queueService, 
 			String hostname, int port) throws IOException {
 		this.executor = executor;
 		this.hostname = hostname;
@@ -76,20 +76,20 @@ public class NIOServer {
 			Socket accept = null;
 			InputStream inputStream = null;
 			try {
-				accept = NIOServer.this.serverSocket.accept();
-				NIOServer.this.acceptNextConnection();
+				accept = SocketServer.this.serverSocket.accept();
+				SocketServer.this.acceptNextConnection();
 				
 				inputStream = accept.getInputStream();
 				String handle = 
 						ProtocolBufferUtils.readHandleFromStream(inputStream);
 				
 				MessageLiteSerializer<?> serializer = 
-						NIOServer.this.queueService.getSerializer(handle);
+						SocketServer.this.queueService.getSerializer(handle);
 				MessageLite msg = 
 						ProtocolBufferUtils.readFromStream(inputStream,
 									serializer.getBuilder(), 
 									serializer.getRegistry());
-				NIOServer.this.queueService.sendObjectToQueue(handle, msg);
+				SocketServer.this.queueService.sendObjectToQueue(handle, msg);
 			} catch (IOException | InterruptedException e) {
 				LOG.error("Error at connection", e);
 			} finally {

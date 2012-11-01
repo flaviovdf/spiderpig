@@ -16,6 +16,8 @@ import br.ufmg.dcc.vod.spiderpig.stats.StatsActor;
 import br.ufmg.dcc.vod.spiderpig.tracker.Tracker;
 import br.ufmg.dcc.vod.spiderpig.tracker.TrackerFactory;
 
+import com.google.common.cache.Cache;
+
 public class Master implements WorkerInterested, FDListener {
 
 	private static final Logger LOG = Logger.getLogger(Master.class);
@@ -39,8 +41,13 @@ public class Master implements WorkerInterested, FDListener {
 	}
 	
 	public void dispatch(CrawlID crawlID) {
+		dispatch(crawlID, true);
+	}
+	
+	private void dispatch(CrawlID crawlID, boolean incrementCount) {
 		this.processorActor.dispatch(crawlID);
-		this.stopCondition.dispatched();
+		if (incrementCount)
+			this.stopCondition.dispatched();
 	}
 	
 	@Override
@@ -54,7 +61,7 @@ public class Master implements WorkerInterested, FDListener {
 			for (CrawlID nextID : toQueue) {
 				//Returns true if obj is new to tracker, thus we dispatch it
 				if (this.tracker.crawled(nextID.getId())) { 
-					dispatch(nextID);
+					dispatch(nextID, true);
 				}
 			}
 		} finally {
@@ -75,7 +82,7 @@ public class Master implements WorkerInterested, FDListener {
 		} finally {
 			this.lock.unlock();
 		}
-		this.stopCondition.resultReceived();
+		this.stopCondition.errorReceived();
 	}
 
 	public StopCondition getStopCondition() {
@@ -93,6 +100,8 @@ public class Master implements WorkerInterested, FDListener {
 	public void isSuspected(ServiceID serviceID) {
 		ServiceID workerID = ServiceID.newBuilder(serviceID)
 				.setHandle(WorkerActor.HANDLE).build();
-		this.workerManager.executorSuspected(workerID);
+		CrawlID cid = this.workerManager.executorSuspected(workerID);
+		if (cid != null)
+			dispatch(cid, false); //Does not count as new dispatch
 	}
 }

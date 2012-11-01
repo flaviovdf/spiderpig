@@ -37,9 +37,11 @@ public interface WorkerManager {
 	 * not be used to execute crawls unless they are re-inserted with the
 	 * {@code WorkerManager#markAvailable} method.
 	 * 
-	 * @param jobExecutor
+	 * @param jobExecutor to mark as suspected
+	 * 
+	 * @param crawlID The id of the crawl the worker was executing if any
 	 */
-	public void executorSuspected(ServiceID jobExecutor);
+	public CrawlID executorSuspected(ServiceID jobExecutor);
 	
 	/**
 	 * Mark's a {@link WorkerID} as available for executing tasks.

@@ -7,7 +7,6 @@ import org.apache.log4j.Logger;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
 import br.ufmg.dcc.vod.spiderpig.master.Master;
 import br.ufmg.dcc.vod.spiderpig.master.StopCondition;
-import br.ufmg.dcc.vod.spiderpig.master.StopCondition.CounterType;
 import br.ufmg.dcc.vod.spiderpig.master.processor.ProcessorActor;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.queue.QueueService;
@@ -67,14 +66,6 @@ public class ThreadedCrawler implements Crawler {
 		//Waiting until crawl ends
 		LOG.info("Waiting until crawl ends");
 		this.stopCondition.awaitAllDone();
-		
-		int counter = this.stopCondition.getCounter(CounterType.OK);
-		while(this.saver.numSaved() != counter)
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-			}
-		
 		this.service.waitUntilWorkIsDoneAndStop(1);
 		
 		LOG.info("Done! Stopping");

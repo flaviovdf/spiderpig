@@ -175,7 +175,8 @@ public class WorkerManagerImplTest {
 		Assert.assertEquals(0, susp.size());
 		Assert.assertEquals(10, idle.size());
 		
-		wmi.executorSuspected(buildSID(0));
+		CrawlID cid = wmi.executorSuspected(buildSID(0));
+		Assert.assertNull(cid);
 		
 		Assert.assertEquals(0, busy.size());
 		Assert.assertEquals(1, susp.size());
@@ -193,7 +194,8 @@ public class WorkerManagerImplTest {
 		Assert.assertTrue(susp.contains(buildSID(0)));
 		Assert.assertFalse(idle.contains(buildSID(0)));
 		
-		wmi.executorSuspected(wid);
+		cid = wmi.executorSuspected(wid);
+		Assert.assertEquals(cid, build("1"));
 		
 		Assert.assertEquals(0, busy.size());
 		Assert.assertEquals(2, susp.size());

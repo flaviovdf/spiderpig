@@ -38,11 +38,13 @@ public class MultiCoreManager implements WorkerManager {
 	}
 
 	@Override
-	public void executorSuspected(ServiceID jobExecutor) {
+	public CrawlID executorSuspected(ServiceID jobExecutor) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void markAvailable(ServiceID jobExecutor) {
+		throw new UnsupportedOperationException();
 	}
 
 }

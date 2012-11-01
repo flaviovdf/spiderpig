@@ -30,8 +30,8 @@ public class TestJobExecutor implements JobExecutor {
 			buff.putInt(n);
 		}
 			
-		interested.crawlDone(id, toQueue);
 		buff.rewind();
 		saver.save(id.getId(), buff.array());
+		interested.crawlDone(id, toQueue);
 	}
 }

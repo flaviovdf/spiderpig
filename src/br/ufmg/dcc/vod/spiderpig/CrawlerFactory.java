@@ -9,9 +9,9 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
+import br.ufmg.dcc.vod.spiderpig.distributed.RemoteMessageSender;
 import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDClientActor;
 import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDServerActor;
-import br.ufmg.dcc.vod.spiderpig.distributed.nio.service.RemoteMessageSender;
 import br.ufmg.dcc.vod.spiderpig.distributed.worker.WorkerActor;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaverActor;

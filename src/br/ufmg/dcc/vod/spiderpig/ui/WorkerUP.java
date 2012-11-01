@@ -8,9 +8,9 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 
 import br.ufmg.dcc.vod.spiderpig.common.LoggerInitiator;
+import br.ufmg.dcc.vod.spiderpig.distributed.RemoteMessageSender;
 import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDServerActor;
 import br.ufmg.dcc.vod.spiderpig.distributed.fd.KillerActor;
-import br.ufmg.dcc.vod.spiderpig.distributed.nio.service.RemoteMessageSender;
 import br.ufmg.dcc.vod.spiderpig.distributed.worker.WorkerActor;
 import br.ufmg.dcc.vod.spiderpig.jobs.JobExecutor;
 import br.ufmg.dcc.vod.spiderpig.queue.QueueService;

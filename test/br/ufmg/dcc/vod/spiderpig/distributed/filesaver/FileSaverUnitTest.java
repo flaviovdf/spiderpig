@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import br.ufmg.dcc.vod.spiderpig.common.FileUtil;
 import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
-import br.ufmg.dcc.vod.spiderpig.distributed.nio.service.RemoteMessageSender;
+import br.ufmg.dcc.vod.spiderpig.distributed.RemoteMessageSender;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaverActor;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaverImpl;

@@ -1,4 +1,4 @@
-package br.ufmg.dcc.vod.spiderpig.distributed.nio.service;
+package br.ufmg.dcc.vod.spiderpig.distributed;
 
 import java.io.IOException;
 import java.io.OutputStream;

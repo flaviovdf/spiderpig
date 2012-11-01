@@ -49,7 +49,7 @@ public class QueueService {
 	
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
 	private final ExecutorService executor = Executors.newCachedThreadPool();
-	private final NIOServer nioServer;
+	private final SocketServer sserver;
 
 	private final String ip;
 	private final int port;
@@ -58,7 +58,7 @@ public class QueueService {
 	public QueueService() throws IOException {
 		this.ip = InetAddress.getLocalHost().getHostAddress();
 		this.port = -1;
-		this.nioServer = null;
+		this.sserver = null;
 		this.sessionID = Math.round(Math.random() * Long.MAX_VALUE);
 	}
 	
@@ -71,8 +71,9 @@ public class QueueService {
 		this.ip = InetAddress.getByName(hostname).getHostAddress();
 		this.port = port;
 		this.sessionID = Math.round(Math.random() * Long.MAX_VALUE);
-		this.nioServer = new NIOServer(this.executor, this, hostname, port);
-		this.nioServer.start();
+		this.sserver = new SocketServer(this.executor, this, this.ip, 
+				this.port);
+		this.sserver.start();
 	}
 	
 	/**
@@ -257,8 +258,8 @@ public class QueueService {
 					runnable.awaitTermination();
 			}
 			
-			if (this.nioServer != null)
-				this.nioServer.shutdown();
+			if (this.sserver != null)
+				this.sserver.shutdown();
 			this.executor.shutdown();
 			this.executor.awaitTermination(Long.MAX_VALUE, 
 					TimeUnit.MILLISECONDS);

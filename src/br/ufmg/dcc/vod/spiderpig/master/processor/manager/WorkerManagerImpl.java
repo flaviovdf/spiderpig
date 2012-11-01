@@ -88,7 +88,7 @@ public class WorkerManagerImpl implements WorkerManager {
 	}
 
 	@Override
-	public void executorSuspected(ServiceID workerID) {
+	public CrawlID executorSuspected(ServiceID workerID) {
 		try {
 			this.lock.lock();
 			CrawlID crawlID = this.inverseAllocMap.remove(workerID);
@@ -102,6 +102,8 @@ public class WorkerManagerImpl implements WorkerManager {
 			
 			if (!this.stateMap.get(WorkerState.SUSPECTED).contains(workerID))
 				this.stateMap.get(WorkerState.SUSPECTED).add(workerID);
+			
+			return crawlID;
 		} finally {
 			this.lock.unlock();
 		}

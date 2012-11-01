@@ -2,8 +2,8 @@ package br.ufmg.dcc.vod.spiderpig.master.processor.manager;
 
 import java.util.Objects;
 
+import br.ufmg.dcc.vod.spiderpig.distributed.RemoteMessageSender;
 import br.ufmg.dcc.vod.spiderpig.distributed.master.JobExecutorProxy;
-import br.ufmg.dcc.vod.spiderpig.distributed.nio.service.RemoteMessageSender;
 import br.ufmg.dcc.vod.spiderpig.jobs.JobExecutor;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
 
