@@ -10,7 +10,6 @@ import br.ufmg.dcc.vod.spiderpig.master.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.master.processor.ProcessorActor;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.queue.QueueService;
-import br.ufmg.dcc.vod.spiderpig.stats.StatsActor;
 
 import com.google.common.base.Preconditions;
 
@@ -18,7 +17,6 @@ public class ThreadedCrawler implements Crawler {
 
 	private static final Logger LOG = Logger.getLogger(ThreadedCrawler.class);
 	
-	protected final StatsActor statsActor;
 	protected final QueueService service;
 	protected final ProcessorActor processorActor;
 	protected final Master master;
@@ -28,13 +26,12 @@ public class ThreadedCrawler implements Crawler {
 
 
 	protected ThreadedCrawler(ProcessorActor processorActor, 
-			StatsActor statsActor, QueueService service, 
-			Master master, FileSaver saver, int numThreads) {
+			QueueService service, Master master, FileSaver saver, 
+			int numThreads) {
 		Preconditions.checkNotNull(processorActor);
 		Preconditions.checkNotNull(service);
 		
 		this.processorActor = processorActor;
-		this.statsActor = statsActor;
 		this.service = service;
 		this.master = master;
 		this.saver = saver;
@@ -59,8 +56,6 @@ public class ThreadedCrawler implements Crawler {
 		LOG.info("Starting Crawler");
 
 		//Starting
-		if (statsActor != null)
-			statsActor.startProcessors(1);
 		processorActor.startProcessors(numThreads);
 		
 		//Waiting until crawl ends

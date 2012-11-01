@@ -51,14 +51,14 @@ public class CrawlerFactory {
 		Resolver resolver = new LoopbackResolver(jobExecutor);
 		ProcessorActor processorActor = new ProcessorActor(workerManager, 
 				service, resolver, workerInterested, saver);
-		Master master = new Master(trackerFactory, processorActor, null,
+		Master master = new Master(trackerFactory, processorActor,
 				workerManager);
 		
 		processorActor.withFileQueue(service, queueDir);
 		
 		workerInterested.setLoopBack(master);
 		
-		return new ThreadedCrawler(processorActor, null, service,
+		return new ThreadedCrawler(processorActor, service,
 				master, saver, numThreads);
 	}
 	
@@ -91,7 +91,7 @@ public class CrawlerFactory {
 		Resolver resolver = new RemoteResolver(callBackID, fileSaverID, sender);
 		ProcessorActor processorActor = new ProcessorActor(workerManager, 
 				service, resolver, null, null);
-		Master master = new Master(trackerFactory, processorActor, null, 
+		Master master = new Master(trackerFactory, processorActor, 
 				workerManager);
 		
 		ResultActor resultActor = new ResultActor(master);
@@ -110,7 +110,7 @@ public class CrawlerFactory {
 					.toResolvedServiceID(sid.getHostname(), sid.getPort(), 
 					 FDServerActor.HANDLE));
 		
-		return new DistributedCrawler(processorActor, null, service, 
+		return new DistributedCrawler(processorActor, service, 
 				master, resultActor, fileSaverActor, fd, 
 				saver, numThreads);
 	}

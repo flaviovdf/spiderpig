@@ -12,11 +12,8 @@ import br.ufmg.dcc.vod.spiderpig.master.processor.ProcessorActor;
 import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerManager;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
-import br.ufmg.dcc.vod.spiderpig.stats.StatsActor;
 import br.ufmg.dcc.vod.spiderpig.tracker.Tracker;
 import br.ufmg.dcc.vod.spiderpig.tracker.TrackerFactory;
-
-import com.google.common.cache.Cache;
 
 public class Master implements WorkerInterested, FDListener {
 
@@ -24,17 +21,14 @@ public class Master implements WorkerInterested, FDListener {
 	
 	private final Tracker<String> tracker;
 	private final ProcessorActor processorActor;
-	private final StatsActor statsActor;
 	private final WorkerManager workerManager;
 	private final StopCondition stopCondition;
 	private final ReentrantLock lock;
 
 	public Master(TrackerFactory<String> trackerFactory, 
-			ProcessorActor processorActor, StatsActor statsActor,
-			WorkerManager workerManager) {
+			ProcessorActor processorActor, WorkerManager workerManager) {
 		this.tracker = trackerFactory.createTracker(String.class);
 		this.processorActor = processorActor;
-		this.statsActor = statsActor;
 		this.workerManager = workerManager;
 		this.stopCondition = new StopCondition();
 		this.lock = new ReentrantLock();
