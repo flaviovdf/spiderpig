@@ -51,13 +51,15 @@ public class QueueService {
 	private final ExecutorService executor = Executors.newCachedThreadPool();
 	private final NIOServer nioServer;
 
-	private final String hostname;
+	private final String ip;
 	private final int port;
+	private final long sessionID;
 
 	public QueueService() throws IOException {
-		this.hostname = InetAddress.getLocalHost().getHostName();
+		this.ip = InetAddress.getLocalHost().getHostAddress();
 		this.port = -1;
 		this.nioServer = null;
+		this.sessionID = Math.round(Math.random() * Long.MAX_VALUE);
 	}
 	
 	public QueueService(int port) throws IOException {
@@ -66,8 +68,9 @@ public class QueueService {
 	
 	public QueueService(String hostname, int port) throws IOException {
 		Preconditions.checkNotNull(hostname);
-		this.hostname = InetAddress.getByName(hostname).getHostAddress();
+		this.ip = InetAddress.getByName(hostname).getHostAddress();
 		this.port = port;
+		this.sessionID = Math.round(Math.random() * Long.MAX_VALUE);
 		this.nioServer = new NIOServer(this.executor, this, hostname, port);
 		this.nioServer.start();
 	}
@@ -315,11 +318,15 @@ public class QueueService {
 		return this.ids.get(label).queue;
 	}
 
-	public String getHostname() {
-		return hostname;
+	public String getIP() {
+		return ip;
 	}
 
 	public int getPort() {
 		return port;
+	}
+
+	public long getSessionID() {
+		return sessionID;
 	}
 }

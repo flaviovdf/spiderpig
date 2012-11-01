@@ -3,6 +3,7 @@ package br.ufmg.dcc.vod.spiderpig.queue;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.UnknownHostException;
 
 import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
@@ -14,6 +15,7 @@ public abstract class Actor<T extends MessageLite> {
 
 	private final String handle;
 	protected QueueService service;
+	private ServiceID serviceID;
 
 	public Actor(String label) {
 		this.handle = label;
@@ -66,8 +68,16 @@ public abstract class Actor<T extends MessageLite> {
 	}
 	
 	public final ServiceID getServiceID() {
-		return ServiceIDUtils.toServiceID(service.getHostname(), 
-				service.getPort(), getHandle());
+		if (this.serviceID != null)
+			return serviceID;
+		
+		try {
+			this.serviceID = ServiceIDUtils.toResolvedServiceID(service.getIP(), 
+					service.getPort(), getHandle());
+			return serviceID;
+		} catch (UnknownHostException e) {
+			throw new QueueServiceException(e);
+		}
 	}
 	
 	public abstract QueueProcessor<T> getQueueProcessor();

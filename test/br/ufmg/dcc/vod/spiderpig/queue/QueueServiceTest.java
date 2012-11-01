@@ -6,6 +6,7 @@ import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.junit.After;
@@ -97,6 +98,13 @@ public class QueueServiceTest extends TestCase {
 		f3.delete();
 		f3.deleteOnExit();
 
+	}
+	
+	public void testIDs() throws IOException {
+		QueueService s1 = new QueueService();
+		QueueService s2 = new QueueService();
+		
+		Assert.assertTrue(s1.getSessionID() != s2.getSessionID());
 	}
 	
 	/*

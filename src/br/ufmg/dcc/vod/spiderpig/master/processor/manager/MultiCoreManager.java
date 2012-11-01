@@ -1,5 +1,6 @@
 package br.ufmg.dcc.vod.spiderpig.master.processor.manager;
 
+import java.net.UnknownHostException;
 import java.util.concurrent.Semaphore;
 
 import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
@@ -9,12 +10,18 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
 
 public class MultiCoreManager implements WorkerManager {
 	
-	private static final ServiceID NULL_ID = 
-			ServiceIDUtils.toServiceID("localhost", 0, WorkerActor.HANDLE);
+	private final ServiceID NULL_ID;
 	private final Semaphore semaphore;
 
 	public MultiCoreManager(int numThreads) {
 		this.semaphore = new Semaphore(numThreads);
+		try {
+			this.NULL_ID = 
+					 ServiceIDUtils
+					 .toResolvedServiceID("localhost", 0, WorkerActor.HANDLE);
+		} catch (UnknownHostException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	@Override

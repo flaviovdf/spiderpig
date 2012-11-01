@@ -10,6 +10,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import br.ufmg.dcc.vod.spiderpig.common.FileUtil;
+import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
 import br.ufmg.dcc.vod.spiderpig.distributed.nio.service.RemoteMessageSender;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaverActor;
@@ -61,12 +62,10 @@ public class FileSaverUnitTest {
 		FileWrapper w2 = new FileWrapper("buh", "oi\nquer\ntc2".getBytes());
 		
 		RemoteMessageSender sender = new RemoteMessageSender();
-		ServiceID.Builder builder = ServiceID.newBuilder();
-		builder.setHostname("localhost");
-		builder.setPort(7676);
-		builder.setHandle(actor.getHandle());
 		
-		ServiceID sid = builder.build();
+		ServiceID sid = 
+				ServiceIDUtils.toResolvedServiceID("localhost", 7676, 
+						actor.getHandle());
 		sender.send(sid, w1.toProtocolBuffer());
 		sender.send(sid, w2.toProtocolBuffer());
 		

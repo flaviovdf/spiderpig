@@ -18,7 +18,6 @@ import org.junit.Test;
 import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
 import br.ufmg.dcc.vod.spiderpig.common.Tuple;
 import br.ufmg.dcc.vod.spiderpig.distributed.nio.service.RemoteMessageSender;
-import br.ufmg.dcc.vod.spiderpig.distributed.worker.FDServerActor;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Fd.PingPong;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
 import br.ufmg.dcc.vod.spiderpig.queue.QueueService;
@@ -52,7 +51,7 @@ public class FDClientActorTest {
 			
 			services.add(service);
 			actors.add(fdactor);
-			sids.add(ServiceIDUtils.toServiceID("localhost", basePort + i, 
+			sids.add(ServiceIDUtils.toResolvedServiceID("localhost", basePort + i, 
 					FDServerActor.HANDLE));
 		}
 		return new Tuple<Set<ServiceID>, Set<FDServerActorX>>(sids, actors);
@@ -79,6 +78,13 @@ public class FDClientActorTest {
 		
 		public void setUp() {
 			this.down.set(false);
+		}
+
+		public void changeID() {
+			PingPong build = PingPong.newBuilder().mergeFrom(this.msg) 
+				.setSessionID(this.msg.getSessionID() + 1)
+				.build();
+			this.msg = build;
 		}
 	}
 	
@@ -243,6 +249,41 @@ public class FDClientActorTest {
 		
 		Assert.assertEquals(100, listener.downs.size());
 		Assert.assertEquals(200, listener.ups.size());
+		
+		service.waitUntilWorkIsDone(1);
+		actor.stopTimer();
+	}
+	
+	@Test
+	public void testUp() throws Exception {
+		Tuple<Set<ServiceID>, Set<FDServerActorX>> tuple = 
+				startToMonitor(1, 9000);
+		Set<ServiceID> toMonitor = tuple.first;
+		
+		CountDownLatch upLatch = new CountDownLatch(2);
+		CountDownLatch downLatch = new CountDownLatch(1);
+		
+		Listener listener = new Listener(upLatch, downLatch);
+		FDClientActor actor = new FDClientActor(5, 1, TimeUnit.SECONDS, 
+				listener, new RemoteMessageSender());
+		QueueService service = new QueueService("localhost", 4004);
+		actor.withSimpleQueue(service).startProcessors(1);
+		for (ServiceID serviceID : toMonitor)
+			actor.watch(serviceID);
+		
+		actor.startTimer();
+		
+		while (upLatch.getCount() > 1);
+		Assert.assertEquals(1, upLatch.getCount());
+		Assert.assertEquals(1, listener.ups.size());
+
+		tuple.second.iterator().next().changeID();
+		
+		downLatch.await();	
+		upLatch.await();
+		
+		Assert.assertEquals(2, listener.ups.size());
+		Assert.assertEquals(1, listener.downs.size());
 		
 		service.waitUntilWorkIsDone(1);
 		actor.stopTimer();

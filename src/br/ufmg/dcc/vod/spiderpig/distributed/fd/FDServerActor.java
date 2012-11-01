@@ -12,6 +12,7 @@ public class FDServerActor extends Actor<PingPong>
 
 	public static final String HANDLE = "FDServer";
 	private final RemoteMessageSender sender;
+	protected PingPong msg;
 
 	public FDServerActor(RemoteMessageSender sender) {
 		super(HANDLE);
@@ -21,9 +22,19 @@ public class FDServerActor extends Actor<PingPong>
 	@Override
 	public void process(PingPong t) {
 		ServiceID callBackID = t.getCallBackID();
-		PingPong build = PingPong.newBuilder().
-				setCallBackID(getServiceID()).build();
+		PingPong build = getMsg();
 		sender.send(callBackID, build);
+	}
+
+	private PingPong getMsg() {
+		if (this.msg != null)
+			return this.msg;
+		
+		this.msg = PingPong.newBuilder()
+				.setCallBackID(getServiceID())
+				.setSessionID(service.getSessionID())
+				.build();
+		return this.msg;
 	}
 
 	@Override

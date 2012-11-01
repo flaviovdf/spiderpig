@@ -27,10 +27,12 @@ public class FDClientActor extends Actor<PingPong>
 		
 		final Stopwatch stopwatch;
 		boolean down;
+		long previd;
 
 		public FDStruct(Stopwatch stopwatch) {
 			this.stopwatch = stopwatch;
 			this.down = true;
+			this.previd = 0;
 		}
 		
 	}
@@ -66,7 +68,10 @@ public class FDClientActor extends Actor<PingPong>
 	
 	private PingPong getMsg() {
 		if (ping == null)
-			ping = PingPong.newBuilder().setCallBackID(getServiceID()).build();
+			ping = PingPong.newBuilder()
+					.setCallBackID(getServiceID())
+					.setSessionID(service.getSessionID())
+					.build();
 		return ping;
 	}
 	
@@ -95,9 +100,7 @@ public class FDClientActor extends Actor<PingPong>
 					FDStruct struct = this.monitoring.get(sid);
 					long elapsedMillis = struct.stopwatch.elapsedMillis();
 					if (!struct.down && elapsedMillis > unit.toMillis(timeout)) {
-						struct.stopwatch.stop();
-						struct.down = true;
-						listener.isSuspected(sid);
+						setDown(sid, struct);
 					}
 					this.sender.send(sid, getMsg());
 				}
@@ -111,6 +114,7 @@ public class FDClientActor extends Actor<PingPong>
 			}
 		}
 	}
+
 
 	@Override
 	public QueueProcessor<PingPong> getQueueProcessor() {
@@ -130,10 +134,12 @@ public class FDClientActor extends Actor<PingPong>
 			
 			if (struct != null) { 
 				if (struct.down) {
-					struct.down = false;
-					struct.stopwatch.reset();
-					struct.stopwatch.start();
-					listener.isUp(t.getCallBackID());
+					setUp(t, struct);
+				//If ids changed then service died and rebourned
+				} else if (struct.previd != t.getSessionID()) {
+					setDown(t.getCallBackID(), struct);
+					setUp(t, struct);
+					
 				}
 			}
 		} finally {
@@ -141,6 +147,20 @@ public class FDClientActor extends Actor<PingPong>
 		}
 	}
 
+	private void setUp(PingPong pingPong, FDStruct struct) {
+		struct.previd = pingPong.getSessionID();
+		struct.down = false;
+		struct.stopwatch.reset();
+		struct.stopwatch.start();
+		listener.isUp(pingPong.getCallBackID());
+	}
+
+	private void setDown(ServiceID sid, FDStruct struct) {
+		struct.stopwatch.stop();
+		struct.down = true;
+		listener.isSuspected(sid);
+	}
+	
 	public void startTimer() {
 		try {
 			this.lock.lock();

@@ -69,12 +69,14 @@ public class WorkerKill extends Command {
 		actor.withSimpleQueue(service).startProcessors(1);
 		
 		ServiceID callbackID = 
-				ServiceIDUtils.toServiceID(hostname, port, 
+				ServiceIDUtils.toResolvedServiceID(hostname, port, 
 						CallBackKillActor.HANDLE);
 		RemoteMessageSender sender = new RemoteMessageSender();
-		sender.send(ServiceIDUtils.toServiceID(workerHostname, workerPort, 
+		sender.send(ServiceIDUtils.toResolvedServiceID(workerHostname, workerPort, 
 				KillerActor.HANDLE), 
-				PingPong.newBuilder().setCallBackID(callbackID).build());
+				PingPong.newBuilder()
+				.setSessionID(1l)
+				.setCallBackID(callbackID).build());
 	}
 
 }

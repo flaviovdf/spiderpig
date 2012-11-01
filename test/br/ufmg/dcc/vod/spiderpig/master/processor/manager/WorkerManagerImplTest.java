@@ -1,5 +1,6 @@
 package br.ufmg.dcc.vod.spiderpig.master.processor.manager;
 
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -14,19 +15,19 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
 
 public class WorkerManagerImplTest {
 
-	private Collection<ServiceID> createIDs(int n) {
+	private Collection<ServiceID> createIDs(int n) throws UnknownHostException {
 		HashSet<ServiceID> set = new HashSet<>();
 		for (int i = 0; i < n; i++)
 			set.add(buildSID(i));
 		return set;
 	}
 
-	private ServiceID buildSID(int i) {
-		return ServiceIDUtils.toServiceID("", i, ""+i);
+	private ServiceID buildSID(int i) throws UnknownHostException {
+		return ServiceIDUtils.toResolvedServiceID("", i, ""+i);
 	}
 	
 	@Test
-	public void testCreation() {
+	public void testCreation() throws UnknownHostException {
 		Collection<ServiceID> ids = createIDs(10);
 		WorkerManagerImpl wmi = new WorkerManagerImpl(ids, WorkerState.IDLE);
 		Collection<ServiceID> idle = wmi.getByState(WorkerState.IDLE);
@@ -40,7 +41,8 @@ public class WorkerManagerImplTest {
 	}
 	
 	@Test
-	public void testAllocateAvailableExecutor() throws InterruptedException {
+	public void testAllocateAvailableExecutor() 
+			throws InterruptedException, UnknownHostException {
 		Collection<ServiceID> ids = createIDs(10);
 		
 		WorkerManagerImpl wmi = new WorkerManagerImpl(ids, WorkerState.IDLE);
@@ -90,7 +92,8 @@ public class WorkerManagerImplTest {
 	}
 	
 	@Test
-	public void testFreeExecutor() throws InterruptedException {
+	public void testFreeExecutor() 
+			throws InterruptedException, UnknownHostException {
 		Collection<ServiceID> ids = createIDs(10);
 		
 		WorkerManagerImpl wmi = new WorkerManagerImpl(ids, WorkerState.IDLE);
@@ -131,7 +134,8 @@ public class WorkerManagerImplTest {
 	}
 
 	@Test
-	public void testThreadSafety1() throws InterruptedException {
+	public void testThreadSafety1() 
+			throws InterruptedException, UnknownHostException {
 		Collection<ServiceID> ids = createIDs(2);
 
 		WorkerManagerImpl wmi = new WorkerManagerImpl(ids, WorkerState.IDLE);
@@ -157,7 +161,8 @@ public class WorkerManagerImplTest {
 	}
 	
 	@Test
-	public void testExecutorSuspected() throws InterruptedException {
+	public void testExecutorSuspected() 
+			throws InterruptedException, UnknownHostException {
 		Collection<ServiceID> ids = createIDs(10);
 		
 		WorkerManagerImpl wmi = new WorkerManagerImpl(ids, WorkerState.IDLE);
@@ -204,7 +209,8 @@ public class WorkerManagerImplTest {
 	}
 
 	@Test
-	public void testMarkAvailable() throws InterruptedException {
+	public void testMarkAvailable() 
+			throws InterruptedException, UnknownHostException {
 		Collection<ServiceID> ids = createIDs(10);
 		
 		WorkerManagerImpl wmi = new WorkerManagerImpl(ids, WorkerState.IDLE);

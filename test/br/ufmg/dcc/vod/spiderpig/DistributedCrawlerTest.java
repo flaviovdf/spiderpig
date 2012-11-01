@@ -19,10 +19,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import br.ufmg.dcc.vod.spiderpig.Crawler;
-import br.ufmg.dcc.vod.spiderpig.CrawlerFactory;
+import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDServerActor;
 import br.ufmg.dcc.vod.spiderpig.distributed.nio.service.RemoteMessageSender;
-import br.ufmg.dcc.vod.spiderpig.distributed.worker.FDServerActor;
 import br.ufmg.dcc.vod.spiderpig.distributed.worker.WorkerActor;
 import br.ufmg.dcc.vod.spiderpig.jobs.JobExecutor;
 import br.ufmg.dcc.vod.spiderpig.jobs.test.RandomizedSyncGraph;

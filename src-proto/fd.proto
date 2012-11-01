@@ -6,6 +6,7 @@ import "ids.proto";
 message PingPong {
 
     required ServiceID callBackID = 1;
+    required int64 sessionID = 2;
 
 }
 

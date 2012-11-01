@@ -10,8 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
 import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDClientActor;
+import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDServerActor;
 import br.ufmg.dcc.vod.spiderpig.distributed.nio.service.RemoteMessageSender;
-import br.ufmg.dcc.vod.spiderpig.distributed.worker.FDServerActor;
 import br.ufmg.dcc.vod.spiderpig.distributed.worker.WorkerActor;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaverActor;
@@ -73,14 +73,15 @@ public class CrawlerFactory {
 		int numThreads = workerAddrs.size();
 		Set<ServiceID> workerIDs = new HashSet<>();
 		
-		ServiceID callBackID = ServiceIDUtils.toServiceID(hostname, port, 
-				ResultActor.HANDLE);
-		ServiceID fileSaverID = ServiceIDUtils.toServiceID(hostname, port, 
-				FileSaverActor.HANDLE);
+		ServiceID callBackID = ServiceIDUtils.
+				toResolvedServiceID(hostname, port, ResultActor.HANDLE);
+		ServiceID fileSaverID = ServiceIDUtils.
+				toResolvedServiceID(hostname, port, FileSaverActor.HANDLE);
 		
 		for (InetSocketAddress socketAddr : workerAddrs) {
-			ServiceID workerID = ServiceIDUtils.toServiceID(
-					socketAddr.getAddress().getHostAddress(), 
+			ServiceID workerID = 
+					ServiceIDUtils.toResolvedServiceID(
+					socketAddr.getHostName(), 
 					socketAddr.getPort(), WorkerActor.HANDLE);
 			workerIDs.add(workerID);
 		}
@@ -104,7 +105,9 @@ public class CrawlerFactory {
 		resultActor.withSimpleQueue(service);
 		
 		for (ServiceID sid : workerIDs)
-			fd.watch(ServiceIDUtils.toServiceID(sid.getHostname(), sid.getPort(), 
+			fd.watch(
+					ServiceIDUtils
+					.toResolvedServiceID(sid.getHostname(), sid.getPort(), 
 					 FDServerActor.HANDLE));
 		
 		return new DistributedCrawler(processorActor, null, service, 
