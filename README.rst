@@ -20,15 +20,18 @@ This package contains the common code for:
 
     * Different Schedulers
         * BFS (Snowball)
-           * Greedy attempt of crawling everythin
+           * Greedy attempt of crawling everything
         * Random Walks
            * Limited by a maximum number of steps
            * Damping factor (stop probability)
            * Doing random jumps is hard on online social networks. Some id
              generation is necessary. It is easy to extend the crawler for this.
         * EGO Networks crawls 
-           * (neighbors, neighbors of neighbors, 
-              neighbors of neighbors of neighbors, etc)
+           * (neighbors, neighbors of neighbors, neighbors of neighbors of neighbors, etc)
+           * Basically, a pruned BFS
+
+    * Caching
+        * Some walkers revist node (such as random walk). Caching aliviates requests to servers in these cases
 
 Since metropolis hasting performs as good as basic random walks with posterior
 correction we decided to implement only random walks. 
