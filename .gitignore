@@ -12,6 +12,9 @@ lib/*
 out/
 out/*
 
+src-gen/
+src-gen/*
+
 .pydevproject
 .project
 .classpath
