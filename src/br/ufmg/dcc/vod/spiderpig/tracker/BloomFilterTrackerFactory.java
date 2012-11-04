@@ -19,6 +19,7 @@ public class BloomFilterTrackerFactory<T> extends TrackerFactory<T> {
 
 	private static final HashMap<Class<?>, Funnel<?>> FUNNELS = new HashMap<>();
 	private static final int TEN_MILLION = 10000000;
+	private final int expectedInserts;
 	
 	static {
 		FUNNELS.put(String.class, Funnels.stringFunnel());
@@ -26,6 +27,24 @@ public class BloomFilterTrackerFactory<T> extends TrackerFactory<T> {
 		FUNNELS.put(byte[].class, Funnels.byteArrayFunnel());
 		FUNNELS.put(Integer.class, Funnels.integerFunnel());
 		FUNNELS.put(Long.class, Funnels.longFunnel());
+	}
+	
+	/**
+	 * Creates a tracker factory where each bloom filter will expect the
+	 * given amount of inserts
+	 * 
+	 * @param expectedInserts Number of inserts expected
+	 */
+	public BloomFilterTrackerFactory(int expectedInserts) {
+		this.expectedInserts = expectedInserts;
+	}
+
+	/**
+	 * Creates a tracker factory where each bloom filter will expect 10million
+	 * inserts
+	 */
+	public BloomFilterTrackerFactory() {
+		this(TEN_MILLION);
 	}
 	
 	@Override
@@ -38,7 +57,7 @@ public class BloomFilterTrackerFactory<T> extends TrackerFactory<T> {
 		
 		@SuppressWarnings("unchecked") Funnel<T> funnel =
 				(Funnel<T>) FUNNELS.get(clazz);
-		BloomFilter<T> bf = BloomFilter.create(funnel, TEN_MILLION);
+		BloomFilter<T> bf = BloomFilter.create(funnel, expectedInserts);
 		return new BloomFilterTracker<>(bf);
 	}
 

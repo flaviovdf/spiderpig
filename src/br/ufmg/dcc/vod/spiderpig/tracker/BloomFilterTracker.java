@@ -24,7 +24,7 @@ public class BloomFilterTracker<T> implements Tracker<T> {
 	}
 
 	@Override
-	public boolean crawled(T t) {
+	public boolean addCrawled(T t) {
 		boolean returnVal = this.bloomFilter.put(t);
 		if (returnVal) {
 			this.size++;

@@ -15,7 +15,7 @@ public interface Tracker<T> {
 	 * @param t The object which was crawled
 	 * @return {@code true} if the obj was not yet crawled, {@false} otherwise
 	 */
-	public boolean crawled(T t);
+	public boolean addCrawled(T t);
 	
 	/**
 	 * Queries whether {@code s} has already been crawled.

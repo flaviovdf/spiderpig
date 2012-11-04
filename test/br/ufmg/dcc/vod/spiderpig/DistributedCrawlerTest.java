@@ -21,12 +21,14 @@ import org.junit.Test;
 
 import br.ufmg.dcc.vod.spiderpig.distributed.RemoteMessageSender;
 import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDServerActor;
-import br.ufmg.dcc.vod.spiderpig.distributed.worker.WorkerActor;
 import br.ufmg.dcc.vod.spiderpig.jobs.JobExecutor;
 import br.ufmg.dcc.vod.spiderpig.jobs.test.RandomizedSyncGraph;
 import br.ufmg.dcc.vod.spiderpig.jobs.test.TestFileSaver;
 import br.ufmg.dcc.vod.spiderpig.jobs.test.TestJobExecutor;
+import br.ufmg.dcc.vod.spiderpig.master.walker.BFSWalker;
+import br.ufmg.dcc.vod.spiderpig.master.walker.Walker;
 import br.ufmg.dcc.vod.spiderpig.queue.QueueService;
+import br.ufmg.dcc.vod.spiderpig.worker.WorkerActor;
 
 public class DistributedCrawlerTest  extends TestCase {
 
@@ -88,9 +90,10 @@ public class DistributedCrawlerTest  extends TestCase {
 		TestFileSaver saver = new TestFileSaver();
 		
 		String host = "localhost";
+		Walker walker = BFSWalker.getTestWalker();
 		Crawler crawler = 
 				CrawlerFactory.createDistributedCrawler(host, 4541, 
-						workerAddrs, myTempDir, saver);
+						workerAddrs, myTempDir, saver, walker, null);
 		
 		crawler.dispatch("0");
 		crawler.crawl();
@@ -109,9 +112,10 @@ public class DistributedCrawlerTest  extends TestCase {
 		TestFileSaver saver = new TestFileSaver();
 		
 		String host = "localhost";
+		Walker walker = BFSWalker.getTestWalker();
 		Crawler crawler = 
 				CrawlerFactory.createDistributedCrawler(host, 4542, 
-						workerAddrs, myTempDir, saver);
+						workerAddrs, myTempDir, saver, walker, null);
 		
 		crawler.dispatch("0");
 		crawler.crawl();
@@ -129,9 +133,10 @@ public class DistributedCrawlerTest  extends TestCase {
 		TestFileSaver saver = new TestFileSaver();
 		
 		String host = "localhost";
+		Walker walker = BFSWalker.getTestWalker();
 		Crawler crawler = 
 				CrawlerFactory.createDistributedCrawler(host, 4543, 
-						workerAddrs, myTempDir, saver);
+						workerAddrs, myTempDir, saver, walker, null);
 		
 		crawler.dispatch("0");
 		crawler.crawl();

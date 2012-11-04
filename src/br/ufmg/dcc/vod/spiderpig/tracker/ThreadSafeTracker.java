@@ -21,8 +21,8 @@ public class ThreadSafeTracker<T> implements Tracker<T> {
 	}
 	
 	@Override
-	public synchronized boolean crawled(T t) {
-		return this.tracker.crawled(t);
+	public synchronized boolean addCrawled(T t) {
+		return this.tracker.addCrawled(t);
 	}
 
 	@Override
