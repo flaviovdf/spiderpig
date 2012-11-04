@@ -15,9 +15,9 @@ public class BloomFilterTrackerTest {
 				new BloomFilterTrackerFactory<String>().createTracker(
 						String.class);
 		
-		Assert.assertTrue(bf.crawled("oi"));
-		Assert.assertTrue(bf.crawled("tudo"));
-		Assert.assertTrue(bf.crawled("bem"));
+		Assert.assertTrue(bf.addCrawled("oi"));
+		Assert.assertTrue(bf.addCrawled("tudo"));
+		Assert.assertTrue(bf.addCrawled("bem"));
 		
 		Assert.assertEquals(3, bf.numCrawled());
 		Assert.assertTrue(bf.wasCrawled("oi"));
@@ -25,7 +25,7 @@ public class BloomFilterTrackerTest {
 		Assert.assertTrue(bf.wasCrawled("bem"));
 		Assert.assertFalse(bf.wasCrawled("bala"));
 		
-		Assert.assertFalse(bf.crawled("oi"));
+		Assert.assertFalse(bf.addCrawled("oi"));
 		Assert.assertEquals(3, bf.numCrawled());
 	}
 

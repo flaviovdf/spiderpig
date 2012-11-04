@@ -1,5 +1,7 @@
 package br.ufmg.dcc.vod.spiderpig.ui;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -9,8 +11,12 @@ import java.util.Map;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.PropertiesConfiguration;
 
 import br.ufmg.dcc.vod.spiderpig.common.Constants;
 
@@ -20,12 +26,33 @@ public abstract class Command {
 	static {
 		CMDS.put("worker_up", new WorkerUP());
 		CMDS.put("master_up", new MasterUP());
-		CMDS.put("threaded_up", new ThreadedUP());
+		CMDS.put("worker_kill", new WorkerKill());
+		CMDS.put("worker_status", new WorkerKill());
 	}
 	
-	public abstract Options getOptions();
+	public abstract void exec(Configuration cli) throws Exception;
 	
-	public abstract void exec(CommandLine cli) throws Exception;
+	@SuppressWarnings("static-access")
+	private static Options getOptions() {
+		Options opts = new Options();
+		opts.addOption(new Option("help", "print this message"));
+		opts.addOption(new Option("version", "print version info"));
+		
+		opts.addOption(OptionBuilder
+				.withArgName("config-file")
+				.hasArg()
+				.isRequired()
+				.withDescription("configuration file")
+				.create("c"));
+
+		opts.addOption(OptionBuilder
+				.withArgName("jar-file")
+				.hasArg()
+				.withDescription("jar file to load additional resources")
+				.create("j"));
+		
+		return opts;
+	}
 	
 	private static String[] shift(String[] args) {
 		//Minor hack for shifting
@@ -56,7 +83,7 @@ public abstract class Command {
 			System.exit(EXIT_CODES.UNKNOWN_COMMAND);
 		}
 		
-		Options opts = command.getOptions();
+		Options opts = getOptions();
 		opts.addOption(new Option("help", "print this message"));
 		opts.addOption(new Option("version", "print version info"));
 
@@ -77,11 +104,22 @@ public abstract class Command {
 		try {
 			GnuParser parser = new GnuParser();
 			CommandLine cli = parser.parse(opts, shifted);
-			command.exec(cli);
+			
+			String configFile = cli.getOptionValue("c");
+			if (!new File(configFile).exists())
+				throw new IOException("Unable to find configuration file " 
+							+configFile);
+			
+			command.exec(new PropertiesConfiguration(configFile));
 		} catch (Exception e) {
 			HelpFormatter hf = new HelpFormatter();
 			hf.printHelp(Constants.CMD_LINE + " " + CMDS.keySet(), opts);
-			e.printStackTrace();
+			
+			if (!(e instanceof MissingOptionException))
+				e.printStackTrace();
+			else
+				System.err.println(e.getMessage());
+			
 			System.exit(EXIT_CODES.ERROR);
 		}
 	}	

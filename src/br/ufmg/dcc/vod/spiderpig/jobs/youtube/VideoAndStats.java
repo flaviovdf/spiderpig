@@ -6,28 +6,28 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.apache.commons.configuration.Configuration;
 import org.apache.log4j.Logger;
 
 import br.ufmg.dcc.vod.spiderpig.common.Tuple;
+import br.ufmg.dcc.vod.spiderpig.common.config.VoidArguments;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
-import br.ufmg.dcc.vod.spiderpig.jobs.JobExecutor;
+import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableJobExecutor;
 import br.ufmg.dcc.vod.spiderpig.jobs.Requester;
 import br.ufmg.dcc.vod.spiderpig.jobs.ThroughputManager;
 import br.ufmg.dcc.vod.spiderpig.jobs.WorkerInterested;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
-public class VideoAndStats implements JobExecutor {
-
-	private static final String NL = System.lineSeparator();
-	private final ThroughputManager throughputManager;
-	private final VideoRequester requester;
+public class VideoAndStats implements ConfigurableJobExecutor {
 
 	private static final Logger LOG = Logger.getLogger(VideoAndStats.class);
 	
-	public VideoAndStats(long timeBetweenRequests) {
-		this.throughputManager = new ThroughputManager(timeBetweenRequests);
-		this.requester = new VideoRequester();
-	}
+	private static final String NL = System.lineSeparator();
+	private static final String SLEEP_TIME = "worker.job.youtube.sleeptime";
+	private static final String DEV_KEY = "worker.job.youtube.devkey";
+	
+	private ThroughputManager throughputManager;
+	private VideoRequester requester;
 	
 	@Override
 	public void crawl(CrawlID id, WorkerInterested interested, FileSaver saver) {
@@ -49,11 +49,10 @@ public class VideoAndStats implements JobExecutor {
 
 	private class VideoRequester implements Requester<Tuple<String, String>> {
 
-		private static final String USER_AGENT = 
-				"Research-Crawler-APIDEVKEY-AI39si59eqKb2OzKrx-" +
-				"4EkV1HkIRJcoYDf_" +
-				"VSKUXZ8AYPtJp-" +
-				"v9abtMYg760MJOqLZs5QIQwW4BpokfNyKKqk1gi52t0qMwJBg";
+		private final String ua;
+		public VideoRequester(String devKey) {
+			this.ua = "Research-Crawler-APIDEVKEY-" + devKey;
+		}
 
 		@Override
 		public Tuple<String, String> performRequest(String crawlID) 
@@ -78,8 +77,7 @@ public class VideoAndStats implements JobExecutor {
 			BufferedReader in = null;
 			try {
 				URLConnection openConnection = u.openConnection();
-				openConnection.setRequestProperty("User-Agent", 
-						USER_AGENT);
+				openConnection.setRequestProperty("User-Agent", ua);
 				
 				openConnection.connect();
 				
@@ -108,5 +106,16 @@ public class VideoAndStats implements JobExecutor {
 				}
 			}
 		}
+	}
+
+	@Override
+	public VoidArguments configurate(Configuration configuration) {
+		long timeBetweenRequests = configuration.getLong(SLEEP_TIME);
+		String devKey = configuration.getString(DEV_KEY);
+		
+		this.throughputManager = new ThroughputManager(timeBetweenRequests);
+		this.requester = new VideoRequester(devKey);
+		
+		return null;
 	}
 }

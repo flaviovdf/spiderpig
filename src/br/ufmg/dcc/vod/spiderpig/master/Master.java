@@ -1,41 +1,44 @@
 package br.ufmg.dcc.vod.spiderpig.master;
 
 import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Logger;
 
 import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDListener;
-import br.ufmg.dcc.vod.spiderpig.distributed.worker.WorkerActor;
 import br.ufmg.dcc.vod.spiderpig.jobs.WorkerInterested;
 import br.ufmg.dcc.vod.spiderpig.master.processor.ProcessorActor;
 import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerManager;
+import br.ufmg.dcc.vod.spiderpig.master.walker.Walker;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
-import br.ufmg.dcc.vod.spiderpig.tracker.Tracker;
-import br.ufmg.dcc.vod.spiderpig.tracker.TrackerFactory;
+import br.ufmg.dcc.vod.spiderpig.worker.WorkerActor;
+
+import com.google.common.cache.Cache;
 
 public class Master implements WorkerInterested, FDListener {
 
 	private static final Logger LOG = Logger.getLogger(Master.class);
 	
-	private final Tracker<String> tracker;
+	private final Walker walker;
 	private final ProcessorActor processorActor;
 	private final WorkerManager workerManager;
 	private final StopCondition stopCondition;
-	private final ReentrantLock lock;
+	private final Cache<CrawlID, List<CrawlID>> cache;
 
-	public Master(TrackerFactory<String> trackerFactory, 
-			ProcessorActor processorActor, WorkerManager workerManager) {
-		this.tracker = trackerFactory.createTracker(String.class);
+	public Master(Walker walker, ProcessorActor processorActor, 
+			WorkerManager workerManager, Cache<CrawlID, List<CrawlID>> cache) {
+		this.walker = walker;
 		this.processorActor = processorActor;
 		this.workerManager = workerManager;
 		this.stopCondition = new StopCondition();
-		this.lock = new ReentrantLock();
+		this.cache = cache;
 	}
 	
-	public void dispatch(CrawlID crawlID) {
-		dispatch(crawlID, true);
+	public void dispatchSeed(List<CrawlID> crawlIDs) {
+		for (CrawlID crawlID : crawlIDs) {
+			dispatch(crawlID, true);
+			walker.addSeedID(crawlID);
+		}
 	}
 	
 	private void dispatch(CrawlID crawlID, boolean incrementCount) {
@@ -49,18 +52,12 @@ public class Master implements WorkerInterested, FDListener {
 		LOG.info("Received result for " + id);
 		
 		this.workerManager.freeExecutor(id);
-		try {
-			this.lock.lock();
-			this.tracker.crawled(id.getId()); //Necessary for initial crawl (seed)
-			for (CrawlID nextID : toQueue) {
-				//Returns true if obj is new to tracker, thus we dispatch it
-				if (this.tracker.crawled(nextID.getId())) { 
-					dispatch(nextID, true);
-				}
-			}
-		} finally {
-			this.lock.unlock();
+		for (CrawlID nextID : this.walker.getToWalk(id, toQueue)) {
+			dispatch(nextID, true);
 		}
+		
+		if (this.cache != null)
+			this.cache.put(id, toQueue);
 		this.stopCondition.resultReceived();
 	}
 
@@ -69,13 +66,6 @@ public class Master implements WorkerInterested, FDListener {
 		LOG.info("Received error for " + id + " cause = " + cause);
 		
 		this.workerManager.freeExecutor(id);
-		try {
-			this.lock.lock();
-			//Necessary for initial crawl (seed)
-			this.tracker.crawled(id.getId());
-		} finally {
-			this.lock.unlock();
-		}
 		this.stopCondition.errorReceived();
 	}
 
@@ -87,6 +77,7 @@ public class Master implements WorkerInterested, FDListener {
 	public void isUp(ServiceID serviceID) {
 		ServiceID workerID = ServiceID.newBuilder(serviceID)
 				.setHandle(WorkerActor.HANDLE).build();
+		LOG.info("Worker up " + workerID);
 		this.workerManager.markAvailable(workerID);
 	}
 
@@ -95,6 +86,7 @@ public class Master implements WorkerInterested, FDListener {
 		ServiceID workerID = ServiceID.newBuilder(serviceID)
 				.setHandle(WorkerActor.HANDLE).build();
 		CrawlID cid = this.workerManager.executorSuspected(workerID);
+		LOG.info("Worker suspected " + workerID);
 		if (cid != null)
 			dispatch(cid, false); //Does not count as new dispatch
 	}

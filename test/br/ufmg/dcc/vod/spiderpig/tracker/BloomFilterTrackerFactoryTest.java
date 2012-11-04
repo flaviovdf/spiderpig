@@ -17,19 +17,19 @@ public class BloomFilterTrackerFactoryTest {
 	public void testValidCreations() {
 		
 		new BloomFilterTrackerFactory<String>().createTracker(
-				String.class).crawled("oi");
+				String.class).addCrawled("oi");
 
 		new BloomFilterTrackerFactory<CharSequence>().createTracker(
-				CharSequence.class).crawled("oi");
+				CharSequence.class).addCrawled("oi");
 		
 		new BloomFilterTrackerFactory<Integer>().createTracker(
-				Integer.class).crawled(1);
+				Integer.class).addCrawled(1);
 		
 		new BloomFilterTrackerFactory<Long>().createTracker(
-				Long.class).crawled(Long.MAX_VALUE);
+				Long.class).addCrawled(Long.MAX_VALUE);
 		
 		new BloomFilterTrackerFactory<byte[]>().createTracker(
-				byte[].class).crawled(new byte[]{1, 2, 3});
+				byte[].class).addCrawled(new byte[]{1, 2, 3});
 		
 	}
 
@@ -38,7 +38,7 @@ public class BloomFilterTrackerFactoryTest {
 		
 		try {
 			new BloomFilterTrackerFactory<Exception>().createTracker(
-					Exception.class).crawled(new Exception());
+					Exception.class).addCrawled(new Exception());
 			Assert.fail();
 		} catch (InstatiationException e) {
 		}

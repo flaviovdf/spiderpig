@@ -2,8 +2,11 @@ package br.ufmg.dcc.vod.spiderpig.master.processor;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.log4j.Logger;
+
+import com.google.common.cache.Cache;
 
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
 import br.ufmg.dcc.vod.spiderpig.jobs.WorkerInterested;
@@ -17,9 +20,8 @@ import br.ufmg.dcc.vod.spiderpig.queue.QueueService;
 import br.ufmg.dcc.vod.spiderpig.queue.serializer.MessageLiteSerializer;
 
 /**
- * This abstract class defines a threaded processor, where {@value n} threads
- * will be started to dispatch jobs to be crawled. Each thread will dispatch
- * one job at a time.
+ * A processor is responsible for dispatching {@link CrawlID}s or getting
+ * cached results for speed-ups.
  * 
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
@@ -35,26 +37,37 @@ public class ProcessorActor extends Actor<CrawlID>
 	private final Resolver resolver;
 	private final WorkerInterested interested;
 	private final FileSaver saver;
+	private final Cache<CrawlID, List<CrawlID>> resultsCache;
 
 
 	public ProcessorActor(WorkerManager manager, QueueService service, 
-			Resolver resolver, WorkerInterested interested, FileSaver saver) 
+			Resolver resolver, WorkerInterested interested, FileSaver saver,
+			Cache<CrawlID, List<CrawlID>> resultsCache) 
 					throws FileNotFoundException, IOException {
 		super(HANDLE);
 		this.manager = manager;
 		this.resolver = resolver;
 		this.interested = interested;
 		this.saver = saver;
+		this.resultsCache = resultsCache;
 	}
 	
 	@Override
 	public void process(CrawlID crawlID) {
-		try {
-			ServiceID sid = this.manager.allocateAvailableExecutor(crawlID);
-			LOG.info("Sending " + crawlID + " to worker " + sid);
-			resolver.resolve(sid).crawl(crawlID, interested, saver);
-		} catch (InterruptedException e) {
-			LOG.error("Unexcpected interruption", e);
+		if (resultsCache != null) {
+			List<CrawlID> cached = resultsCache.getIfPresent(crawlID);
+			if (cached != null) {
+				interested.crawlDone(crawlID, cached);
+				LOG.info("Found " + crawlID + " in cache");
+			}
+		} else {
+			try {
+				ServiceID sid = this.manager.allocateAvailableExecutor(crawlID);
+				LOG.info("Sending " + crawlID + " to worker " + sid);
+				resolver.resolve(sid).crawl(crawlID, interested, saver);
+			} catch (InterruptedException e) {
+				LOG.error("Unexcpected interruption", e);
+			}
 		}
 	}
 

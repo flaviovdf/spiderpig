@@ -4,9 +4,9 @@ import java.net.UnknownHostException;
 import java.util.concurrent.Semaphore;
 
 import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
-import br.ufmg.dcc.vod.spiderpig.distributed.worker.WorkerActor;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
+import br.ufmg.dcc.vod.spiderpig.worker.WorkerActor;
 
 public class MultiCoreManager implements WorkerManager {
 	

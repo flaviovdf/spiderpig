@@ -1,4 +1,4 @@
-package br.ufmg.dcc.vod.spiderpig.distributed.worker;
+package br.ufmg.dcc.vod.spiderpig.worker;
 
 import java.util.List;
 

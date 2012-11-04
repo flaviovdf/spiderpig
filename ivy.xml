@@ -12,6 +12,9 @@
         <dependency org="com.google.guava" transitive="false" name="guava" rev="13.0+"/>
         <dependency org="com.google.protobuf" transitive="false" name="protobuf-java" rev="2.4+"/>
         <dependency org="junit" name="junit" transitive="false" rev="4.10+" />
+        <dependency org="commons-configuration" transitive="false" name="commons-configuration" rev="[1.9,2.0["/>
+        <dependency org="commons-lang" transitive="false" name="commons-lang" rev="2.6"/>
+        <dependency org="commons-logging" transitive="false" name="commons-logging" rev="1.1.1"/>
 
         <exclude type="javadoc" ext="jar"/>
     </dependencies>

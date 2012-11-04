@@ -1,4 +1,4 @@
-package br.ufmg.dcc.vod.spiderpig.distributed.master;
+package br.ufmg.dcc.vod.spiderpig.master;
 
 import br.ufmg.dcc.vod.spiderpig.distributed.RemoteMessageSender;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
