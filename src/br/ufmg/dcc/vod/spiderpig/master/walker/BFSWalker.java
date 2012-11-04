@@ -56,12 +56,4 @@ public class BFSWalker implements ConfigurableWalker {
 		
 		return null;
 	}
-	
-	//TODO: find a better way to create a test walker
-	public static BFSWalker getTestWalker() {
-		BFSWalker bfsWalker = new BFSWalker();
-		bfsWalker.tracker = new BloomFilterTrackerFactory<String>().
-				createTracker(String.class);
-		return bfsWalker;
-	}
 }

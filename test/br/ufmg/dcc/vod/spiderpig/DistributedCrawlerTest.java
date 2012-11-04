@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -15,6 +16,7 @@ import java.util.Set;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
+import org.apache.commons.configuration.BaseConfiguration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,9 +28,14 @@ import br.ufmg.dcc.vod.spiderpig.jobs.test.RandomizedSyncGraph;
 import br.ufmg.dcc.vod.spiderpig.jobs.test.TestFileSaver;
 import br.ufmg.dcc.vod.spiderpig.jobs.test.TestJobExecutor;
 import br.ufmg.dcc.vod.spiderpig.master.walker.BFSWalker;
-import br.ufmg.dcc.vod.spiderpig.master.walker.Walker;
+import br.ufmg.dcc.vod.spiderpig.master.walker.RandomWalker;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.queue.QueueService;
 import br.ufmg.dcc.vod.spiderpig.worker.WorkerActor;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheStats;
 
 public class DistributedCrawlerTest  extends TestCase {
 
@@ -90,7 +97,12 @@ public class DistributedCrawlerTest  extends TestCase {
 		TestFileSaver saver = new TestFileSaver();
 		
 		String host = "localhost";
-		Walker walker = BFSWalker.getTestWalker();
+		BFSWalker walker = new BFSWalker();
+		BaseConfiguration configuration = new BaseConfiguration();
+		
+		configuration.addProperty(BFSWalker.BLOOM_INSERTS, 1e6);
+		walker.configurate(configuration);
+		
 		Crawler crawler = 
 				CrawlerFactory.createDistributedCrawler(host, 4541, 
 						workerAddrs, myTempDir, saver, walker, null);
@@ -112,7 +124,12 @@ public class DistributedCrawlerTest  extends TestCase {
 		TestFileSaver saver = new TestFileSaver();
 		
 		String host = "localhost";
-		Walker walker = BFSWalker.getTestWalker();
+		BFSWalker walker = new BFSWalker();
+		BaseConfiguration configuration = new BaseConfiguration();
+		
+		configuration.addProperty(BFSWalker.BLOOM_INSERTS, 1e6);
+		walker.configurate(configuration);
+		
 		Crawler crawler = 
 				CrawlerFactory.createDistributedCrawler(host, 4542, 
 						workerAddrs, myTempDir, saver, walker, null);
@@ -133,7 +150,12 @@ public class DistributedCrawlerTest  extends TestCase {
 		TestFileSaver saver = new TestFileSaver();
 		
 		String host = "localhost";
-		Walker walker = BFSWalker.getTestWalker();
+		BFSWalker walker = new BFSWalker();
+		BaseConfiguration configuration = new BaseConfiguration();
+		
+		configuration.addProperty(BFSWalker.BLOOM_INSERTS, 1e6);
+		walker.configurate(configuration);
+		
 		Crawler crawler = 
 				CrawlerFactory.createDistributedCrawler(host, 4543, 
 						workerAddrs, myTempDir, saver, walker, null);
@@ -145,6 +167,45 @@ public class DistributedCrawlerTest  extends TestCase {
 		doTheAsserts(crawled, g);
 	}
 
+	@Test
+	public void testCrawl10ThreadsCached() throws Exception {
+		
+		RandomizedSyncGraph g = new RandomizedSyncGraph(200);
+		Set<InetSocketAddress> workerAddrs = initiateServers(10, g, 8000);
+		
+		TestFileSaver saver = new TestFileSaver();
+		
+		String host = "localhost";
+		RandomWalker walker = new RandomWalker();
+		BaseConfiguration configuration = new BaseConfiguration();
+		
+		configuration.addProperty(RandomWalker.RANDOM_SEED, 3);
+		configuration.addProperty(RandomWalker.STEPS, 50);
+		configuration.addProperty(RandomWalker.STOP_PROB, 0);
+		
+		walker.configurate(configuration);
+		
+		Cache<CrawlID, List<CrawlID>> cache;
+		cache = CacheBuilder.newBuilder()
+				.concurrencyLevel(workerAddrs.size())
+				.maximumSize(200)
+				.recordStats()
+				.build();
+		
+		Crawler crawler = 
+				CrawlerFactory.createDistributedCrawler(host, 4544, 
+						workerAddrs, myTempDir, saver, walker, cache);
+		
+		crawler.dispatch("0");
+		crawler.crawl();
+		
+		Map<Integer, byte[]> crawled = saver.getCrawled();
+		
+		CacheStats stats = cache.stats();
+		long hitCount = stats.hitCount();
+		assertEquals(50 - hitCount, crawled.size());
+	}
+	
 	
 	private void doTheAsserts(Map<Integer, byte[]> crawled, 
 			RandomizedSyncGraph g) {

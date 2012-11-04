@@ -54,13 +54,17 @@ public class ProcessorActor extends Actor<CrawlID>
 	
 	@Override
 	public void process(CrawlID crawlID) {
+		boolean inCache = false;
 		if (resultsCache != null) {
 			List<CrawlID> cached = resultsCache.getIfPresent(crawlID);
 			if (cached != null) {
 				interested.crawlDone(crawlID, cached);
+				inCache = true;
 				LOG.info("Found " + crawlID + " in cache");
 			}
-		} else {
+		}
+		
+		if (!inCache) {
 			try {
 				ServiceID sid = this.manager.allocateAvailableExecutor(crawlID);
 				LOG.info("Sending " + crawlID + " to worker " + sid);
