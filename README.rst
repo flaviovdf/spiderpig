@@ -33,10 +33,23 @@ This package contains the common code for:
     * Caching
         * Some walkers revist node (such as random walk). Caching aliviates requests to servers in these cases
 
+To really crawl content individual *Jobs* should be implemented.
+
+personal notes
+--------------
+
+- Metropolis Hasting Random Walk performs as good as a normal random walk with posterior correction,
+  thus no need to implement this - See http://goo.gl/emv1U.
+- For directed graphs (say twitter) some id generation is needed for efficient crawling - 
+   See http://goo.gl/9Rd7H
+- Instead of performing jumps, if some search engine backs up the service this is a good alternative
+   Baz-Yossef 2006 - http://goo.gl/kvI0h. You need to create a Job which does the search engne queries and
+   use the random walker.
+
 Since metropolis hasting performs as good as basic random walks with posterior
 correction we decided to implement only random walks. 
 
-To really crawl content individual *Jobs* should be implemented.
+
 
 dependecies
 -----------
