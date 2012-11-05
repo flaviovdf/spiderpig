@@ -1,32 +1,42 @@
 package br.ufmg.dcc.vod.spiderpig.common;
 
-import java.io.IOException;
-
+import org.apache.commons.configuration.Configuration;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.DailyRollingFileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
+import br.ufmg.dcc.vod.spiderpig.common.config.Configurable;
+import br.ufmg.dcc.vod.spiderpig.common.config.VoidArguments;
+
 /**
  * Configures Log4J Logger 
  * 
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
-public class LoggerInitiator {
+public class LoggerInitiator implements Configurable<VoidArguments> {
 
-	/**
-	 * Sets the basic configurations for our logger
-	 * 
-	 * @param logPath File which will be used for logging
-	 * @throws IOException
-	 */
-	public static void initiateLog(String logPath) throws IOException {
-		System.setProperty("log4j.disable", "DEBUG");
+	public static final String LOG_FILE = "log.logfile";
+	public static final String LOG_LEVEL = "log.level";
+	
+	public LoggerInitiator() {
+		Logger.getRootLogger().setLevel(Level.OFF);
+	}
+	
+	@Override
+	public VoidArguments configurate(Configuration configuration)
+			throws Exception {
+		String logPath = configuration.getString(LOG_FILE);
+		String logLevel = configuration.getString(LOG_LEVEL);
+		
+		Level level = Level.toLevel(logLevel);
 		BasicConfigurator.configure(new DailyRollingFileAppender(
 				new PatternLayout("%d [%t] %-5p %c - %m%n"), logPath, 
 				"'.'yyyy-MM-dd"));
-		Logger.getRootLogger().setLevel(Level.INFO);
+		Logger.getRootLogger().setLevel(level);
+		
+		return VoidArguments.defaultInstance();
 	}
 	
 }

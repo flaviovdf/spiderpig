@@ -19,6 +19,7 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
 
 import br.ufmg.dcc.vod.spiderpig.common.Constants;
+import br.ufmg.dcc.vod.spiderpig.common.LoggerInitiator;
 
 public abstract class Command {
 
@@ -27,10 +28,10 @@ public abstract class Command {
 		CMDS.put("worker_up", new WorkerUP());
 		CMDS.put("master_up", new MasterUP());
 		CMDS.put("worker_kill", new WorkerKill());
-		CMDS.put("worker_status", new WorkerKill());
+		CMDS.put("worker_status", new WorkerStatus());
 	}
 	
-	public abstract void exec(Configuration cli) throws Exception;
+	public abstract void exec(Configuration configuration) throws Exception;
 	
 	@SuppressWarnings("static-access")
 	private static Options getOptions() {
@@ -110,7 +111,12 @@ public abstract class Command {
 				throw new IOException("Unable to find configuration file " 
 							+configFile);
 			
-			command.exec(new PropertiesConfiguration(configFile));
+			LoggerInitiator loggerInitiator = new LoggerInitiator();
+			PropertiesConfiguration props = 
+					new PropertiesConfiguration(configFile);
+			loggerInitiator.configurate(props);
+			
+			command.exec(props);
 		} catch (Exception e) {
 			HelpFormatter hf = new HelpFormatter();
 			hf.printHelp(Constants.CMD_LINE + " " + CMDS.keySet(), opts);

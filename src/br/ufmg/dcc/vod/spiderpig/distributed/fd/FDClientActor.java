@@ -75,13 +75,17 @@ public class FDClientActor extends Actor<PingPong>
 		return ping;
 	}
 	
-	public void watch(ServiceID serviceID) {
+	public void watch(ServiceID serviceID, boolean considerAsUp) {
 		try {
 			this.lock.lock();
 			FDStruct struct = this.monitoring.get(serviceID);
 			if (struct == null) {
 				Stopwatch stopwatch = new Stopwatch();
 				struct = new FDStruct(stopwatch);
+				
+				if (considerAsUp)
+					struct.down = false;
+				
 				this.monitoring.put(serviceID, struct);
 				stopwatch.start();
 			}

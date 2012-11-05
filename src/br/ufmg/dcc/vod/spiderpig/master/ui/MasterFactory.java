@@ -15,7 +15,6 @@ import org.apache.commons.configuration.Configuration;
 import br.ufmg.dcc.vod.spiderpig.Crawler;
 import br.ufmg.dcc.vod.spiderpig.CrawlerFactory;
 import br.ufmg.dcc.vod.spiderpig.common.FileUtil;
-import br.ufmg.dcc.vod.spiderpig.common.LoggerInitiator;
 import br.ufmg.dcc.vod.spiderpig.common.config.Configurable;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaverImpl;
@@ -29,7 +28,6 @@ public class MasterFactory implements Configurable<MasterArguments> {
 
 	public static final String HOSTNAME = "service.hostname";
 	public static final String PORT = "service.port";
-	public static final String LOG_FILE = "log.logfile";
 	
 	public static final String WORKERS = "master.workersfile";
 	public static final String SAVE_FOLDER = "master.savefolder";
@@ -65,8 +63,6 @@ public class MasterFactory implements Configurable<MasterArguments> {
 	@Override
 	public MasterArguments configurate(Configuration configuration)
 			throws Exception {
-		
-		LoggerInitiator.initiateLog(configuration.getString(LOG_FILE));
 		
 		String hostname = configuration.getString(HOSTNAME);
 		int port = configuration.getInt(PORT);

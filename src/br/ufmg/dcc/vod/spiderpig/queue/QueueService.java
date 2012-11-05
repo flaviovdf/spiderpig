@@ -248,7 +248,10 @@ public class QueueService {
 	
 	public void waitUntilWorkIsDoneAndStop(int secondsBetweenChecks) {
 		waitUntilWorkIsDone(secondsBetweenChecks);
-		
+		stop();
+	}
+
+	private void stop() {
 		try {
 			for (ServiceStruct<?> struct : ids.values()) {
 				MonitoredSyncQueue m = struct.queue;
@@ -306,10 +309,16 @@ public class QueueService {
 		}
 	}
 	
-	MessageLiteSerializer<?> getSerializer(String handle) {
+	MessageLiteSerializer<?> getSerializer(String handle) throws IOException {
 		try {
 			this.lock.readLock().lock();
-			return this.ids.get(handle).actor.newMsgSerializer();
+			ServiceStruct<?> serviceStruct = this.ids.get(handle);
+			
+			if (serviceStruct == null) {
+				throw new IOException("Unknown handle " + handle);
+			}
+			
+			return serviceStruct.actor.newMsgSerializer();
 		} finally {
 			this.lock.readLock().unlock();
 		}

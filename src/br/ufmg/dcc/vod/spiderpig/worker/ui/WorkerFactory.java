@@ -4,7 +4,6 @@ import java.lang.reflect.Constructor;
 
 import org.apache.commons.configuration.Configuration;
 
-import br.ufmg.dcc.vod.spiderpig.common.LoggerInitiator;
 import br.ufmg.dcc.vod.spiderpig.common.config.Configurable;
 import br.ufmg.dcc.vod.spiderpig.distributed.RemoteMessageSender;
 import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDServerActor;
@@ -17,14 +16,11 @@ public class WorkerFactory implements Configurable<WorkerArguments> {
 
 	public static final String HOSTNAME = "service.hostname";
 	public static final String PORT = "service.port";
-	public static final String LOG_FILE = "log.logfile";
 	public static final String JOB = "worker.job";
 
 	@Override
 	public WorkerArguments configurate(Configuration configuration) 
 			throws Exception {
-		
-		LoggerInitiator.initiateLog(configuration.getString(LOG_FILE));
 		
 		String hostname = configuration.getString(HOSTNAME);
 		int port = configuration.getInt(PORT);

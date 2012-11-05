@@ -133,7 +133,7 @@ public class FDClientActorTest {
 		QueueService service = new QueueService("localhost", 4000);
 		actor.withSimpleQueue(service).startProcessors(1);
 		for (ServiceID serviceID : toMonitor)
-			actor.watch(serviceID);
+			actor.watch(serviceID, false);
 		
 		actor.startTimer();
 		upLatch.await();
@@ -160,7 +160,7 @@ public class FDClientActorTest {
 		QueueService service = new QueueService("localhost", 4001);
 		actor.withSimpleQueue(service).startProcessors(1);
 		for (ServiceID serviceID : toMonitor)
-			actor.watch(serviceID);
+			actor.watch(serviceID, false);
 		
 		actor.startTimer();
 		
@@ -189,7 +189,7 @@ public class FDClientActorTest {
 		QueueService service = new QueueService("localhost", 4002);
 		actor.withSimpleQueue(service).startProcessors(1);
 		for (ServiceID serviceID : toMonitor)
-			actor.watch(serviceID);
+			actor.watch(serviceID, false);
 		
 		actor.startTimer();
 		
@@ -225,7 +225,7 @@ public class FDClientActorTest {
 		QueueService service = new QueueService("localhost", 4003);
 		actor.withSimpleQueue(service).startProcessors(1);
 		for (ServiceID serviceID : toMonitor)
-			actor.watch(serviceID);
+			actor.watch(serviceID, false);
 		
 		actor.startTimer();
 		
@@ -269,7 +269,7 @@ public class FDClientActorTest {
 		QueueService service = new QueueService("localhost", 4004);
 		actor.withSimpleQueue(service).startProcessors(1);
 		for (ServiceID serviceID : toMonitor)
-			actor.watch(serviceID);
+			actor.watch(serviceID, false);
 		
 		actor.startTimer();
 		
