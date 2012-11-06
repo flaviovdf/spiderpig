@@ -1,10 +1,13 @@
 package br.ufmg.dcc.vod.spiderpig.worker.ui;
 
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 
-import br.ufmg.dcc.vod.spiderpig.common.config.Configurable;
+import br.ufmg.dcc.vod.spiderpig.common.config.AbstractConfigurable;
 import br.ufmg.dcc.vod.spiderpig.distributed.RemoteMessageSender;
 import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDServerActor;
 import br.ufmg.dcc.vod.spiderpig.distributed.fd.KillerActor;
@@ -12,14 +15,14 @@ import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableJobExecutor;
 import br.ufmg.dcc.vod.spiderpig.queue.QueueService;
 import br.ufmg.dcc.vod.spiderpig.worker.WorkerActor;
 
-public class WorkerFactory implements Configurable<WorkerArguments> {
+public class WorkerFactory extends AbstractConfigurable<Worker> {
 
 	public static final String HOSTNAME = "service.hostname";
 	public static final String PORT = "service.port";
 	public static final String JOB = "worker.job";
 
 	@Override
-	public WorkerArguments configurate(Configuration configuration) 
+	public Worker realConfigurate(Configuration configuration) 
 			throws Exception {
 		
 		String hostname = configuration.getString(HOSTNAME);
@@ -45,6 +48,11 @@ public class WorkerFactory implements Configurable<WorkerArguments> {
 		FDServerActor fdServerActor = new FDServerActor(sender);
 		fdServerActor.withSimpleQueue(service);
 		
-		return new WorkerArguments(workerActor, killerActor, fdServerActor);
+		return new Worker(workerActor, killerActor, fdServerActor);
+	}
+
+	@Override
+	public Set<String> getRequiredParameters() {
+		return new HashSet<>(Arrays.asList(HOSTNAME, PORT, JOB));
 	}
 }

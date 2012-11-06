@@ -1,11 +1,14 @@
 package br.ufmg.dcc.vod.spiderpig.master.walker;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 
-import br.ufmg.dcc.vod.spiderpig.common.config.VoidArguments;
+import br.ufmg.dcc.vod.spiderpig.common.config.AbstractConfigurable;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.tracker.BloomFilterTrackerFactory;
 import br.ufmg.dcc.vod.spiderpig.tracker.Tracker;
@@ -18,7 +21,8 @@ import br.ufmg.dcc.vod.spiderpig.tracker.Tracker;
  * 
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
-public class EGONetWalker implements ConfigurableWalker {
+public class EGONetWalker extends AbstractConfigurable<Void> 
+		implements ConfigurableWalker {
 
 	public static final String BLOOM_INSERTS = 
 			"master.walkstrategy.bfs.bloomfilter_expected_inserts";
@@ -71,7 +75,7 @@ public class EGONetWalker implements ConfigurableWalker {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public synchronized VoidArguments configurate(Configuration configuration) {
+	public synchronized Void realConfigurate(Configuration configuration) {
 		
 		int numEgoNets = configuration.getInt(NUM_NETS) + 1;
 		
@@ -86,4 +90,8 @@ public class EGONetWalker implements ConfigurableWalker {
 		return null;
 	}
 
+	@Override
+	public Set<String> getRequiredParameters() {
+		return new HashSet<String>(Arrays.asList(BLOOM_INSERTS, NUM_NETS));
+	}
 }

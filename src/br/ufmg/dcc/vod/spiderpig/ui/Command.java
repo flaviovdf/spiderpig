@@ -46,12 +46,6 @@ public abstract class Command {
 				.withDescription("configuration file")
 				.create("c"));
 
-		opts.addOption(OptionBuilder
-				.withArgName("jar-file")
-				.hasArg()
-				.withDescription("jar file to load additional resources")
-				.create("j"));
-		
 		return opts;
 	}
 	
@@ -85,8 +79,6 @@ public abstract class Command {
 		}
 		
 		Options opts = getOptions();
-		opts.addOption(new Option("help", "print this message"));
-		opts.addOption(new Option("version", "print version info"));
 
 		for (String opt : shifted)
 			if (opt.equals("help") || opt.equals("-help")) {

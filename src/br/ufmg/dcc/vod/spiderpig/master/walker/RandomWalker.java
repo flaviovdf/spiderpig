@@ -2,13 +2,15 @@ package br.ufmg.dcc.vod.spiderpig.master.walker;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.configuration.Configuration;
 
-import br.ufmg.dcc.vod.spiderpig.common.config.VoidArguments;
+import br.ufmg.dcc.vod.spiderpig.common.config.AbstractConfigurable;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
 /**
@@ -17,7 +19,8 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
  * 
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
-public class RandomWalker implements ConfigurableWalker {
+public class RandomWalker extends AbstractConfigurable<Void> 
+		implements ConfigurableWalker {
 
 	public static final String STEPS = "master.walkstrategy.rw.steps";
 	public static final String STOP_PROB = "master.walkstrategy.rw.stopprob";
@@ -50,7 +53,7 @@ public class RandomWalker implements ConfigurableWalker {
 	}
 	
 	@Override
-	public VoidArguments configurate(Configuration configuration) {
+	public Void realConfigurate(Configuration configuration) {
 		this.stopProbability = configuration.getDouble(STOP_PROB);
 		
 		long seed = configuration.getLong(RANDOM_SEED);
@@ -64,4 +67,9 @@ public class RandomWalker implements ConfigurableWalker {
 		return null;
 	}
 
+	@Override
+	public Set<String> getRequiredParameters() {
+		return new HashSet<String>(Arrays.asList(STEPS, STOP_PROB, 
+				RANDOM_SEED));
+	}
 }

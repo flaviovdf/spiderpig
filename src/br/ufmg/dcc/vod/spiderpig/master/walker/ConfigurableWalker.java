@@ -1,7 +1,6 @@
 package br.ufmg.dcc.vod.spiderpig.master.walker;
 
 import br.ufmg.dcc.vod.spiderpig.common.config.Configurable;
-import br.ufmg.dcc.vod.spiderpig.common.config.VoidArguments;
 
 /**
  * Interface which make's {@link Walker}s configurable via the 
@@ -10,6 +9,6 @@ import br.ufmg.dcc.vod.spiderpig.common.config.VoidArguments;
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
 public interface ConfigurableWalker 
-		extends Walker, Configurable<VoidArguments> {
+		extends Walker, Configurable<Void> {
 
 }

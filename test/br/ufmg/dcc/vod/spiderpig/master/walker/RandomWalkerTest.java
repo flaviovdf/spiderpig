@@ -13,7 +13,7 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 public class RandomWalkerTest {
 
 	@Test
-	public void testProb0() {
+	public void testProb0() throws Exception {
 		RandomWalker walker = new RandomWalker();
 		BaseConfiguration configuration = new BaseConfiguration();
 		
@@ -47,7 +47,7 @@ public class RandomWalkerTest {
 	}
 	
 	@Test
-	public void testProb1() {
+	public void testProb1() throws Exception {
 		RandomWalker walker = new RandomWalker();
 		BaseConfiguration configuration = new BaseConfiguration();
 		

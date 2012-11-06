@@ -13,7 +13,7 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 public class BFSWalkerTest {
 
 	@Test
-	public void testAll() {
+	public void testAll() throws Exception {
 		
 		BFSWalker walker = new BFSWalker();
 		BaseConfiguration configuration = new BaseConfiguration();

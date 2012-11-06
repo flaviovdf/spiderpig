@@ -56,7 +56,6 @@ public class Crawler {
 	}
 	
 	public void crawl() {
-		System.out.println("Starting Crawler");
 		LOG.info("Starting Crawler");
 
 		//Starting Processors
@@ -75,8 +74,6 @@ public class Crawler {
 		} catch (InterruptedException e) {
 		}
 		
-		LOG.info("Done! Stopping");
-		System.out.println("Done! Stopping");
 		LOG.info("Crawl done!");
 	}
 }

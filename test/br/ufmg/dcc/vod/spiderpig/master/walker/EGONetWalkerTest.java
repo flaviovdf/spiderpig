@@ -13,7 +13,7 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 public class EGONetWalkerTest {
 
 	@Test
-	public void testOneLevel() {
+	public void testOneLevel() throws Exception {
 		EGONetWalker walker = new EGONetWalker();
 		BaseConfiguration configuration = new BaseConfiguration();
 		
@@ -49,7 +49,7 @@ public class EGONetWalkerTest {
 	}
 
 	@Test
-	public void testZeroLevel() {
+	public void testZeroLevel() throws Exception {
 		EGONetWalker walker = new EGONetWalker();
 		BaseConfiguration configuration = new BaseConfiguration();
 		
@@ -76,7 +76,7 @@ public class EGONetWalkerTest {
 	}
 	
 	@Test
-	public void testTwoLevel() {
+	public void testTwoLevel() throws Exception {
 		EGONetWalker walker = new EGONetWalker();
 		BaseConfiguration configuration = new BaseConfiguration();
 		

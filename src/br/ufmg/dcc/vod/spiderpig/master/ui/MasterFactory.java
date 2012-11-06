@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -15,7 +16,7 @@ import org.apache.commons.configuration.Configuration;
 import br.ufmg.dcc.vod.spiderpig.Crawler;
 import br.ufmg.dcc.vod.spiderpig.CrawlerFactory;
 import br.ufmg.dcc.vod.spiderpig.common.FileUtil;
-import br.ufmg.dcc.vod.spiderpig.common.config.Configurable;
+import br.ufmg.dcc.vod.spiderpig.common.config.AbstractConfigurable;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaverImpl;
 import br.ufmg.dcc.vod.spiderpig.master.walker.ConfigurableWalker;
@@ -24,7 +25,7 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
-public class MasterFactory implements Configurable<MasterArguments> {
+public class MasterFactory extends AbstractConfigurable<Crawler> {
 
 	public static final String HOSTNAME = "service.hostname";
 	public static final String PORT = "service.port";
@@ -61,9 +62,15 @@ public class MasterFactory implements Configurable<MasterArguments> {
 	}
 	
 	@Override
-	public MasterArguments configurate(Configuration configuration)
+	public Set<String> getRequiredParameters() {
+		return new HashSet<>(Arrays.asList(HOSTNAME, PORT, WORKERS,
+				SAVE_FOLDER, QUEUE_FOLDER, SEED_FILE, CACHE_ENABLED,
+				CACHE_SIZE, WALK_STRATEGY));
+	}
+
+	@Override
+	public Crawler realConfigurate(Configuration configuration)
 			throws Exception {
-		
 		String hostname = configuration.getString(HOSTNAME);
 		int port = configuration.getInt(PORT);
 		
@@ -112,8 +119,8 @@ public class MasterFactory implements Configurable<MasterArguments> {
 		Crawler crawler = 
 				CrawlerFactory.createDistributedCrawler(hostname, port, 
 					workerAddrs, queueFolder, saver, walker, cache);
-		
-		return new MasterArguments(crawler, seed);
+		crawler.dispatch(seed);
+		return crawler;
 	}
 
 }

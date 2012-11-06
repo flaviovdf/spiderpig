@@ -1,5 +1,7 @@
 package br.ufmg.dcc.vod.spiderpig.common.config;
 
+import java.util.Set;
+
 import org.apache.commons.configuration.Configuration;
 
 /**
@@ -11,11 +13,14 @@ import org.apache.commons.configuration.Configuration;
  *       to a single configuration. I'll keep it like this for now.
  * 
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
+ * 
+ * @param <T> Return value of the configurable
  */
-public interface Configurable<T extends Arguments> {
+public interface Configurable<T> {
 
 	/**
-	 * Parses the configuration and returns objects as {@link Arguments}
+	 * Parses the configuration and returns objects which were 
+	 * configurated.
 	 * 
 	 * @param configuration Configuration to parse
 	 * 
@@ -24,5 +29,12 @@ public interface Configurable<T extends Arguments> {
 	 * @throws Exception if unable to parse configuration.
 	 */
 	public T configurate(Configuration configuration) throws Exception;
+	
+	/**
+	 * Get's the set of required parameters for configurating this class
+	 * 
+	 * @return Set of parameters names
+	 */
+	public Set<String> getRequiredParameters();
 	
 }
