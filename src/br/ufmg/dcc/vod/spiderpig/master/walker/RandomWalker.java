@@ -1,7 +1,7 @@
 package br.ufmg.dcc.vod.spiderpig.master.walker;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -37,11 +37,11 @@ public class RandomWalker extends AbstractConfigurable<Void>
 	
 	@Override
 	public List<CrawlID> getToWalk(CrawlID crawled, List<CrawlID> links) {
-		double pStop = Math.random();
+		double pStop = this.random.nextDouble();
 		this.steps.incrementAndGet();
 		if (links == null || links.isEmpty() || 
 				this.steps.get() == this.maxSteps || pStop < stopProbability) {
-			return new ArrayList<>();
+			return Collections.emptyList();
 		} else {
 			int rand = this.random.nextInt(links.size());
 			return Arrays.asList(links.get(rand));

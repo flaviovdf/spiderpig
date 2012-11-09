@@ -81,7 +81,7 @@ public class VideoAndStats extends AbstractConfigurable<Void>
 			String today = year +  "%2F" + month + "%2F" + day;
 			
 			URL statsUrl = new URL("http://vimeo.com/stats?action=clip" +
-					"&start_date=2007%2F01%2F01" +
+					"&start_date=2000%2F01%2F01" +
 					"&end_date=" + today +
 					"&clip_id=" + crawlID);
 			byte[] statsHtml = this.jsonGetter.getHtml(statsUrl, header, footer);

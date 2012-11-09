@@ -10,8 +10,6 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
  * of ids to be queued for crawling based on the result of a previous crawled
  * id. 
  * 
- * Implementations of this class are thread safe. 
- * 
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
 public interface Walker {

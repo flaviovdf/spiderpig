@@ -20,6 +20,7 @@ import br.ufmg.dcc.vod.spiderpig.common.config.AbstractConfigurable;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaverImpl;
 import br.ufmg.dcc.vod.spiderpig.master.walker.ConfigurableWalker;
+import br.ufmg.dcc.vod.spiderpig.master.walker.ThreadSafeWalker;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
 import com.google.common.cache.Cache;
@@ -100,8 +101,8 @@ public class MasterFactory extends AbstractConfigurable<Crawler> {
 				.getConstructor();
 		ConfigurableWalker walker = 
 				(ConfigurableWalker) constructor.newInstance();
-		
-		walker.configurate(configuration);
+		ThreadSafeWalker threadSafeWalker = new ThreadSafeWalker(walker);
+		threadSafeWalker.configurate(configuration);
 		
 		//Cache
 		boolean cacheEnabled = configuration.getBoolean(CACHE_ENABLED);
@@ -118,7 +119,7 @@ public class MasterFactory extends AbstractConfigurable<Crawler> {
 		//Finally, create crawler.
 		Crawler crawler = 
 				CrawlerFactory.createDistributedCrawler(hostname, port, 
-					workerAddrs, queueFolder, saver, walker, cache);
+					workerAddrs, queueFolder, saver, threadSafeWalker, cache);
 		crawler.dispatch(seed);
 		return crawler;
 	}

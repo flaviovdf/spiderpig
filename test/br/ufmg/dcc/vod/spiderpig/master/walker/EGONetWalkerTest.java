@@ -17,7 +17,7 @@ public class EGONetWalkerTest {
 		EGONetWalker walker = new EGONetWalker();
 		BaseConfiguration configuration = new BaseConfiguration();
 		
-		configuration.addProperty(EGONetWalker.BLOOM_INSERTS, 100);
+		configuration.addProperty(BFSWalker.BLOOM_INSERTS, 100);
 		configuration.addProperty(EGONetWalker.NUM_NETS, 1);
 		walker.configurate(configuration);
 		
@@ -53,7 +53,7 @@ public class EGONetWalkerTest {
 		EGONetWalker walker = new EGONetWalker();
 		BaseConfiguration configuration = new BaseConfiguration();
 		
-		configuration.addProperty(EGONetWalker.BLOOM_INSERTS, 100);
+		configuration.addProperty(BFSWalker.BLOOM_INSERTS, 100);
 		configuration.addProperty(EGONetWalker.NUM_NETS, 0);
 		walker.configurate(configuration);
 		
@@ -80,7 +80,7 @@ public class EGONetWalkerTest {
 		EGONetWalker walker = new EGONetWalker();
 		BaseConfiguration configuration = new BaseConfiguration();
 		
-		configuration.addProperty(EGONetWalker.BLOOM_INSERTS, 100);
+		configuration.addProperty(BFSWalker.BLOOM_INSERTS, 100);
 		configuration.addProperty(EGONetWalker.NUM_NETS, 2);
 		walker.configurate(configuration);
 		

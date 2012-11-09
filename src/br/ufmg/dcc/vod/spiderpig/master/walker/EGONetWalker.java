@@ -24,15 +24,12 @@ import br.ufmg.dcc.vod.spiderpig.tracker.Tracker;
 public class EGONetWalker extends AbstractConfigurable<Void> 
 		implements ConfigurableWalker {
 
-	public static final String BLOOM_INSERTS = 
-			"master.walkstrategy.bfs.bloomfilter_expected_inserts";
 	public static final String NUM_NETS = "master.walkstrategy.ego.nets";
 	
 	private Tracker<String>[] trackers;
 
 	@Override
-	public synchronized List<CrawlID> getToWalk(CrawlID crawled, 
-			List<CrawlID> links) {
+	public List<CrawlID> getToWalk(CrawlID crawled, List<CrawlID> links) {
 		
 		int crawlIDLayer = -1;
 		for (int i = 0; i < trackers.length; i++) {
@@ -69,17 +66,17 @@ public class EGONetWalker extends AbstractConfigurable<Void>
 	}
 
 	@Override
-	public synchronized void addSeedID(CrawlID seed) {
+	public void addSeedID(CrawlID seed) {
 		this.trackers[0].addCrawled(seed.getId());
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public synchronized Void realConfigurate(Configuration configuration) {
+	public Void realConfigurate(Configuration configuration) {
 		
 		int numEgoNets = configuration.getInt(NUM_NETS) + 1;
 		
-		int expectedInserts = configuration.getInt(BLOOM_INSERTS);
+		int expectedInserts = configuration.getInt(BFSWalker.BLOOM_INSERTS);
 		BloomFilterTrackerFactory<String> factory = 
 				new BloomFilterTrackerFactory<String>(expectedInserts);
 		
@@ -92,6 +89,7 @@ public class EGONetWalker extends AbstractConfigurable<Void>
 
 	@Override
 	public Set<String> getRequiredParameters() {
-		return new HashSet<String>(Arrays.asList(BLOOM_INSERTS, NUM_NETS));
+		return new HashSet<String>(Arrays.asList(BFSWalker.BLOOM_INSERTS, 
+				NUM_NETS));
 	}
 }
