@@ -44,7 +44,6 @@ public class VideoAndStats extends AbstractConfigurable<Void>
 			LOG.error("Error at id " + id, e);
 			interested.crawlError(id, e.toString());
 		}
-
 	}
 
 	private static class VideoRequester 

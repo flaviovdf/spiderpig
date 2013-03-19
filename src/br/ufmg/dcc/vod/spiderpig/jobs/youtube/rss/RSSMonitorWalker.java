@@ -1,4 +1,4 @@
-package br.ufmg.dcc.vod.spiderpig.master.walker.feed;
+package br.ufmg.dcc.vod.spiderpig.jobs.youtube.rss;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -11,6 +11,7 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.log4j.Logger;
 
 import br.ufmg.dcc.vod.spiderpig.common.config.AbstractConfigurable;
+import br.ufmg.dcc.vod.spiderpig.jobs.Requester;
 import br.ufmg.dcc.vod.spiderpig.jobs.ThroughputManager;
 import br.ufmg.dcc.vod.spiderpig.master.walker.ConfigurableWalker;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
@@ -24,7 +25,6 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 	
 	public static final String MAX_MONITOR = "master.walkstrategy.rss.max";
 	public static final String TIME_BETWEEN = "master.walkstrategy.rss.time";
-	public static final String FEED_PARSER = "master.walkstrategy.rss.parser";
 	
 	private HashSet<CrawlID> memorySet;
 	private List<CrawlID> toCrawlList;
@@ -32,7 +32,6 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 	private CrawlID feed;
 	private long timeBetween;
 	private ThroughputManager throughputManager;
-	private FeedParser parser;
 	
 	public RSSMonitorWalker() {
 		this.memorySet = new HashSet<>();
@@ -41,7 +40,6 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 		this.feed = null;
 		this.timeBetween = 0;
 		this.throughputManager = null;
-		this.parser = null;
 	}
 	
 	@Override
@@ -56,7 +54,14 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 			
 			try {
 				List<CrawlID> links = this.throughputManager.sleepAndPerform(
-						this.feed.getId(), this.parser);
+						this.feed.getId(), new Requester<List<CrawlID>>() {
+							@Override
+							public List<CrawlID> performRequest(String crawlID)
+									throws Exception {
+								return null;
+							}
+						});
+				
 				this.memorySet.addAll(links);
 				this.toCrawlList = ImmutableList.copyOf(this.memorySet);
 			} catch (Exception e) {
@@ -74,8 +79,7 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 
 	@Override
 	public Set<String> getRequiredParameters() {
-		return new HashSet<String>(Arrays.asList(MAX_MONITOR, TIME_BETWEEN,
-				FEED_PARSER));
+		return new HashSet<String>(Arrays.asList(MAX_MONITOR, TIME_BETWEEN));
 	}
 
 	@Override
@@ -85,14 +89,10 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 		this.timeBetween = configuration.getLong(TIME_BETWEEN);
 		this.throughputManager = new ThroughputManager(this.timeBetween);
 		
-		String parserClass = configuration.getString(FEED_PARSER);
-		Constructor<?> constructor = Class.forName(parserClass)
-				.getConstructor();
-		
-		FeedParser parser = 
-				(FeedParser) constructor.newInstance();
-		
-		this.parser = parser;
+//		FeedParser parser = 
+//				(FeedParser) constructor.newInstance();
+//		
+//		this.parser = parser;
 		
 		return null;
 	}

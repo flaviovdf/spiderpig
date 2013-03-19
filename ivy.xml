@@ -15,9 +15,8 @@
         <dependency org="commons-configuration" transitive="false" name="commons-configuration" rev="[1.9,2.0["/>
         <dependency org="commons-lang" transitive="false" name="commons-lang" rev="2.6"/>
         <dependency org="commons-logging" transitive="false" name="commons-logging" rev="1.1.1"/>
-        <dependency org="com.google.api-client" transitive="true" name="google-api-client" rev="1.13.2-beta">
-            <exclude name='guava-jdk5' />
-        </dependency>
+        <dependency org="com.google.code.gson" name="gson" rev="2.2.2+" />
+        <dependency org="javax.mail" name="mail" rev="1.4+" />
         <exclude type="javadoc" ext="jar"/>
     </dependencies>
 </ivy-module>
