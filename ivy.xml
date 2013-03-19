@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-     Ivy build file for the vod-crawler
+     Ivy build file for spiderpig
 -->
 
 <ivy-module version="2.0">
@@ -15,7 +15,9 @@
         <dependency org="commons-configuration" transitive="false" name="commons-configuration" rev="[1.9,2.0["/>
         <dependency org="commons-lang" transitive="false" name="commons-lang" rev="2.6"/>
         <dependency org="commons-logging" transitive="false" name="commons-logging" rev="1.1.1"/>
-
+        <dependency org="com.google.api-client" transitive="true" name="google-api-client" rev="1.13.2-beta">
+            <exclude name='guava-jdk5' />
+        </dependency>
         <exclude type="javadoc" ext="jar"/>
     </dependencies>
 </ivy-module>
