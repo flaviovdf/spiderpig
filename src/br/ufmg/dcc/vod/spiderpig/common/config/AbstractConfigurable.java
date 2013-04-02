@@ -22,7 +22,8 @@ public abstract class AbstractConfigurable<T> implements Configurable<T> {
 		while (keys.hasNext()) {
 			String key = keys.next();
 			if (!getRequiredParameters().contains(key))
-				throw new ConfigurationException("Required key not found");
+				throw new ConfigurationException("Required key " + key + 
+						" not found");
 		}
 		
 		return realConfigurate(configuration);
