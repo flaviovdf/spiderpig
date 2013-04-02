@@ -90,7 +90,7 @@ public class MasterFactory extends AbstractConfigurable<Crawler> {
 		Set<InetSocketAddress> workerAddrs = interpret(serverFile);
 		
 		//Create saver
-		FileSaver saver = new FileSaverImpl(saveFolder.getAbsolutePath());
+		FileSaver saver = new FileSaverImpl(saveFolder.getAbsolutePath(), true);
 		
 		//Get seed
 		List<String> seed = FileUtil.readFileToList(seedFile);

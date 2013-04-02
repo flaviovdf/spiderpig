@@ -37,6 +37,10 @@ Ant build file for spiderpig
             <fileset dir="${lib.dir}">
                 <include name="**/*.jar"/>
             </fileset>
+            
+            <fileset dir="${lib-static.dir}">
+                <include name="**/*.jar"/>
+            </fileset>
         </path>
 
         <javac srcdir="${src.dir}:${test.dir}:${src.gen.dir}"

@@ -49,7 +49,7 @@ public class FileSaverUnitTest {
 	@Test
 	public void testAll() throws Exception {
 		File tmp = Files.createTempDir();
-		FileSaverImpl impl = new FileSaverImpl(tmp.getAbsolutePath());
+		FileSaverImpl impl = new FileSaverImpl(tmp.getAbsolutePath(), false);
 		
 		SynchronousQueue<Object> waitQueue = new SynchronousQueue<>();
 		

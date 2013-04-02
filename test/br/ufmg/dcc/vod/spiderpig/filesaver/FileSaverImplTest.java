@@ -19,7 +19,7 @@ public class FileSaverImplTest {
 	@Test
 	public void testSave() throws IOException {
 		File tmp = Files.createTempDir();
-		FileSaverImpl impl = new FileSaverImpl(tmp.getAbsolutePath());
+		FileSaverImpl impl = new FileSaverImpl(tmp.getAbsolutePath(), false);
 
 		impl.save("bah", "oi\nquer\ntc".getBytes());
 		

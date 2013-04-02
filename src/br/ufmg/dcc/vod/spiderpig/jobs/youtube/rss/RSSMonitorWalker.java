@@ -1,6 +1,6 @@
 package br.ufmg.dcc.vod.spiderpig.jobs.youtube.rss;
 
-import java.lang.reflect.Constructor;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -17,21 +17,32 @@ import br.ufmg.dcc.vod.spiderpig.master.walker.ConfigurableWalker;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gdata.client.youtube.YouTubeService;
+import com.google.gdata.data.Link;
+import com.google.gdata.data.youtube.VideoEntry;
+import com.google.gdata.data.youtube.VideoFeed;
 
 public class RSSMonitorWalker extends AbstractConfigurable<Void> 
 	implements ConfigurableWalker {
 
 	private static final Logger LOG = Logger.getLogger(RSSMonitorWalker.class);
 	
-	public static final String MAX_MONITOR = "master.walkstrategy.rss.max";
-	public static final String TIME_BETWEEN = "master.walkstrategy.rss.time";
+	public static final String MAX_MONITOR = 
+			"master.walkstrategy.youtube.rss.max";
+	public static final String TIME_BETWEEN = 
+			"master.walkstrategy.youtube.rss.time";
+	public static final String FEED = 
+			"master.walkstrategy.youtube.rss.feed";
+	
+	private int maxMonitor;
+	private long timeBetween;
+	private String feed;
 	
 	private HashSet<CrawlID> memorySet;
 	private List<CrawlID> toCrawlList;
-	private int maxMonitor;
-	private CrawlID feed;
-	private long timeBetween;
+	
 	private ThroughputManager throughputManager;
+	private Requester<List<CrawlID>> requester;
 	
 	public RSSMonitorWalker() {
 		this.memorySet = new HashSet<>();
@@ -54,18 +65,12 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 			
 			try {
 				List<CrawlID> links = this.throughputManager.sleepAndPerform(
-						this.feed.getId(), new Requester<List<CrawlID>>() {
-							@Override
-							public List<CrawlID> performRequest(String crawlID)
-									throws Exception {
-								return null;
-							}
-						});
+						this.feed, this.requester);
 				
 				this.memorySet.addAll(links);
 				this.toCrawlList = ImmutableList.copyOf(this.memorySet);
 			} catch (Exception e) {
-				LOG.error("Unable to parse feed " + this.feed.getId(), e);
+				LOG.error("Unable to parse feed " + this.feed, e);
 			}
 		}
 		
@@ -74,12 +79,12 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 
 	@Override
 	public void addSeedID(CrawlID seed) {
-		this.feed = seed;
 	}
 
 	@Override
 	public Set<String> getRequiredParameters() {
-		return new HashSet<String>(Arrays.asList(MAX_MONITOR, TIME_BETWEEN));
+		return new HashSet<String>(Arrays.asList(MAX_MONITOR, TIME_BETWEEN,
+				FEED));
 	}
 
 	@Override
@@ -89,11 +94,40 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 		this.timeBetween = configuration.getLong(TIME_BETWEEN);
 		this.throughputManager = new ThroughputManager(this.timeBetween);
 		
-//		FeedParser parser = 
-//				(FeedParser) constructor.newInstance();
-//		
-//		this.parser = parser;
+		this.feed = configuration.getString(FEED);
+		this.requester = new FeedRequester();
 		
 		return null;
+	}
+	
+	private static class FeedRequester implements Requester<List<CrawlID>> {
+		@Override
+		public List<CrawlID> performRequest(String feed) throws Exception {
+			
+			List<CrawlID> returnVal = new ArrayList<>();
+			YouTubeService service = new YouTubeService("");
+			
+			URL feedLink = new URL(feed);
+			while (feedLink != null) {
+				VideoFeed videoFeed = service.getFeed(feedLink, 
+						VideoFeed.class);
+				
+				for (VideoEntry entry : videoFeed.getEntries()) {
+					String[] vidIdSplit = entry.getId().split(":");
+					String vidId = vidIdSplit[vidIdSplit.length - 1];
+					returnVal.add(CrawlID.newBuilder().setId(vidId).build());
+				}
+					
+				Link nextLink = videoFeed.getLink("next", 
+                		"application/atom+xml");
+				if (nextLink != null) {
+					feedLink = new URL(nextLink.getHref());
+				} else {
+					feedLink = null;
+				}
+			}
+
+			return returnVal;
+		}
 	}
 }

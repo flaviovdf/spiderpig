@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.StandardOpenOption;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
@@ -19,14 +20,17 @@ public class FileSaverImpl implements FileSaver {
 	private static final Logger LOG = Logger.getLogger(FileSaverImpl.class);
 	private final String saveFolder;
 	private final AtomicInteger saved;
+	private final boolean appendDate;
 	
 	/**
 	 * Creates a new file saver which will store files at the given folder.
 	 * 
 	 * @param saveFolder Folder to store files
+	 * @param appendDate Appends date to beggining of file
 	 */
-	public FileSaverImpl(String saveFolder){
+	public FileSaverImpl(String saveFolder, boolean appendDate){
 		this.saveFolder = saveFolder;
+		this.appendDate = appendDate;
 		this.saved = new AtomicInteger(0);
 	}
 	
@@ -35,7 +39,14 @@ public class FileSaverImpl implements FileSaver {
 		LOG.info("Received file " + fileID + " " + payload.length + " bytes ");
 		FileChannel fileChannel = null;
 		try {
-			File fpath = new File(this.saveFolder, fileID);
+			String fileName = null;
+			
+			if (appendDate)
+				fileName = new Date().toString() + " " + fileID;
+			else
+				fileName = fileID;
+			
+			File fpath = new File(this.saveFolder, fileName);
 			fpath.createNewFile();
 			
 			fileChannel = 
