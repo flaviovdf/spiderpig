@@ -1,6 +1,8 @@
 package br.ufmg.dcc.vod.spiderpig.common.config;
 
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
@@ -19,12 +21,16 @@ public abstract class AbstractConfigurable<T> implements Configurable<T> {
 	public final T configurate(Configuration configuration) throws Exception {
 		Iterator<String> keys = configuration.getKeys();
 		
+		Set<String> reqKeys = new HashSet<>(getRequiredParameters());
 		while (keys.hasNext()) {
 			String key = keys.next();
-			if (!getRequiredParameters().contains(key))
-				throw new ConfigurationException("Required key " + key + 
-						" not found");
+			if (reqKeys.contains(key))
+				reqKeys.remove(key);
 		}
+
+		if (!reqKeys.isEmpty())
+			throw new ConfigurationException("Required keys " + reqKeys + 
+					" not found");
 		
 		return realConfigurate(configuration);
 	}
