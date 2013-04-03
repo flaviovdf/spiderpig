@@ -107,7 +107,7 @@ public class DistributedCrawlerTest  extends TestCase {
 				CrawlerFactory.createDistributedCrawler(host, 4541, 
 						workerAddrs, myTempDir, saver, walker, null);
 		
-		crawler.dispatch("0");
+		crawler.addSeed("0");
 		crawler.crawl();
 		
 		Map<Integer, byte[]> crawled = saver.getCrawled();
@@ -134,7 +134,7 @@ public class DistributedCrawlerTest  extends TestCase {
 				CrawlerFactory.createDistributedCrawler(host, 4542, 
 						workerAddrs, myTempDir, saver, walker, null);
 		
-		crawler.dispatch("0");
+		crawler.addSeed("0");
 		crawler.crawl();
 		
 		Map<Integer, byte[]> crawled = saver.getCrawled();
@@ -160,7 +160,7 @@ public class DistributedCrawlerTest  extends TestCase {
 				CrawlerFactory.createDistributedCrawler(host, 4543, 
 						workerAddrs, myTempDir, saver, walker, null);
 		
-		crawler.dispatch("0");
+		crawler.addSeed("0");
 		crawler.crawl();
 		
 		Map<Integer, byte[]> crawled = saver.getCrawled();
@@ -196,7 +196,7 @@ public class DistributedCrawlerTest  extends TestCase {
 				CrawlerFactory.createDistributedCrawler(host, 4544, 
 						workerAddrs, myTempDir, saver, walker, cache);
 		
-		crawler.dispatch("0");
+		crawler.addSeed("0");
 		crawler.crawl();
 		
 		Map<Integer, byte[]> crawled = saver.getCrawled();
@@ -206,6 +206,48 @@ public class DistributedCrawlerTest  extends TestCase {
 		assertEquals(50 - hitCount, crawled.size());
 	}
 	
+	@Test
+	public void testCrawl10ThreadsCacheLimit() throws Exception {
+		
+		RandomizedSyncGraph g = new RandomizedSyncGraph(200);
+		Set<InetSocketAddress> workerAddrs = initiateServers(10, g, 9000);
+		
+		TestFileSaver saver = new TestFileSaver();
+		
+		String host = "localhost";
+		RandomWalker walker = new RandomWalker();
+		BaseConfiguration configuration = new BaseConfiguration();
+		
+		configuration.addProperty(RandomWalker.RANDOM_SEED, 3);
+		configuration.addProperty(RandomWalker.STEPS, 50);
+		configuration.addProperty(RandomWalker.STOP_PROB, 0);
+		
+		walker.configurate(configuration);
+		
+		Cache<CrawlID, List<CrawlID>> cache;
+		cache = CacheBuilder.newBuilder()
+				.concurrencyLevel(workerAddrs.size())
+				.maximumSize(2)
+				.recordStats()
+				.build();
+		
+		Crawler crawler = 
+				CrawlerFactory.createDistributedCrawler(host, 4545, 
+						workerAddrs, myTempDir, saver, walker, cache);
+		
+		crawler.addSeed("0");
+		crawler.crawl();
+		
+		Map<Integer, byte[]> crawled = saver.getCrawled();
+		
+		CacheStats stats = cache.stats();
+		long hitCount = stats.hitCount();
+		System.out.println(hitCount);
+		System.out.println(stats.missCount());
+		System.out.println(stats.evictionCount() + stats.hitCount());
+		System.out.println(stats);
+		assertEquals(50 - hitCount, crawled.size());
+	}
 	
 	private void doTheAsserts(Map<Integer, byte[]> crawled, 
 			RandomizedSyncGraph g) {

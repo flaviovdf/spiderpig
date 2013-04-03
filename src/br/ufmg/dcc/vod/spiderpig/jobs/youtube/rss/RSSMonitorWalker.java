@@ -82,6 +82,17 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 	}
 
 	@Override
+	public List<CrawlID> getSeedDispatch() {
+		try {
+			return this.throughputManager.sleepAndPerform(
+					this.feed, this.requester);
+		} catch (Exception e) {
+			LOG.error("Unable to dispatch seed " + this.feed, e);
+			throw new RuntimeException(e);
+		}
+	}
+	
+	@Override
 	public Set<String> getRequiredParameters() {
 		return new HashSet<String>(Arrays.asList(MAX_MONITOR, TIME_BETWEEN,
 				FEED));

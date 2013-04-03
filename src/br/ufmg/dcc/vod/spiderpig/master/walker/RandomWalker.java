@@ -1,5 +1,6 @@
 package br.ufmg.dcc.vod.spiderpig.master.walker;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -30,7 +31,8 @@ public class RandomWalker extends AbstractConfigurable<Void>
 	private Random random;
 	private long maxSteps;
 	private AtomicLong steps;
-
+	private ArrayList<CrawlID> seed;
+	
 	public RandomWalker() {
 		this.steps = new AtomicLong(0);
 	}
@@ -40,7 +42,8 @@ public class RandomWalker extends AbstractConfigurable<Void>
 		double pStop = this.random.nextDouble();
 		this.steps.incrementAndGet();
 		if (links == null || links.isEmpty() || 
-				this.steps.get() == this.maxSteps || pStop < stopProbability) {
+				this.steps.get() == this.maxSteps || 
+				pStop < this.stopProbability) {
 			return Collections.emptyList();
 		} else {
 			int rand = this.random.nextInt(links.size());
@@ -50,6 +53,12 @@ public class RandomWalker extends AbstractConfigurable<Void>
 
 	@Override
 	public void addSeedID(CrawlID seed) {
+		this.seed.add(seed);
+	}
+	
+	@Override
+	public List<CrawlID> getSeedDispatch() {
+		return this.seed;
 	}
 	
 	@Override
@@ -63,7 +72,7 @@ public class RandomWalker extends AbstractConfigurable<Void>
 			this.random = new Random();
 		
 		this.maxSteps = configuration.getLong(STEPS);
-		
+		this.seed = new ArrayList<>();
 		return null;
 	}
 

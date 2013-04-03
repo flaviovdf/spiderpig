@@ -34,11 +34,15 @@ public class Master implements WorkerInterested, FDListener {
 		this.cache = cache;
 	}
 	
-	public void dispatchSeed(List<CrawlID> crawlIDs) {
+	public void addSeed(List<CrawlID> crawlIDs) {
 		for (CrawlID crawlID : crawlIDs) {
-			dispatch(crawlID, true);
 			walker.addSeedID(crawlID);
 		}
+		
+		List<CrawlID> toDispatch = walker.getSeedDispatch();
+		if (toDispatch != null)
+			for (CrawlID crawlID : toDispatch)
+				dispatch(crawlID, true);
 	}
 	
 	private void dispatch(CrawlID crawlID, boolean incrementCount) {

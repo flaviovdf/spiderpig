@@ -26,6 +26,7 @@ public class BFSWalker extends AbstractConfigurable<Void>
 			"master.walkstrategy.bloomfilter_expected_inserts";
 	
 	private Tracker<String> tracker;
+	private ArrayList<CrawlID> seed;
 
 	@Override
 	public List<CrawlID> getToWalk(CrawlID crawled, List<CrawlID> links) {
@@ -53,14 +54,20 @@ public class BFSWalker extends AbstractConfigurable<Void>
 	@Override
 	public void addSeedID(CrawlID seed) {
 		this.tracker.addCrawled(seed.getId());
+		this.seed.add(seed);
 	}
 
+	@Override
+	public List<CrawlID> getSeedDispatch() {
+		return seed;
+	}
+	
 	@Override
 	public Void realConfigurate(Configuration configuration) {
 		int expectedInserts = configuration.getInt(BLOOM_INSERTS);
 		this.tracker = new BloomFilterTrackerFactory<String>(expectedInserts)
 							.createTracker(String.class);
-		
+		this.seed = new ArrayList<>();
 		return null;
 	}
 

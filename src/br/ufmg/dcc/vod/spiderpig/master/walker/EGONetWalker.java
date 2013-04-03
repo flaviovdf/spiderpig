@@ -27,6 +27,7 @@ public class EGONetWalker extends AbstractConfigurable<Void>
 	public static final String NUM_NETS = "master.walkstrategy.ego.nets";
 	
 	private Tracker<String>[] trackers;
+	private ArrayList<CrawlID> seed;
 
 	@Override
 	public List<CrawlID> getToWalk(CrawlID crawled, List<CrawlID> links) {
@@ -68,6 +69,12 @@ public class EGONetWalker extends AbstractConfigurable<Void>
 	@Override
 	public void addSeedID(CrawlID seed) {
 		this.trackers[0].addCrawled(seed.getId());
+		this.seed.add(seed);
+	}
+
+	@Override
+	public List<CrawlID> getSeedDispatch() {
+		return seed;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -84,6 +91,7 @@ public class EGONetWalker extends AbstractConfigurable<Void>
 		for (int i = 0; i < numEgoNets; i++)
 			this.trackers[i] = factory.createThreadSafeTracker(String.class);
 		
+		this.seed = new ArrayList<>();
 		return null;
 	}
 

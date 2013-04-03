@@ -31,5 +31,13 @@ public interface Walker {
 	 * @param seed seed ID.
 	 */
 	public void addSeedID(CrawlID seed);
+
+	/**
+	 * After seeds are indicated, this method will return which ids
+	 * should be crawled.
+	 * 
+	 * @return List of ids to crawl
+	 */
+	public List<CrawlID> getSeedDispatch();
 	
 }

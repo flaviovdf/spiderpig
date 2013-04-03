@@ -120,7 +120,7 @@ public class MasterFactory extends AbstractConfigurable<Crawler> {
 		Crawler crawler = 
 				CrawlerFactory.createDistributedCrawler(hostname, port, 
 					workerAddrs, queueFolder, saver, threadSafeWalker, cache);
-		crawler.dispatch(seed);
+		crawler.addSeed(seed);
 		return crawler;
 	}
 

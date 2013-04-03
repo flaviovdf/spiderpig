@@ -24,6 +24,7 @@ public class UniMetropolisHastingRW
 	private Random random;
 	private long maxSteps;
 	private long steps;
+	private ArrayList<CrawlID> seed;
 
 	public UniMetropolisHastingRW() {
 		this.nodes = new HashMap<>();
@@ -141,8 +142,14 @@ public class UniMetropolisHastingRW
 
 	@Override
 	public void addSeedID(CrawlID seed) {
+		this.seed.add(seed);
 	}
-
+	
+	@Override
+	public List<CrawlID> getSeedDispatch() {
+		return this.seed;
+	}
+	
 	@Override
 	public Void realConfigurate(Configuration configuration) throws Exception {
 		configuration.setProperty(RandomWalker.STOP_PROB, 0);
@@ -153,7 +160,7 @@ public class UniMetropolisHastingRW
 			this.random = new Random();
 		
 		this.maxSteps = configuration.getLong(RandomWalker.STEPS);
-		
+		this.seed = new ArrayList<>();
 		return null;
 	}
 

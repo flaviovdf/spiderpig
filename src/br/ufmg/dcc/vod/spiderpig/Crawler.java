@@ -43,16 +43,16 @@ public class Crawler {
 		this.fd = fd;
 	}
 	
-	public void dispatch(List<String> seed) {
+	public void addSeed(List<String> seed) {
 		CrawlID.Builder builder = CrawlID.newBuilder();
 		List<CrawlID> seedList = new ArrayList<>();
 		for (String crawlID : seed)
 			seedList.add(builder.setId(crawlID).build());
-		master.dispatchSeed(seedList);
+		master.addSeed(seedList);
 	}
 
-	public void dispatch(String... seed) {
-		dispatch(Arrays.asList(seed));
+	public void addSeed(String... seed) {
+		addSeed(Arrays.asList(seed));
 	}
 	
 	public void crawl() {

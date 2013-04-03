@@ -39,6 +39,16 @@ public class ThreadSafeWalker implements ConfigurableWalker {
 	}
 
 	@Override
+	public List<CrawlID> getSeedDispatch() {
+		try {
+			lock.lock();
+			return this.walker.getSeedDispatch();
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	@Override
 	public Void configurate(Configuration configuration) throws Exception {
 		return this.walker.configurate(configuration);
 	}
