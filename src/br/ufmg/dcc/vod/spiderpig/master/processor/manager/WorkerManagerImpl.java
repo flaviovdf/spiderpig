@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.log4j.Logger;
+
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
 
@@ -15,6 +17,8 @@ import com.google.common.annotations.VisibleForTesting;
 
 public class WorkerManagerImpl implements WorkerManager {
 
+	private static final Logger LOG = Logger.getLogger(WorkerManagerImpl.class);
+	
 	public enum WorkerState {IDLE, BUSY, SUSPECTED}
 
 	private Map<WorkerState, Collection<ServiceID>> stateMap;
@@ -35,6 +39,9 @@ public class WorkerManagerImpl implements WorkerManager {
 		this.inverseAllocMap = new HashMap<>();
 		this.lock = new ReentrantLock();
 		this.waitCondition = this.lock.newCondition();
+		
+		LOG.info("WorkerManager up and managing " + workerIDs + 
+				". Initial state = " + initial);
 	}
 	
 	public WorkerManagerImpl(Collection<ServiceID> workerIDs) {
@@ -60,6 +67,9 @@ public class WorkerManagerImpl implements WorkerManager {
 			this.stateMap.get(WorkerState.BUSY).add(workerID);
 			this.allocMap.put(crawlID, workerID);
 			this.inverseAllocMap.put(workerID, crawlID);
+			
+			LOG.info("Allocating " + workerID);
+			
 			return workerID;
 		} finally {
 			this.lock.unlock();
@@ -78,6 +88,9 @@ public class WorkerManagerImpl implements WorkerManager {
 				this.stateMap.get(WorkerState.BUSY).remove(workerID);
 				this.stateMap.get(WorkerState.IDLE).add(workerID);
 				this.waitCondition.signal();
+				
+				LOG.info("Deallocating " + workerID);
+				
 				return true;
 			} else {
 				return false;
@@ -103,6 +116,7 @@ public class WorkerManagerImpl implements WorkerManager {
 			if (!this.stateMap.get(WorkerState.SUSPECTED).contains(workerID))
 				this.stateMap.get(WorkerState.SUSPECTED).add(workerID);
 			
+			LOG.info("Suspected of failure " + workerID);
 			return crawlID;
 		} finally {
 			this.lock.unlock();
@@ -136,6 +150,8 @@ public class WorkerManagerImpl implements WorkerManager {
 			assert !this.stateMap.get(WorkerState.SUSPECTED).contains(workerID);
 			
 			this.stateMap.get(WorkerState.IDLE).add(workerID);
+			
+			LOG.info("Back online " + workerID);
 			this.waitCondition.signal();
 		} finally {
 			this.lock.unlock();
