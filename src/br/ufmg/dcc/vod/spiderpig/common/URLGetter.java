@@ -22,6 +22,7 @@ public class URLGetter {
 		this.requestProperties = new HashMap<>();
 		this.requestProperties.put("Accept-Charset", UTF8);
 		this.requestProperties.put("Accept-Language", "en-US,en");
+        this.charSet = Charset.forName(UTF8);
 	}
 
 	public URLGetter(String charset, String lang) {

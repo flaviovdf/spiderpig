@@ -46,11 +46,10 @@ public class Video extends AbstractConfigurable<Void>
 
 	@Override
 	public void crawl(CrawlID id, WorkerInterested interested, FileSaver saver) {
-		String sid = id.getId();
-		LOG.info("Received id " + id);
+		LOG.info("Received id " + id + " " + id.getId());
 		try {
 			List<Tuple<String, byte[]>> result = 
-					this.throughputManager.sleepAndPerform(sid, requester);
+					this.throughputManager.sleepAndPerform(id.getId(), requester);
 			
 			for (Tuple<String, byte[]> t : result) {
 				saver.save(t.first, t.second);
@@ -108,6 +107,7 @@ public class Video extends AbstractConfigurable<Void>
 
 			ArrayList<Tuple<String, byte[]>> returnVal = new ArrayList<>();
 			if (this.crawlHtml) {
+                LOG.info("Collecting video page for id " + id);
 				String videoUrl = "http://www.youtube.com/watch?v=" + id +
 						"&gl=US&hl=en";
 				byte[] vidHtml = this.htmlRequester.performRequest(videoUrl);
@@ -116,6 +116,7 @@ public class Video extends AbstractConfigurable<Void>
 			}
 
 			if (this.crawlStats) {
+                LOG.info("Collecting stats page for id " + id);
 				String statsUrl = "http://www.youtube.com/insight_ajax?" +
 						"action_get_statistics_and_data=1&v="+ id +
 						"&gl=US&hl=en";
@@ -125,6 +126,7 @@ public class Video extends AbstractConfigurable<Void>
 			}
 			
 			if (this.crawlApi) {
+                LOG.info("Collecting api page for id " + id);
 				byte[] apiJson = this.apiRequester.performRequest(id);
 				returnVal.add(new Tuple<String, byte[]>(id + "-api.json", 
 						apiJson));

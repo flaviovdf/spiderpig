@@ -141,4 +141,9 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 			return returnVal;
 		}
 	}
+
+	@Override
+	public boolean canGenerateNewIds() {
+		return true;
+	}
 }

@@ -16,10 +16,9 @@ public class HTMLPageRequester implements Requester<byte[]> {
 	}
 	
 	@Override
-	public byte[] performRequest(String crawlID) throws Exception {
-		URL videoUrl = new URL("http://www.youtube.com/watch?v=" + crawlID +
-				"&gl=US&hl=en");
-		String header = "<crawledvideoid = " + crawlID + ">";
+	public byte[] performRequest(String url) throws Exception {
+		URL videoUrl = new URL(url);
+		String header = "<crawledvideoid = " + url + ">";
 		String footer = "</crawledvideoid>";
 		return this.getter.getHtml(videoUrl, header, footer);
 	}

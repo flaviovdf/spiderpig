@@ -100,4 +100,9 @@ public class EGONetWalker extends AbstractConfigurable<Void>
 		return new HashSet<String>(Arrays.asList(BFSWalker.BLOOM_INSERTS, 
 				NUM_NETS));
 	}
+
+	@Override
+	public boolean canGenerateNewIds() {
+		return false;
+	}
 }

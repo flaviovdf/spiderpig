@@ -169,4 +169,9 @@ public class UniMetropolisHastingRW
 		return new HashSet<String>(Arrays.asList(RandomWalker.STEPS, 
 				RandomWalker.RANDOM_SEED));
 	}
+
+	@Override
+	public boolean canGenerateNewIds() {
+		return false;
+	}
 }

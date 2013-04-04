@@ -81,4 +81,9 @@ public class RandomWalker extends AbstractConfigurable<Void>
 		return new HashSet<String>(Arrays.asList(STEPS, STOP_PROB, 
 				RANDOM_SEED));
 	}
+
+	@Override
+	public boolean canGenerateNewIds() {
+		return false;
+	}
 }

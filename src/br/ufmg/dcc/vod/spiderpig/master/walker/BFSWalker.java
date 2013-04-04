@@ -75,4 +75,9 @@ public class BFSWalker extends AbstractConfigurable<Void>
 	public Set<String> getRequiredParameters() {
 		return new HashSet<String>(Arrays.asList(BLOOM_INSERTS));
 	}
+
+	@Override
+	public boolean canGenerateNewIds() {
+		return false;
+	}
 }

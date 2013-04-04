@@ -40,4 +40,14 @@ public interface Walker {
 	 */
 	public List<CrawlID> getSeedDispatch();
 	
+	/**
+	 * Indicates that the walker can generate new ids even after all of
+	 * the dispatched ones have had results received. In a sense, this indicates
+	 * that the crawl will never stop and always wait for new ids from the
+	 * walker.
+	 * 
+	 * @return true if it can, false otherwise.
+	 */
+	public boolean canGenerateNewIds();
+	
 }

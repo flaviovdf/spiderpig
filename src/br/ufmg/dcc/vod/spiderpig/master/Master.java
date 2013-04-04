@@ -31,6 +31,14 @@ public class Master implements WorkerInterested, FDListener {
 		this.processorActor = processorActor;
 		this.workerManager = workerManager;
 		this.stopCondition = new StopCondition();
+		
+		//TODO: This is a hack! It makes the walker never stop because there is
+		//      one more item dispatched. I should refactor the stop condition
+		//      to the walker!
+		if (this.walker.canGenerateNewIds()) {
+			this.stopCondition.dispatched();
+		}
+		
 		this.cache = cache;
 	}
 	

@@ -42,7 +42,7 @@ public class FileSaverImpl implements FileSaver {
 			String fileName = null;
 			
 			if (appendDate)
-				fileName = new Date().toString() + " " + fileID;
+				fileName = new Date().getTime() + "-" + fileID;
 			else
 				fileName = fileID;
 			

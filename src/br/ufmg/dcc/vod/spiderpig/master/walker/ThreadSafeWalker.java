@@ -57,4 +57,9 @@ public class ThreadSafeWalker implements ConfigurableWalker {
 	public Set<String> getRequiredParameters() {
 		return this.walker.getRequiredParameters();
 	}
+
+	@Override
+	public boolean canGenerateNewIds() {
+		return false;
+	}
 }
