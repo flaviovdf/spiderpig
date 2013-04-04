@@ -139,10 +139,10 @@ cdeploy() {
             scp $PAK $host:$dep_dir
             
             echo "[deploy] Extracting package"
-            ssh -n $host "cd $dep_dir && tar zvf $PAK"
+            ssh -n $host "cd $dep_dir && tar zxf $PAK"
 
             echo
-        cd -
+        cd - > /dev/null 2>&1
     done
     rm -rf $TMP_DIR 2> /dev/null
 }
