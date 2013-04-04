@@ -66,6 +66,7 @@ usage() {
     echo "      clean: clean worker folder for \$HOME/.spiderpig"
     echo "      deploy: create and copy worker package to \$HOME/.spiderpig"
     echo "      sshcheck: checks if host is online for ssh in port 22"
+    echo "      kill: kill's java at the host (be carefull!)"
     echo ""
     echo "It is required to have ssh access without passwords and prompts."
     echo "Create a key for this."
@@ -164,7 +165,7 @@ cstatus() {
         
         echo "[status] Checking worker state at $host-$port"
         ssh -n $host \
-            "$dir/spiderpig.sh worker_status -c $dir/PROPERTIES_FNAME"
+            "$dir/spiderpig.sh worker_status -c $dir/$PROPERTIES_FNAME"
     done
 }
 
@@ -175,7 +176,7 @@ cstop() {
 
         echo "[stop] Stopping worker at $host-$port"
         ssh -n $host \
-            "$dir/spiderpig.sh worker_kill -c $dir/PROPERTIES_FNAME"
+            "$dir/spiderpig.sh worker_kill -c $dir/$PROPERTIES_FNAME"
     done
 }
 
@@ -186,7 +187,17 @@ cstart() {
 
         echo "[start] Starting worker at $host-$port"
         ssh -n $host \
-            "nohup $dir/spiderpigbg.sh worker_up -c $dir/PROPERTIES_FNAME"
+            "$dir/spiderpigbg.sh worker_up -c $dir/$PROPERTIES_FNAME"
+    done
+}
+
+ckill() {
+    for host in ${!HOSTS[@]}; do
+        local port=${HOSTS[$host]}
+        local dir=`get_worker_dir $host $port`
+
+        echo "[kill] killing all java worker at $host-$port"
+        ssh -n $host "killall -9 java"
     done
 }
 
@@ -226,6 +237,9 @@ main() {
     done
 
     case $OPTION in
+        kill)
+            ckill
+            ;;
         start)
             cstart
             ;;
