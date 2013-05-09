@@ -87,7 +87,7 @@ public class CrawlerFactory {
 			fd.watch(
 					ServiceIDUtils
 					.toResolvedServiceID(sid.getHostname(), sid.getPort(), 
-					 FDServerActor.HANDLE), false);
+					 FDServerActor.HANDLE));
 		
 		return new Crawler(processorActor, service, master, resultActor, 
 				fileSaverActor, fd, numThreads);
