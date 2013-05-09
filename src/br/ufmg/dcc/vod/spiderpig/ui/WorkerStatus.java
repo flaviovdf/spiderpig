@@ -20,6 +20,12 @@ public class WorkerStatus extends Command {
 	public static final String WORKER_HOSTNAME = "service.hostname";
 	public static final String WORKER_PORT = "service.port";
 	
+	/*
+	 * Timeout to declare the service as offline 
+	 */
+	private static final int TIMEOUT = 5;
+	private static final int PING = 1;
+	
 	@Override
 	public void exec(Configuration configuration) throws Exception {
 		String hostname = configuration.getString(HOSTNAME);
@@ -32,8 +38,8 @@ public class WorkerStatus extends Command {
 		QueueService service = new QueueService(hostname, port);
 		
 		FDListener listener = new FDStatusListener(service);
-		FDClientActor actor = new FDClientActor(5, 1, TimeUnit.SECONDS, 
-				listener, sender);
+		FDClientActor actor = new FDClientActor(TIMEOUT, PING, 
+				TimeUnit.SECONDS, listener, sender);
 		ServiceID workerID = ServiceIDUtils.toResolvedServiceID(workerHostname, 
 				workerPort, FDServerActor.HANDLE);
 

@@ -105,7 +105,7 @@ public class DistributedCrawlerTest  extends TestCase {
 		
 		Crawler crawler = 
 				CrawlerFactory.createDistributedCrawler(host, 4541, 
-						workerAddrs, myTempDir, saver, walker, null);
+						workerAddrs, 1, 1, myTempDir, saver, walker, null);
 		
 		crawler.addSeed("0");
 		crawler.crawl();
@@ -132,7 +132,7 @@ public class DistributedCrawlerTest  extends TestCase {
 		
 		Crawler crawler = 
 				CrawlerFactory.createDistributedCrawler(host, 4542, 
-						workerAddrs, myTempDir, saver, walker, null);
+						workerAddrs, 1, 1, myTempDir, saver, walker, null);
 		
 		crawler.addSeed("0");
 		crawler.crawl();
@@ -158,7 +158,7 @@ public class DistributedCrawlerTest  extends TestCase {
 		
 		Crawler crawler = 
 				CrawlerFactory.createDistributedCrawler(host, 4543, 
-						workerAddrs, myTempDir, saver, walker, null);
+						workerAddrs, 1, 1, myTempDir, saver, walker, null);
 		
 		crawler.addSeed("0");
 		crawler.crawl();
@@ -194,7 +194,7 @@ public class DistributedCrawlerTest  extends TestCase {
 		
 		Crawler crawler = 
 				CrawlerFactory.createDistributedCrawler(host, 4544, 
-						workerAddrs, myTempDir, saver, walker, cache);
+						workerAddrs, 1, 1, myTempDir, saver, walker, cache);
 		
 		crawler.addSeed("0");
 		crawler.crawl();

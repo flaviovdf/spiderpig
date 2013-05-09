@@ -39,7 +39,8 @@ import com.google.common.cache.Cache;
 public class CrawlerFactory {
 
 	public static Crawler createDistributedCrawler(String hostname, int port, 
-			Set<InetSocketAddress> workerAddrs, File queueDir, FileSaver saver,
+			Set<InetSocketAddress> workerAddrs, int fdTimeOutSeconds, 
+			int fdPingTimeSeconds, File queueDir, FileSaver saver,
 			Walker walker, Cache<CrawlID, List<CrawlID>> resultCache) 
 					throws FileNotFoundException, IOException {
 		
@@ -75,8 +76,8 @@ public class CrawlerFactory {
 		
 		ResultActor resultActor = new ResultActor(master);
 		FileSaverActor fileSaverActor = new FileSaverActor(saver);
-		FDClientActor fd = new FDClientActor(30, 5, TimeUnit.SECONDS, 
-				master, sender);
+		FDClientActor fd = new FDClientActor(fdTimeOutSeconds, 
+				fdPingTimeSeconds, TimeUnit.SECONDS, master, sender);
 		
 		fd.withSimpleQueue(service);
 		processorActor.withFileQueue(service, queueDir);

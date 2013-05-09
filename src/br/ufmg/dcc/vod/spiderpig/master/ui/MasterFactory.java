@@ -41,6 +41,9 @@ public class MasterFactory extends AbstractConfigurable<Crawler> {
 
 	public static final String WALK_STRATEGY = "master.walkstrategy";
 	
+	public static final String FD_TIMEOUT = "master.fd.timeout_secs";
+	public static final String FD_PING = "master.fd.ping_secs";
+	
 	private Set<InetSocketAddress> interpret(File serverFile) 
 			throws IOException {
 		LinkedHashSet<String> servers = FileUtil.readFileToSet(serverFile);
@@ -66,7 +69,7 @@ public class MasterFactory extends AbstractConfigurable<Crawler> {
 	public Set<String> getRequiredParameters() {
 		return new HashSet<>(Arrays.asList(HOSTNAME, PORT, WORKERS,
 				SAVE_FOLDER, QUEUE_FOLDER, SEED_FILE, CACHE_ENABLED,
-				CACHE_SIZE, WALK_STRATEGY));
+				CACHE_SIZE, WALK_STRATEGY, FD_TIMEOUT, FD_PING));
 	}
 
 	@Override
@@ -116,10 +119,15 @@ public class MasterFactory extends AbstractConfigurable<Crawler> {
 					.build();
 		}
 		
+		//FD options
+		int timeout = configuration.getInt(FD_TIMEOUT);
+		int ping = configuration.getInt(FD_PING);
+		
 		//Finally, create crawler.
 		Crawler crawler = 
 				CrawlerFactory.createDistributedCrawler(hostname, port, 
-					workerAddrs, queueFolder, saver, threadSafeWalker, cache);
+					workerAddrs, timeout, ping, queueFolder, saver, 
+					threadSafeWalker, cache);
 		crawler.addSeed(seed);
 		return crawler;
 	}
