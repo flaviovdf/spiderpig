@@ -93,8 +93,6 @@ class FIFOByteArrayQueue implements EventQueue<byte[]> {
 			
 			this.open = true;
 			this.created = true;
-			
-			sync();
 		}
 	}
 	
@@ -186,14 +184,8 @@ class FIFOByteArrayQueue implements EventQueue<byte[]> {
 		return data;
 	}
 
-	public void sync() {
-		verifyIfOpen();
-		this.map.force();
-	}
-
 	public void shutdownAndSync() throws IOException {
 		verifyIfOpen();
-		sync();
 		this.channel.close();
 		this.open = false;
 		this.map = null;
