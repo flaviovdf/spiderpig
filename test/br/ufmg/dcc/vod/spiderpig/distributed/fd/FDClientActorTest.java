@@ -37,32 +37,33 @@ public class FDClientActorTest {
 			s.waitUntilWorkIsDoneAndStop(1);
 	}
 	
-	public Tuple<Set<ServiceID>, Set<FDServerActorX>> 
-			startToMonitor(int numServers, int basePort) 
+	public Tuple<Set<ServiceID>, Set<MockFDServerActor>> 
+			startToMonitor(int numServers, int basePort, boolean isDown) 
 						throws IOException {
 		RemoteMessageSender sender = new RemoteMessageSender();
 		Set<ServiceID> sids = new HashSet<>();
-		Set<FDServerActorX> actors = new HashSet<>();
+		Set<MockFDServerActor> actors = new HashSet<>();
 		for (int i = 0; i < numServers; i++) {
 			QueueService service = new QueueService("localhost", basePort + i);
 			
-			FDServerActorX fdactor = new FDServerActorX(sender);
+			MockFDServerActor fdactor = new MockFDServerActor(sender, isDown);
 			fdactor.withSimpleQueue(service).startProcessors(1);
 			
 			services.add(service);
 			actors.add(fdactor);
-			sids.add(ServiceIDUtils.toResolvedServiceID("localhost", basePort + i, 
-					FDServerActor.HANDLE));
+			sids.add(ServiceIDUtils.toResolvedServiceID("localhost", 
+					basePort + i, FDServerActor.HANDLE));
 		}
-		return new Tuple<Set<ServiceID>, Set<FDServerActorX>>(sids, actors);
+		return new Tuple<Set<ServiceID>, Set<MockFDServerActor>>(sids, actors);
 	}
 	
-	private class FDServerActorX extends FDServerActor {
+	private class MockFDServerActor extends FDServerActor {
 
-		private AtomicBoolean down = new AtomicBoolean(false);
+		private AtomicBoolean down;
 
-		public FDServerActorX(RemoteMessageSender sender) {
+		public MockFDServerActor(RemoteMessageSender sender, boolean isDown) {
 			super(sender);
+			this.down = new AtomicBoolean(isDown);
 		}
 		
 		@Override
@@ -120,8 +121,8 @@ public class FDClientActorTest {
 	
 	@Test
 	public void testUpOne() throws IOException, InterruptedException {
-		Tuple<Set<ServiceID>, Set<FDServerActorX>> tuple = 
-				startToMonitor(1, 5000);
+		Tuple<Set<ServiceID>, Set<MockFDServerActor>> tuple = 
+				startToMonitor(1, 5000, false);
 		Set<ServiceID> toMonitor = tuple.first;
 		
 		CountDownLatch upLatch = new CountDownLatch(1);
@@ -147,8 +148,8 @@ public class FDClientActorTest {
 
 	@Test
 	public void testUp100() throws Exception {
-		Tuple<Set<ServiceID>, Set<FDServerActorX>> tuple = 
-				startToMonitor(100, 6000);
+		Tuple<Set<ServiceID>, Set<MockFDServerActor>> tuple = 
+				startToMonitor(100, 6000, false);
 		Set<ServiceID> toMonitor = tuple.first;
 		
 		CountDownLatch upLatch = new CountDownLatch(100);
@@ -176,8 +177,8 @@ public class FDClientActorTest {
 	
 	@Test
 	public void testUpDown100() throws Exception {
-		Tuple<Set<ServiceID>, Set<FDServerActorX>> tuple = 
-				startToMonitor(100, 7000);
+		Tuple<Set<ServiceID>, Set<MockFDServerActor>> tuple = 
+				startToMonitor(100, 7000, false);
 		Set<ServiceID> toMonitor = tuple.first;
 		
 		CountDownLatch upLatch = new CountDownLatch(100);
@@ -198,7 +199,7 @@ public class FDClientActorTest {
 		Assert.assertEquals(100, listener.ups.size());
 		Assert.assertTrue(toMonitor.containsAll(listener.ups));
 		
-		for (FDServerActorX fdax : tuple.second)
+		for (MockFDServerActor fdax : tuple.second)
 			fdax.setDown();
 		
 		downLatch.await();
@@ -212,8 +213,8 @@ public class FDClientActorTest {
 	
 	@Test
 	public void testUpDownUp100() throws Exception {
-		Tuple<Set<ServiceID>, Set<FDServerActorX>> tuple = 
-				startToMonitor(100, 8000);
+		Tuple<Set<ServiceID>, Set<MockFDServerActor>> tuple = 
+				startToMonitor(100, 8000, false);
 		Set<ServiceID> toMonitor = tuple.first;
 		
 		CountDownLatch upLatch = new CountDownLatch(200);
@@ -234,7 +235,7 @@ public class FDClientActorTest {
 		Assert.assertEquals(100, upLatch.getCount());
 		Assert.assertEquals(100, listener.ups.size());
 		
-		for (FDServerActorX fdax : tuple.second)
+		for (MockFDServerActor fdax : tuple.second)
 			fdax.setDown();
 		
 		downLatch.await();
@@ -242,13 +243,13 @@ public class FDClientActorTest {
 		Assert.assertEquals(100, listener.downs.size());
 		Assert.assertTrue(toMonitor.containsAll(listener.downs));
 
-		for (FDServerActorX fdax : tuple.second)
+		for (MockFDServerActor fdax : tuple.second)
 			fdax.setUp();
 		
 		upLatch.await();
 		
-		Assert.assertEquals(100, listener.downs.size());
 		Assert.assertEquals(200, listener.ups.size());
+		Assert.assertEquals(100, listener.downs.size());
 		
 		service.waitUntilWorkIsDone(1);
 		actor.stopTimer();
@@ -256,8 +257,8 @@ public class FDClientActorTest {
 	
 	@Test
 	public void testUp() throws Exception {
-		Tuple<Set<ServiceID>, Set<FDServerActorX>> tuple = 
-				startToMonitor(1, 9000);
+		Tuple<Set<ServiceID>, Set<MockFDServerActor>> tuple = 
+				startToMonitor(1, 9000, false);
 		Set<ServiceID> toMonitor = tuple.first;
 		
 		CountDownLatch upLatch = new CountDownLatch(2);
@@ -287,5 +288,30 @@ public class FDClientActorTest {
 		
 		service.waitUntilWorkIsDone(1);
 		actor.stopTimer();
+	}
+	
+	@Test
+	public void testInitialDownMsg() throws Exception {
+		Tuple<Set<ServiceID>, Set<MockFDServerActor>> tuple = 
+				startToMonitor(1, 2000, true);
+		
+		Set<ServiceID> toMonitor = tuple.first;
+		CountDownLatch upLatch = new CountDownLatch(0);
+		CountDownLatch downLatch = new CountDownLatch(1);
+		
+		Listener listener = new Listener(upLatch, downLatch);
+		FDClientActor actor = new FDClientActor(5, 1, TimeUnit.SECONDS, 
+				listener, new RemoteMessageSender());
+		QueueService service = new QueueService("localhost", 4005);
+		actor.withSimpleQueue(service).startProcessors(1);
+		for (ServiceID serviceID : toMonitor)
+			actor.watch(serviceID);
+		
+		actor.startTimer();
+		
+		upLatch.await();
+		downLatch.await();	
+		
+		Assert.assertEquals(1, listener.downs.size());
 	}
 }

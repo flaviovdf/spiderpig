@@ -38,18 +38,16 @@ public class WorkerStatus extends Command {
 				workerPort, FDServerActor.HANDLE);
 
 		actor.withSimpleQueue(service).startProcessors(1);
-		actor.startTimer();
 		actor.watch(workerID);
+		actor.startTimer();
 	}
 	
 	private class FDStatusListener implements FDListener {
 
 		private final QueueService service;
-		private boolean firstSuspected;
 
 		public FDStatusListener(QueueService service) {
 			this.service = service;
-			this.firstSuspected = true;
 		}
 		
 		@Override
@@ -60,12 +58,8 @@ public class WorkerStatus extends Command {
 		
 		@Override
 		public void isSuspected(ServiceID serviceID) {
-			if (this.firstSuspected) {
-				this.firstSuspected = false;
-			} else {
-				System.out.println("Worker Down");
-				new Thread(new ShutdownRunnable()).start();
-			}
+			System.out.println("Worker Down");
+			new Thread(new ShutdownRunnable()).start();
 		}
 
 		private class ShutdownRunnable implements Runnable {
