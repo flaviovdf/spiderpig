@@ -12,13 +12,26 @@ import br.ufmg.dcc.vod.spiderpig.queue.common.ProtocolBufferUtils;
 
 import com.google.protobuf.MessageLite;
 
+/**
+ * Class used to send messages to remote services. It uses sockets and streams.
+ * 
+ * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
+ */
 public class RemoteMessageSender {
 	
 	private static final Logger LOG = Logger.getLogger(RemoteMessageSender.class);
 	
+	/**
+	 * Sends the given message to the service id.
+	 * 
+	 * @param serviceID ID to send message to.
+	 * @param msg the message.
+	 */
 	public void send(ServiceID serviceID, MessageLite msg) {
+		
 		if (LOG.isDebugEnabled())
 			LOG.debug("Sending " + msg + " to " + serviceID);
+		
 		String receiverHost = serviceID.getHostname();
 		int receiverPort = serviceID.getPort();
 		String handle = serviceID.getHandle();
@@ -34,6 +47,7 @@ public class RemoteMessageSender {
 			outputStream = socket.getOutputStream();
 			ProtocolBufferUtils.msgToStream(handle, msg, 
 					outputStream);
+			
 			if (LOG.isDebugEnabled())
 				LOG.debug("Message Sent " + msg + " to " + serviceID);
 		} catch (IOException e) {
