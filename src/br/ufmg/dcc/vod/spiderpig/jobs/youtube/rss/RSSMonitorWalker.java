@@ -135,6 +135,8 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 			
 			List<CrawlID> returnVal = new ArrayList<>();
 			YouTubeService service = new YouTubeService("");
+			String[] feedSplit = feed.split("/");
+			String feedType = feedSplit[feedSplit.length - 1];
 			
 			URL feedLink = new URL(feed);
 			while (feedLink != null) {
@@ -144,7 +146,10 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 				for (VideoEntry entry : videoFeed.getEntries()) {
 					String[] vidIdSplit = entry.getId().split(":");
 					String vidId = vidIdSplit[vidIdSplit.length - 1];
-					returnVal.add(CrawlID.newBuilder().setId(vidId).build());
+					returnVal.add(CrawlID.newBuilder().
+							setId(vidId).
+							setResourceType(feedType).
+							build());
 				}
 					
 				Link nextLink = videoFeed.getLink("next", 
