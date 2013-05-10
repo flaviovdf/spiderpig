@@ -19,6 +19,7 @@ import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.gdata.client.youtube.YouTubeService;
 import com.google.gdata.data.Link;
 import com.google.gdata.data.youtube.VideoEntry;
@@ -34,11 +35,11 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 	public static final String TIME_BETWEEN = 
 			"master.walkstrategy.youtube.rss.time";
 	public static final String FEED = 
-			"master.walkstrategy.youtube.rss.feed";
+			"master.walkstrategy.youtube.rss.feeds";
 	
 	private int maxMonitor;
 	private long timeBetween;
-	private String feed;
+	private List<String> feeds;
 	
 	private HashSet<CrawlID> memorySet;
 	private List<CrawlID> toCrawlList;
@@ -51,7 +52,7 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 		this.memorySet = new HashSet<>();
 		this.toCrawlList = new ArrayList<>();
 		this.maxMonitor = 0;
-		this.feed = null;
+		this.feeds = null;
 		this.timeBetween = 0;
 		this.throughputManager = null;
 	}
@@ -65,15 +66,16 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 		
 		//adds new elements until it reaches totalMonitor
 		if (this.toCrawlList.size() < this.maxMonitor) {
-			
 			try {
-				List<CrawlID> links = this.throughputManager.sleepAndPerform(
-						this.feed, this.requester);
-				
-				this.memorySet.addAll(links);
+				for (String feed : feeds) {
+					List<CrawlID> links = 
+							this.throughputManager.sleepAndPerform(feed, 
+									this.requester);
+					this.memorySet.addAll(links);
+				}
 				this.toCrawlList = ImmutableList.copyOf(this.memorySet);
 			} catch (Exception e) {
-				LOG.error("Unable to parse feed " + this.feed, e);
+				LOG.error("Unable to parse feeds " + this.feeds, e);
 			}
 		}
 		
@@ -87,10 +89,14 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 	@Override
 	public List<CrawlID> getSeedDispatch() {
 		try {
-			return this.throughputManager.sleepAndPerform(
-					this.feed, this.requester);
+			List<CrawlID> links = new ArrayList<>();
+			for (String feed : feeds) {
+				links.addAll(this.throughputManager.sleepAndPerform(feed, 
+						this.requester));
+			}
+			return links;
 		} catch (Exception e) {
-			LOG.error("Unable to dispatch seed " + this.feed, e);
+			LOG.error("Unable to dispatch seeds " + this.feeds, e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -113,7 +119,10 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 		this.timeBetween = configuration.getLong(TIME_BETWEEN);
 		this.throughputManager = new ThroughputManager(this.timeBetween);
 		
-		this.feed = configuration.getString(FEED);
+		String feeds = configuration.getString(FEED);
+		String[] feedsArray = feeds.split(",");
+		
+		this.feeds = Lists.newArrayList(feedsArray);
 		this.requester = new FeedRequester();
 		this.stopCondition = new NeverEndingCondition();
 		
