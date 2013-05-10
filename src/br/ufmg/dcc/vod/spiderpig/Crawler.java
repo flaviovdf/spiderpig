@@ -3,7 +3,7 @@ package br.ufmg.dcc.vod.spiderpig;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.log4j.Logger;
 
@@ -70,17 +70,17 @@ public class Crawler {
 		//Waiting until crawl ends
 		LOG.info("Waiting until crawl ends");
 		
-		final SynchronousQueue<Object> queue = new SynchronousQueue<>();
+		final CountDownLatch latch = new CountDownLatch(1);
 		stopCondition.addCrawlFinishedListener(new CrawlFinishedListener() {
 			@Override
 			public void crawlDone() {
-				queue.offer(new Object());
+				latch.countDown();
 			}
 		});
 		
-		queue.poll();
-		service.waitUntilWorkIsDoneAndStop(1);
 		try {
+			latch.await();
+			service.waitUntilWorkIsDoneAndStop(1);
 			fd.stopTimer();
 		} catch (InterruptedException e) {
 		}
