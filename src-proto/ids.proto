@@ -3,6 +3,7 @@ option java_package = "br.ufmg.dcc.vod.spiderpig.protocol_buffers";
 
 message CrawlID {
     required string id = 1;
+    optional string resourceType = 2 [default = ""];
 }
 
 message ServiceID {
