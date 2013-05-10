@@ -52,7 +52,11 @@ public class Video extends AbstractConfigurable<Void>
 					this.throughputManager.sleepAndPerform(id.getId(), requester);
 			
 			for (Tuple<String, byte[]> t : result) {
-				saver.save(t.first, t.second);
+				String type = id.getResourceType();
+				if (type.length() > 0)
+					saver.save(id.getResourceType() + "-" + t.first, t.second);
+				else
+					saver.save(t.first, t.second);
 			}
 			LOG.info("Sending result for id " + id);
 		} catch (Exception e) {
