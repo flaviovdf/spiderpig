@@ -67,12 +67,10 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 		//adds new elements until it reaches totalMonitor
 		if (this.toCrawlList.size() < this.maxMonitor) {
 			try {
-				for (String feed : feeds) {
-					List<CrawlID> links = 
-							this.throughputManager.sleepAndPerform(feed, 
-									this.requester);
-					this.memorySet.addAll(links);
-				}
+				List<CrawlID> links = 
+						this.throughputManager.sleepAndPerform(null, 
+								this.requester);
+				this.memorySet.addAll(links);
 				this.toCrawlList = ImmutableList.copyOf(this.memorySet);
 			} catch (Exception e) {
 				LOG.error("Unable to parse feeds " + this.feeds, e);
@@ -89,12 +87,8 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 	@Override
 	public List<CrawlID> getSeedDispatch() {
 		try {
-			List<CrawlID> links = new ArrayList<>();
-			for (String feed : feeds) {
-				links.addAll(this.throughputManager.sleepAndPerform(feed, 
-						this.requester));
-			}
-			return links;
+			return this.throughputManager.sleepAndPerform(null, 
+					this.requester);
 		} catch (Exception e) {
 			LOG.error("Unable to dispatch seeds " + this.feeds, e);
 			throw new RuntimeException(e);
@@ -119,45 +113,50 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 		this.timeBetween = configuration.getLong(TIME_BETWEEN);
 		this.throughputManager = new ThroughputManager(this.timeBetween);
 		
-		String feeds = configuration.getString(FEED);
-		String[] feedsArray = feeds.split(",");
+		String[] feedsArray = configuration.getStringArray(FEED);
 		
 		this.feeds = Lists.newArrayList(feedsArray);
+		
 		this.requester = new FeedRequester();
 		this.stopCondition = new NeverEndingCondition();
 		
 		return null;
 	}
 	
-	private static class FeedRequester implements Requester<List<CrawlID>> {
+	private class FeedRequester implements Requester<List<CrawlID>> {
 		@Override
-		public List<CrawlID> performRequest(String feed) throws Exception {
+		public List<CrawlID> performRequest(String nullString) 
+				throws Exception {
 			
 			List<CrawlID> returnVal = new ArrayList<>();
 			YouTubeService service = new YouTubeService("");
-			String[] feedSplit = feed.split("/");
-			String feedType = feedSplit[feedSplit.length - 1];
-			
-			URL feedLink = new URL(feed);
-			while (feedLink != null) {
-				VideoFeed videoFeed = service.getFeed(feedLink, 
-						VideoFeed.class);
+			for (String feed : RSSMonitorWalker.this.feeds) {
+				LOG.info("Parsing feed " + feed);
+				String[] feedSplit = feed.split("/");
+				String feedType = feedSplit[feedSplit.length - 1];
 				
-				for (VideoEntry entry : videoFeed.getEntries()) {
-					String[] vidIdSplit = entry.getId().split(":");
-					String vidId = vidIdSplit[vidIdSplit.length - 1];
-					returnVal.add(CrawlID.newBuilder().
-							setId(vidId).
-							setResourceType(feedType).
-							build());
-				}
+				URL feedLink = new URL(feed);
+				while (feedLink != null) {
+					VideoFeed videoFeed = service.getFeed(feedLink, 
+							VideoFeed.class);
 					
-				Link nextLink = videoFeed.getLink("next", 
-                		"application/atom+xml");
-				if (nextLink != null) {
-					feedLink = new URL(nextLink.getHref());
-				} else {
-					feedLink = null;
+					for (VideoEntry entry : videoFeed.getEntries()) {
+						String[] vidIdSplit = entry.getId().split(":");
+						String vidId = vidIdSplit[vidIdSplit.length - 1];
+						LOG.info("Found video " + vidId);
+						returnVal.add(CrawlID.newBuilder().
+								setId(vidId).
+								setResourceType(feedType).
+								build());
+					}
+						
+					Link nextLink = videoFeed.getLink("next", 
+	                		"application/atom+xml");
+					if (nextLink != null) {
+						feedLink = new URL(nextLink.getHref());
+					} else {
+						feedLink = null;
+					}
 				}
 			}
 

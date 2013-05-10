@@ -107,7 +107,7 @@ public abstract class Command {
 			PropertiesConfiguration props = 
 					new PropertiesConfiguration(configFile);
 			loggerInitiator.configurate(props);
-			
+			props.setListDelimiter(Constants.LIST_DELIM);
 			command.exec(props);
 		} catch (Exception e) {
 			HelpFormatter hf = new HelpFormatter();
