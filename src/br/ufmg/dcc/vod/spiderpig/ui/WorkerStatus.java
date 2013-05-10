@@ -37,7 +37,7 @@ public class WorkerStatus extends Command {
 		RemoteMessageSender sender = new RemoteMessageSender();
 		QueueService service = new QueueService(hostname, port);
 		
-		FDListener listener = new FDStatusListener(service);
+		FDListener listener = new FDStatusListener();
 		FDClientActor actor = new FDClientActor(TIMEOUT, PING, 
 				TimeUnit.SECONDS, listener, sender);
 		ServiceID workerID = ServiceIDUtils.toResolvedServiceID(workerHostname, 
@@ -50,32 +50,16 @@ public class WorkerStatus extends Command {
 	
 	private class FDStatusListener implements FDListener {
 
-		private final QueueService service;
-
-		public FDStatusListener(QueueService service) {
-			this.service = service;
-		}
-		
 		@Override
 		public void isUp(ServiceID serviceID) {
 			System.out.println("Worker UP");
-			new Thread(new ShutdownRunnable()).start();
+			System.exit(EXIT_CODES.OK);
 		}
 		
 		@Override
 		public void isSuspected(ServiceID serviceID) {
 			System.out.println("Worker Down");
-			new Thread(new ShutdownRunnable()).start();
-		}
-
-		private class ShutdownRunnable implements Runnable {
-
-			@Override
-			public void run() {
-				FDStatusListener.this.service.waitUntilWorkIsDoneAndStop(1);
-				System.exit(EXIT_CODES.OK);
-			}
-			
+			System.exit(EXIT_CODES.OK);
 		}
 	}
 }

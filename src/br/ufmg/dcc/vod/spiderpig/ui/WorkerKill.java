@@ -39,6 +39,7 @@ public class WorkerKill extends Command {
 				PingPong.newBuilder()
 				.setSessionID(1l)
 				.setCallBackID(callbackID).build());
+		System.exit(EXIT_CODES.OK);
 	}
 
 }

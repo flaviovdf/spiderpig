@@ -45,9 +45,9 @@ public class KillerActor extends Actor<PingPong>
 
 		@Override
 		public void run() {
-			service.waitUntilWorkIsDoneAndStop(1);
 			sender.send(callBackID, 
 					KillResult.newBuilder().setExitcode(EXIT_CODES.OK).build());
+			service.waitUntilWorkIsDoneAndStop(1);
 			System.exit(EXIT_CODES.OK);
 		}
 		
