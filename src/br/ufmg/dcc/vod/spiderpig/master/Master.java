@@ -9,6 +9,7 @@ import br.ufmg.dcc.vod.spiderpig.jobs.WorkerInterested;
 import br.ufmg.dcc.vod.spiderpig.master.processor.ProcessorActor;
 import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerManager;
 import br.ufmg.dcc.vod.spiderpig.master.walker.Walker;
+import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
 import br.ufmg.dcc.vod.spiderpig.worker.WorkerActor;
@@ -30,15 +31,7 @@ public class Master implements WorkerInterested, FDListener {
 		this.walker = walker;
 		this.processorActor = processorActor;
 		this.workerManager = workerManager;
-		this.stopCondition = new StopCondition();
-		
-		//TODO: This is a hack! It makes the walker never stop because there is
-		//      one more item dispatched. I should refactor the stop condition
-		//      to the walker!
-		if (this.walker.canGenerateNewIds()) {
-			this.stopCondition.dispatched();
-		}
-		
+		this.stopCondition = this.walker.getStopCondition();
 		this.cache = cache;
 	}
 	

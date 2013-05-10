@@ -3,6 +3,7 @@ package br.ufmg.dcc.vod.spiderpig;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.SynchronousQueue;
 
 import org.apache.log4j.Logger;
 
@@ -10,8 +11,9 @@ import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDClientActor;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaverActor;
 import br.ufmg.dcc.vod.spiderpig.master.Master;
 import br.ufmg.dcc.vod.spiderpig.master.ResultActor;
-import br.ufmg.dcc.vod.spiderpig.master.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.master.processor.ProcessorActor;
+import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.CrawlFinishedListener;
+import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.queue.QueueService;
 
@@ -67,7 +69,16 @@ public class Crawler {
 		
 		//Waiting until crawl ends
 		LOG.info("Waiting until crawl ends");
-		stopCondition.awaitAllDone();
+		
+		final SynchronousQueue<Object> queue = new SynchronousQueue<>();
+		stopCondition.addCrawlFinishedListener(new CrawlFinishedListener() {
+			@Override
+			public void crawlDone() {
+				queue.offer(new Object());
+			}
+		});
+		
+		queue.poll();
 		service.waitUntilWorkIsDoneAndStop(1);
 		try {
 			fd.stopTimer();

@@ -9,6 +9,8 @@ import java.util.Set;
 import org.apache.commons.configuration.Configuration;
 
 import br.ufmg.dcc.vod.spiderpig.common.config.AbstractConfigurable;
+import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.ExhaustCondition;
+import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.tracker.BloomFilterTrackerFactory;
 import br.ufmg.dcc.vod.spiderpig.tracker.Tracker;
@@ -27,6 +29,7 @@ public class BFSWalker extends AbstractConfigurable<Void>
 	
 	private Tracker<String> tracker;
 	private ArrayList<CrawlID> seed;
+	private ExhaustCondition stopCondition;
 
 	@Override
 	public List<CrawlID> getToWalk(CrawlID crawled, List<CrawlID> links) {
@@ -63,21 +66,22 @@ public class BFSWalker extends AbstractConfigurable<Void>
 	}
 	
 	@Override
+	public StopCondition getStopCondition() {
+		return this.stopCondition;
+	}
+	
+	@Override
 	public Void realConfigurate(Configuration configuration) {
 		int expectedInserts = configuration.getInt(BLOOM_INSERTS);
 		this.tracker = new BloomFilterTrackerFactory<String>(expectedInserts)
 							.createTracker(String.class);
 		this.seed = new ArrayList<>();
+		this.stopCondition = new ExhaustCondition();
 		return null;
 	}
 
 	@Override
 	public Set<String> getRequiredParameters() {
 		return new HashSet<String>(Arrays.asList(BLOOM_INSERTS));
-	}
-
-	@Override
-	public boolean canGenerateNewIds() {
-		return false;
 	}
 }

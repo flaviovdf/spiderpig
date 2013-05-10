@@ -14,6 +14,8 @@ import br.ufmg.dcc.vod.spiderpig.common.config.AbstractConfigurable;
 import br.ufmg.dcc.vod.spiderpig.jobs.Requester;
 import br.ufmg.dcc.vod.spiderpig.jobs.ThroughputManager;
 import br.ufmg.dcc.vod.spiderpig.master.walker.ConfigurableWalker;
+import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.NeverEndingCondition;
+import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
 import com.google.common.collect.ImmutableList;
@@ -43,6 +45,7 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 	
 	private ThroughputManager throughputManager;
 	private Requester<List<CrawlID>> requester;
+	private NeverEndingCondition stopCondition;
 	
 	public RSSMonitorWalker() {
 		this.memorySet = new HashSet<>();
@@ -99,6 +102,11 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 	}
 
 	@Override
+	public StopCondition getStopCondition() {
+		return this.stopCondition;
+	}
+	
+	@Override
 	public Void realConfigurate(Configuration configuration) throws Exception {
 		
 		this.maxMonitor = configuration.getInt(MAX_MONITOR);
@@ -107,6 +115,7 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 		
 		this.feed = configuration.getString(FEED);
 		this.requester = new FeedRequester();
+		this.stopCondition = new NeverEndingCondition();
 		
 		return null;
 	}
@@ -140,10 +149,5 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 
 			return returnVal;
 		}
-	}
-
-	@Override
-	public boolean canGenerateNewIds() {
-		return true;
 	}
 }

@@ -2,6 +2,7 @@ package br.ufmg.dcc.vod.spiderpig.master.walker;
 
 import java.util.List;
 
+import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
 /**
@@ -41,13 +42,11 @@ public interface Walker {
 	public List<CrawlID> getSeedDispatch();
 	
 	/**
-	 * Indicates that the walker can generate new ids even after all of
-	 * the dispatched ones have had results received. In a sense, this indicates
-	 * that the crawl will never stop and always wait for new ids from the
-	 * walker.
+	 * Gets the {@link StopCondition} which can indicate when the crawl is
+	 * done.
 	 * 
-	 * @return true if it can, false otherwise.
+	 * @return {@link StopCondition} implementation
 	 */
-	public boolean canGenerateNewIds();
+	public StopCondition getStopCondition();
 	
 }

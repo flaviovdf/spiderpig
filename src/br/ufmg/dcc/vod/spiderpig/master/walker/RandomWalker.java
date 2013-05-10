@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.configuration.Configuration;
 
 import br.ufmg.dcc.vod.spiderpig.common.config.AbstractConfigurable;
+import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.ExhaustCondition;
+import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
 /**
@@ -32,6 +34,7 @@ public class RandomWalker extends AbstractConfigurable<Void>
 	private long maxSteps;
 	private AtomicLong steps;
 	private ArrayList<CrawlID> seed;
+	private ExhaustCondition stopCondition;
 	
 	public RandomWalker() {
 		this.steps = new AtomicLong(0);
@@ -62,6 +65,11 @@ public class RandomWalker extends AbstractConfigurable<Void>
 	}
 	
 	@Override
+	public StopCondition getStopCondition() {
+		return this.stopCondition;
+	}
+	
+	@Override
 	public Void realConfigurate(Configuration configuration) {
 		this.stopProbability = configuration.getDouble(STOP_PROB);
 		
@@ -73,6 +81,7 @@ public class RandomWalker extends AbstractConfigurable<Void>
 		
 		this.maxSteps = configuration.getLong(STEPS);
 		this.seed = new ArrayList<>();
+		this.stopCondition = new ExhaustCondition();
 		return null;
 	}
 
@@ -80,10 +89,5 @@ public class RandomWalker extends AbstractConfigurable<Void>
 	public Set<String> getRequiredParameters() {
 		return new HashSet<String>(Arrays.asList(STEPS, STOP_PROB, 
 				RANDOM_SEED));
-	}
-
-	@Override
-	public boolean canGenerateNewIds() {
-		return false;
 	}
 }

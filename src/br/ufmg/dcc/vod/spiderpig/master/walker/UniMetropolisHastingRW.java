@@ -13,6 +13,8 @@ import java.util.Set;
 import org.apache.commons.configuration.Configuration;
 
 import br.ufmg.dcc.vod.spiderpig.common.config.AbstractConfigurable;
+import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.ExhaustCondition;
+import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
 import com.google.common.collect.Sets;
@@ -25,6 +27,7 @@ public class UniMetropolisHastingRW
 	private long maxSteps;
 	private long steps;
 	private ArrayList<CrawlID> seed;
+	private ExhaustCondition stopCondition;
 
 	public UniMetropolisHastingRW() {
 		this.nodes = new HashMap<>();
@@ -151,6 +154,11 @@ public class UniMetropolisHastingRW
 	}
 	
 	@Override
+	public StopCondition getStopCondition() {
+		return this.stopCondition;
+	}
+	
+	@Override
 	public Void realConfigurate(Configuration configuration) throws Exception {
 		configuration.setProperty(RandomWalker.STOP_PROB, 0);
 		long seed = configuration.getLong(RandomWalker.RANDOM_SEED);
@@ -161,6 +169,7 @@ public class UniMetropolisHastingRW
 		
 		this.maxSteps = configuration.getLong(RandomWalker.STEPS);
 		this.seed = new ArrayList<>();
+		this.stopCondition = new ExhaustCondition();
 		return null;
 	}
 
@@ -168,10 +177,5 @@ public class UniMetropolisHastingRW
 	public Set<String> getRequiredParameters() {
 		return new HashSet<String>(Arrays.asList(RandomWalker.STEPS, 
 				RandomWalker.RANDOM_SEED));
-	}
-
-	@Override
-	public boolean canGenerateNewIds() {
-		return false;
 	}
 }

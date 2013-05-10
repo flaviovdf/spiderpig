@@ -6,6 +6,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.configuration.Configuration;
 
+import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
 public class ThreadSafeWalker implements ConfigurableWalker {
@@ -59,7 +60,7 @@ public class ThreadSafeWalker implements ConfigurableWalker {
 	}
 
 	@Override
-	public boolean canGenerateNewIds() {
-		return false;
+	public StopCondition getStopCondition() {
+		return this.walker.getStopCondition();
 	}
 }
