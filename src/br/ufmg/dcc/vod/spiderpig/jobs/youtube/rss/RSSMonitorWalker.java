@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -41,7 +42,7 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 	private long timeBetween;
 	private List<String> feeds;
 	
-	private HashSet<CrawlID> memorySet;
+	private LinkedHashSet<CrawlID> memorySet;
 	private List<CrawlID> toCrawlList;
 	
 	private ThroughputManager throughputManager;
@@ -49,7 +50,7 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 	private NeverEndingCondition stopCondition;
 	
 	public RSSMonitorWalker() {
-		this.memorySet = new HashSet<>();
+		this.memorySet = new LinkedHashSet<>();
 		this.toCrawlList = new ArrayList<>();
 		this.maxMonitor = 0;
 		this.feeds = null;
