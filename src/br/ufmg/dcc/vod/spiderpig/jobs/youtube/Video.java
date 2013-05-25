@@ -49,7 +49,8 @@ public class Video extends AbstractConfigurable<Void>
 		LOG.info("Received id " + id + " " + id.getId());
 		try {
 			List<Tuple<String, byte[]>> result = 
-					this.throughputManager.sleepAndPerform(id.getId(), requester);
+					this.throughputManager.sleepAndPerform(id.getId(), 
+							requester);
 			
 			for (Tuple<String, byte[]> t : result) {
 				String type = id.getResourceType();
@@ -58,6 +59,7 @@ public class Video extends AbstractConfigurable<Void>
 				else
 					saver.save(t.first, t.second);
 			}
+			interested.crawlDone(id, null);
 			LOG.info("Sending result for id " + id);
 		} catch (Exception e) {
 			LOG.error("Error at id " + id, e);
