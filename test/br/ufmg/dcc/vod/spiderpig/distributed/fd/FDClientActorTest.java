@@ -193,9 +193,8 @@ public class FDClientActorTest {
 			actor.watch(serviceID);
 		
 		actor.startTimer();
-		
 		upLatch.await();
-		
+
 		Assert.assertEquals(100, listener.ups.size());
 		Assert.assertTrue(toMonitor.containsAll(listener.ups));
 		

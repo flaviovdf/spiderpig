@@ -17,8 +17,11 @@ import com.google.common.base.Stopwatch;
 /**
  * A really basic failure detector. Basically it has two parameters, a pingTime 
  * and a timeout. It sends ping to services at every pingTime and considers 
- * services as dead if the timeout has passed. Upon calling start this class
- * initiate a thread for monitoring.
+ * services as dead if the timeout has passed. Upon calling the start method
+ * this class initiates a thread for sending pings. We check for timeouts at the
+ * same time we send pings, thus the implementation does not guarantee that
+ * notifications will be sent exactly at timeouts. This is good enough for 
+ * the crawler.
  * 
  * When adding ServiceIDs to be monitored this class guarantees that 
  * for each id added at least one answer will be send to the listener 
@@ -39,7 +42,8 @@ public class FDClientActor extends Actor<PingPong>
 		final Stopwatch stopwatch;
 		boolean down;
 		long previd;
-		boolean forceNotify;
+		boolean forceNotify; //Flag used to guarantee that at least one 
+							 //notification is sent
 
 		public FDStruct(Stopwatch stopwatch) {
 			this.stopwatch = stopwatch;
@@ -133,10 +137,10 @@ public class FDClientActor extends Actor<PingPong>
 				for (ServiceID sid : this.monitoring.keySet()) {
 					FDStruct struct = this.monitoring.get(sid);
 					long elapsedMillis = struct.stopwatch.elapsedMillis();
-					
+
 					if (elapsedMillis > unit.toMillis(timeout)) {
 						if (!struct.down || struct.forceNotify) {
-							setDown(sid, struct);	
+							setDown(sid, struct);
 						}
 					}
 					this.sender.send(sid, getMsg());
@@ -176,6 +180,9 @@ public class FDClientActor extends Actor<PingPong>
 				} else if (struct.previd != t.getSessionID()) {
 					setDown(t.getCallBackID(), struct);
 					setUp(t, struct);
+				} else if (!struct.down) {
+					struct.stopwatch.reset(); //still alive, re-start counter
+					struct.stopwatch.start();
 				}
 			}
 		} finally {
