@@ -1,5 +1,6 @@
 package br.ufmg.dcc.vod.spiderpig.master.walker;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +22,7 @@ public class NopWalker extends AbstractConfigurable<Void>
 		implements ConfigurableWalker {
 
 	private final StopCondition stopCondition = new ExhaustCondition();
+	private final List<CrawlID> seed = new ArrayList<CrawlID>();
 	
 	@Override
 	public List<CrawlID> getToWalk(CrawlID crawled, List<CrawlID> links) {
@@ -28,12 +30,13 @@ public class NopWalker extends AbstractConfigurable<Void>
 	}
 
 	@Override
-	public void addSeedID(CrawlID seed) {
+	public void addSeedID(CrawlID seedId) {
+		seed.add(seedId);
 	}
 
 	@Override
 	public List<CrawlID> getSeedDispatch() {
-		return Collections.emptyList();
+		return seed;
 	}
 
 	@Override
