@@ -47,6 +47,7 @@ public abstract class AbstractWalker extends AbstractConfigurable<Void>
 	@Override
 	public final void errorReceived(CrawlID idWithError) {
 		this.stopCondition.errorReceived();
+		errorReceivedImpl(idWithError);
 	}
 
 	@Override

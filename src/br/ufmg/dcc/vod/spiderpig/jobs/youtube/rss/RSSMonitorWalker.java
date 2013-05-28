@@ -42,7 +42,7 @@ public class RSSMonitorWalker extends AbstractWalker {
 	private List<String> feeds;
 	
 	private LinkedHashSet<CrawlID> monitoredIds;
-	private HashSet<Object> dispatched;
+	private HashSet<CrawlID> dispatched;
 	private List<CrawlID> toCrawlList;
 	
 	private ThroughputManager throughputManager;
