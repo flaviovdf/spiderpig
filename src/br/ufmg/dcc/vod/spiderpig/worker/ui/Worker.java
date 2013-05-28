@@ -1,7 +1,7 @@
 package br.ufmg.dcc.vod.spiderpig.worker.ui;
 
-import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDServerActor;
-import br.ufmg.dcc.vod.spiderpig.distributed.fd.KillerActor;
+import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.FDServerActor;
+import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.KillerActor;
 import br.ufmg.dcc.vod.spiderpig.worker.WorkerActor;
 
 public class Worker {

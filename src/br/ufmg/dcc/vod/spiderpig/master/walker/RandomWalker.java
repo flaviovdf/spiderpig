@@ -1,6 +1,5 @@
 package br.ufmg.dcc.vod.spiderpig.master.walker;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -11,7 +10,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.configuration.Configuration;
 
-import br.ufmg.dcc.vod.spiderpig.common.config.AbstractConfigurable;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.ExhaustCondition;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
@@ -22,8 +20,7 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
  * 
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
-public class RandomWalker extends AbstractConfigurable<Void> 
-		implements ConfigurableWalker {
+public class RandomWalker extends AbstractWalker {
 
 	public static final String STEPS = "master.walkstrategy.rw.steps";
 	public static final String STOP_PROB = "master.walkstrategy.rw.stopprob";
@@ -33,15 +30,13 @@ public class RandomWalker extends AbstractConfigurable<Void>
 	private Random random;
 	private long maxSteps;
 	private AtomicLong steps;
-	private ArrayList<CrawlID> seed;
-	private ExhaustCondition stopCondition;
 	
 	public RandomWalker() {
 		this.steps = new AtomicLong(0);
 	}
 	
 	@Override
-	public List<CrawlID> getToWalk(CrawlID crawled, List<CrawlID> links) {
+	protected List<CrawlID> getToWalkImpl(CrawlID crawled, List<CrawlID> links) {
 		double pStop = this.random.nextDouble();
 		this.steps.incrementAndGet();
 		if (links == null || links.isEmpty() || 
@@ -55,18 +50,17 @@ public class RandomWalker extends AbstractConfigurable<Void>
 	}
 
 	@Override
-	public void addSeedID(CrawlID seed) {
-		this.seed.add(seed);
+	protected List<CrawlID> filterSeeds(List<CrawlID> seeds) {
+		return seeds;
 	}
-	
+
 	@Override
-	public List<CrawlID> getSeedDispatch() {
-		return this.seed;
+	protected void errorReceivedImpl(CrawlID crawled) {
 	}
-	
+
 	@Override
-	public StopCondition getStopCondition() {
-		return this.stopCondition;
+	protected StopCondition createStopCondition() {
+		return new ExhaustCondition();
 	}
 	
 	@Override
@@ -80,8 +74,6 @@ public class RandomWalker extends AbstractConfigurable<Void>
 			this.random = new Random();
 		
 		this.maxSteps = configuration.getLong(STEPS);
-		this.seed = new ArrayList<>();
-		this.stopCondition = new ExhaustCondition();
 		return null;
 	}
 

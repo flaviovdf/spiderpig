@@ -5,12 +5,12 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.configuration.Configuration;
 
 import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
-import br.ufmg.dcc.vod.spiderpig.distributed.RemoteMessageSender;
-import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDClientActor;
-import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDListener;
-import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDServerActor;
+import br.ufmg.dcc.vod.spiderpig.common.distributed.RemoteMessageSender;
+import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.FDClientActor;
+import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.FDListener;
+import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.FDServerActor;
+import br.ufmg.dcc.vod.spiderpig.common.queue.QueueService;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
-import br.ufmg.dcc.vod.spiderpig.queue.QueueService;
 
 public class WorkerStatus extends Command {
 

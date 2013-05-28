@@ -8,12 +8,11 @@ import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 
-import br.ufmg.dcc.vod.spiderpig.common.config.AbstractConfigurable;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.ExhaustCondition;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
+import br.ufmg.dcc.vod.spiderpig.master.walker.tracker.BloomFilterTrackerFactory;
+import br.ufmg.dcc.vod.spiderpig.master.walker.tracker.Tracker;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
-import br.ufmg.dcc.vod.spiderpig.tracker.BloomFilterTrackerFactory;
-import br.ufmg.dcc.vod.spiderpig.tracker.Tracker;
 
 /**
  * A walker based on breadth first search. A {@link Tracker} is used to keep
@@ -21,18 +20,15 @@ import br.ufmg.dcc.vod.spiderpig.tracker.Tracker;
  * 
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
-public class BFSWalker extends AbstractConfigurable<Void> 
-		implements ConfigurableWalker {
+public class BFSWalker extends AbstractWalker {
 
 	public static final String BLOOM_INSERTS = 
 			"master.walkstrategy.bloomfilter_expected_inserts";
 	
 	private Tracker<String> tracker;
-	private ArrayList<CrawlID> seed;
-	private ExhaustCondition stopCondition;
 
 	@Override
-	public List<CrawlID> getToWalk(CrawlID crawled, List<CrawlID> links) {
+	protected List<CrawlID> getToWalkImpl(CrawlID crawled, List<CrawlID> links) {
 		List<CrawlID> rv = new ArrayList<>();
 
 		if (!tracker.wasCrawled(crawled.getId())) {
@@ -50,24 +46,25 @@ public class BFSWalker extends AbstractConfigurable<Void>
 		return rv;
 	}
 	
-	boolean wasCrawled(CrawlID id) {
-		return this.tracker.wasCrawled(id.toString());
-	}
 	
 	@Override
-	public void addSeedID(CrawlID seed) {
-		this.tracker.addCrawled(seed.getId());
-		this.seed.add(seed);
+	protected List<CrawlID> filterSeeds(List<CrawlID> seeds) {
+		List<CrawlID> toDispatch = new ArrayList<>();
+		for (CrawlID seed : seeds)
+			if (tracker.addCrawled((seed.getId())))
+				toDispatch.add(seed);
+		
+		return toDispatch;
 	}
 
 	@Override
-	public List<CrawlID> getSeedDispatch() {
-		return seed;
+	protected void errorReceivedImpl(CrawlID crawled) {
+		tracker.wasCrawled(crawled.getId());
 	}
-	
+
 	@Override
-	public StopCondition getStopCondition() {
-		return this.stopCondition;
+	protected StopCondition createStopCondition() {
+		return new ExhaustCondition();
 	}
 	
 	@Override
@@ -75,8 +72,6 @@ public class BFSWalker extends AbstractConfigurable<Void>
 		int expectedInserts = configuration.getInt(BLOOM_INSERTS);
 		this.tracker = new BloomFilterTrackerFactory<String>(expectedInserts)
 							.createTracker(String.class);
-		this.seed = new ArrayList<>();
-		this.stopCondition = new ExhaustCondition();
 		return null;
 	}
 

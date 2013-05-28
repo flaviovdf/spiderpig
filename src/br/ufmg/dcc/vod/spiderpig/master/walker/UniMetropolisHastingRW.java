@@ -12,22 +12,18 @@ import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 
-import br.ufmg.dcc.vod.spiderpig.common.config.AbstractConfigurable;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.ExhaustCondition;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
 import com.google.common.collect.Sets;
 
-public class UniMetropolisHastingRW 
-		extends AbstractConfigurable<Void> implements ConfigurableWalker {
+public class UniMetropolisHastingRW extends AbstractWalker {
 	
 	private Map<CrawlID, IDStruct> nodes;
 	private Random random;
 	private long maxSteps;
 	private long steps;
-	private ArrayList<CrawlID> seed;
-	private ExhaustCondition stopCondition;
 
 	public UniMetropolisHastingRW() {
 		this.nodes = new HashMap<>();
@@ -35,7 +31,7 @@ public class UniMetropolisHastingRW
 	}
 	
 	@Override
-	public List<CrawlID> getToWalk(CrawlID crawled, List<CrawlID> links) {
+	protected List<CrawlID> getToWalkImpl(CrawlID crawled, List<CrawlID> links) {
 		
 		if (this.steps == this.maxSteps)
 			return Collections.emptyList();
@@ -143,19 +139,17 @@ public class UniMetropolisHastingRW
 		return struct;
 	}
 
-	@Override
-	public void addSeedID(CrawlID seed) {
-		this.seed.add(seed);
+	protected List<CrawlID> filterSeeds(List<CrawlID> seeds) {
+		return seeds;
 	}
-	
+
 	@Override
-	public List<CrawlID> getSeedDispatch() {
-		return this.seed;
+	protected void errorReceivedImpl(CrawlID crawled) {
 	}
-	
+
 	@Override
-	public StopCondition getStopCondition() {
-		return this.stopCondition;
+	protected StopCondition createStopCondition() {
+		return new ExhaustCondition();
 	}
 	
 	@Override
@@ -168,8 +162,6 @@ public class UniMetropolisHastingRW
 			this.random = new Random();
 		
 		this.maxSteps = configuration.getLong(RandomWalker.STEPS);
-		this.seed = new ArrayList<>();
-		this.stopCondition = new ExhaustCondition();
 		return null;
 	}
 

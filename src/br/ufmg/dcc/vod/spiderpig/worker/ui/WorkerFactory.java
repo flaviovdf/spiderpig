@@ -8,11 +8,11 @@ import java.util.Set;
 import org.apache.commons.configuration.Configuration;
 
 import br.ufmg.dcc.vod.spiderpig.common.config.AbstractConfigurable;
-import br.ufmg.dcc.vod.spiderpig.distributed.RemoteMessageSender;
-import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDServerActor;
-import br.ufmg.dcc.vod.spiderpig.distributed.fd.KillerActor;
+import br.ufmg.dcc.vod.spiderpig.common.distributed.RemoteMessageSender;
+import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.FDServerActor;
+import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.KillerActor;
+import br.ufmg.dcc.vod.spiderpig.common.queue.QueueService;
 import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableJobExecutor;
-import br.ufmg.dcc.vod.spiderpig.queue.QueueService;
 import br.ufmg.dcc.vod.spiderpig.worker.WorkerActor;
 
 public class WorkerFactory extends AbstractConfigurable<Worker> {

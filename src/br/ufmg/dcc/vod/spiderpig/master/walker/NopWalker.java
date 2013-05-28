@@ -1,13 +1,11 @@
 package br.ufmg.dcc.vod.spiderpig.master.walker;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 
-import br.ufmg.dcc.vod.spiderpig.common.config.AbstractConfigurable;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.ExhaustCondition;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
@@ -18,30 +16,25 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
  * 
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
-public class NopWalker extends AbstractConfigurable<Void> 
-		implements ConfigurableWalker {
+public class NopWalker extends AbstractWalker {
 
-	private final StopCondition stopCondition = new ExhaustCondition();
-	private final List<CrawlID> seed = new ArrayList<CrawlID>();
-	
 	@Override
-	public List<CrawlID> getToWalk(CrawlID crawled, List<CrawlID> links) {
+	protected List<CrawlID> getToWalkImpl(CrawlID crawled, List<CrawlID> links) {
 		return Collections.emptyList();
 	}
-
+	
 	@Override
-	public void addSeedID(CrawlID seedId) {
-		seed.add(seedId);
+	protected List<CrawlID> filterSeeds(List<CrawlID> seeds) {
+		return seeds;
 	}
 
 	@Override
-	public List<CrawlID> getSeedDispatch() {
-		return seed;
+	protected void errorReceivedImpl(CrawlID crawled) {
 	}
 
 	@Override
-	public StopCondition getStopCondition() {
-		return stopCondition;
+	protected StopCondition createStopCondition() {
+		return new ExhaustCondition();
 	}
 
 	@Override
@@ -53,4 +46,6 @@ public class NopWalker extends AbstractConfigurable<Void>
 	public Void realConfigurate(Configuration configuration) throws Exception {
 		return null;
 	}
+
+	
 }

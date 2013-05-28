@@ -8,16 +8,16 @@ import org.apache.log4j.Logger;
 
 import com.google.common.cache.Cache;
 
+import br.ufmg.dcc.vod.spiderpig.common.queue.Actor;
+import br.ufmg.dcc.vod.spiderpig.common.queue.QueueProcessor;
+import br.ufmg.dcc.vod.spiderpig.common.queue.QueueService;
+import br.ufmg.dcc.vod.spiderpig.common.queue.serializer.MessageLiteSerializer;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
 import br.ufmg.dcc.vod.spiderpig.jobs.WorkerInterested;
 import br.ufmg.dcc.vod.spiderpig.master.processor.manager.Resolver;
 import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerManager;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
-import br.ufmg.dcc.vod.spiderpig.queue.Actor;
-import br.ufmg.dcc.vod.spiderpig.queue.QueueProcessor;
-import br.ufmg.dcc.vod.spiderpig.queue.QueueService;
-import br.ufmg.dcc.vod.spiderpig.queue.serializer.MessageLiteSerializer;
 
 /**
  * A processor is responsible for dispatching {@link CrawlID}s or getting

@@ -6,6 +6,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.configuration.Configuration;
 
+import br.ufmg.dcc.vod.spiderpig.master.processor.ProcessorActor;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
@@ -20,15 +21,26 @@ public class ThreadSafeWalker implements ConfigurableWalker {
 	}
 	
 	@Override
-	public List<CrawlID> getToWalk(CrawlID crawled, List<CrawlID> links) {
+	public void dispatchNext(CrawlID crawled, List<CrawlID> links) {
 		try {
 			lock.lock();
-			return this.walker.getToWalk(crawled, links);
+			this.walker.dispatchNext(crawled, links);
 		} finally {
 			lock.unlock();
 		}
 	}
 
+
+	@Override
+	public void errorReceived(CrawlID idWithError) {
+		try {
+			lock.lock();
+			this.walker.errorReceived(idWithError);
+		} finally {
+			lock.unlock();
+		}
+	}
+	
 	@Override
 	public void addSeedID(CrawlID seed) {
 		try {
@@ -40,10 +52,30 @@ public class ThreadSafeWalker implements ConfigurableWalker {
 	}
 
 	@Override
-	public List<CrawlID> getSeedDispatch() {
+	public void dispatchSeeds() {
 		try {
 			lock.lock();
-			return this.walker.getSeedDispatch();
+			this.walker.dispatchSeeds();
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	@Override
+	public void workerFailedWithID(CrawlID id) {
+		try {
+			lock.lock();
+			this.walker.workerFailedWithID(id);
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	@Override
+	public void setProcessorActor(ProcessorActor processorActor) {
+		try {
+			lock.lock();
+			this.walker.setProcessorActor(processorActor);
 		} finally {
 			lock.unlock();
 		}

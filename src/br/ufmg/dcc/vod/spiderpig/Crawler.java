@@ -7,7 +7,8 @@ import java.util.concurrent.CountDownLatch;
 
 import org.apache.log4j.Logger;
 
-import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDClientActor;
+import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.FDClientActor;
+import br.ufmg.dcc.vod.spiderpig.common.queue.QueueService;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaverActor;
 import br.ufmg.dcc.vod.spiderpig.master.Master;
 import br.ufmg.dcc.vod.spiderpig.master.ResultActor;
@@ -15,7 +16,6 @@ import br.ufmg.dcc.vod.spiderpig.master.processor.ProcessorActor;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.CrawlFinishedListener;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
-import br.ufmg.dcc.vod.spiderpig.queue.QueueService;
 
 public class Crawler {
 

@@ -10,9 +10,9 @@ import junit.framework.TestCase;
 
 import org.junit.Test;
 
-import br.ufmg.dcc.vod.spiderpig.queue.QueueServiceException;
-import br.ufmg.dcc.vod.spiderpig.queue.basequeues.MemoryMappedFIFOQueue;
-import br.ufmg.dcc.vod.spiderpig.queue.serializer.StringSerializer;
+import br.ufmg.dcc.vod.spiderpig.common.queue.QueueServiceException;
+import br.ufmg.dcc.vod.spiderpig.common.queue.basequeues.MemoryMappedFIFOQueue;
+import br.ufmg.dcc.vod.spiderpig.common.queue.serializer.StringSerializer;
 
 public class MemoryMappedQueueTest extends TestCase {
 

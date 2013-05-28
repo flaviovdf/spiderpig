@@ -11,9 +11,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import br.ufmg.dcc.vod.spiderpig.queue.QueueServiceException;
-import br.ufmg.dcc.vod.spiderpig.queue.basequeues.MultiFileMMapFifoQueue;
-import br.ufmg.dcc.vod.spiderpig.queue.serializer.StringSerializer;
+import br.ufmg.dcc.vod.spiderpig.common.queue.QueueServiceException;
+import br.ufmg.dcc.vod.spiderpig.common.queue.basequeues.MultiFileMMapFifoQueue;
+import br.ufmg.dcc.vod.spiderpig.common.queue.serializer.StringSerializer;
 
 public class MultiFileMMapFifoQueueTest extends TestCase {
 	

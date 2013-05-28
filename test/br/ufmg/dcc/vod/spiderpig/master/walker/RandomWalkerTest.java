@@ -24,25 +24,26 @@ public class RandomWalkerTest {
 		walker.configurate(configuration);
 		
 		CrawlID id1 = CrawlID.newBuilder().setId("1").build();
-		List<CrawlID> toWalk = walker.getToWalk(id1, new ArrayList<CrawlID>());
+		List<CrawlID> toWalk = walker.getToWalkImpl(id1, 
+				new ArrayList<CrawlID>());
 		Assert.assertTrue(toWalk.isEmpty());
 		
-		toWalk = walker.getToWalk(id1, null);
+		toWalk = walker.getToWalkImpl(id1, null);
 		Assert.assertTrue(toWalk.isEmpty());
 		
 		CrawlID id2 = CrawlID.newBuilder().setId("2").build();
 		CrawlID id3 = CrawlID.newBuilder().setId("3").build();
 		CrawlID id4 = CrawlID.newBuilder().setId("4").build();
 		
-		toWalk = walker.getToWalk(id2, Arrays.asList(id3, id4));
+		toWalk = walker.getToWalkImpl(id2, Arrays.asList(id3, id4));
 		Assert.assertEquals(1, toWalk.size());
 		Assert.assertTrue(toWalk.contains(id3) || toWalk.contains(id4));
 		
-		toWalk = walker.getToWalk(toWalk.get(0), Arrays.asList(id1));
+		toWalk = walker.getToWalkImpl(toWalk.get(0), Arrays.asList(id1));
 		Assert.assertEquals(1, toWalk.size());
 		Assert.assertTrue(toWalk.contains(id1));
 		
-		toWalk = walker.getToWalk(id1, Arrays.asList(id1, id2, id3));
+		toWalk = walker.getToWalkImpl(id1, Arrays.asList(id1, id2, id3));
 		Assert.assertTrue(toWalk.isEmpty());
 	}
 	
@@ -64,10 +65,10 @@ public class RandomWalkerTest {
 		
 		List<CrawlID> links = Arrays.asList(id1, id2, id3, id4);
 		
-		List<CrawlID> toWalk = walker.getToWalk(id1, links);
+		List<CrawlID> toWalk = walker.getToWalkImpl(id1, links);
 		Assert.assertTrue(toWalk.isEmpty());
 		
-		toWalk = walker.getToWalk(id2, links);
+		toWalk = walker.getToWalkImpl(id2, links);
 		Assert.assertTrue(toWalk.isEmpty());
 	}
 

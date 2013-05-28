@@ -2,6 +2,7 @@ package br.ufmg.dcc.vod.spiderpig.master.walker;
 
 import java.util.List;
 
+import br.ufmg.dcc.vod.spiderpig.master.processor.ProcessorActor;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
@@ -16,14 +17,28 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 public interface Walker {
 
 	/**
-	 * Returns a list of id's to crawl based on the current result.
+	 * Indicates that the current id was crawled and dispatches new ids based 
+	 * on current result
 	 * 
 	 * @param crawled ID crawled.
 	 * @param links Links discovered
-	 * 
-	 * @return A new set of ids to crawl
 	 */
-	public List<CrawlID> getToWalk(CrawlID crawled, List<CrawlID> links);
+	public void dispatchNext(CrawlID crawled, List<CrawlID> links);
+	
+	/**
+	 * Indicates to the walker that the following id produced an error.
+	 * 
+	 * @param idWithError ID crawled.
+	 */
+	public void errorReceived(CrawlID idWithError);
+
+	/**
+	 * Indicates to the walker that the following id was not crawled because
+	 * a worker has died. The default approach here is to re-dispatch the id.
+	 * 
+	 * @param id ID crawled.
+	 */
+	public void workerFailedWithID(CrawlID id);
 	
 	/**
 	 * Add seed ID the walker. Seeds are initial ids which may require special
@@ -34,12 +49,17 @@ public interface Walker {
 	public void addSeedID(CrawlID seed);
 
 	/**
-	 * After seeds are indicated, this method will return which ids
+	 * After seeds are indicated, this method will dispatch the ids which
 	 * should be crawled.
-	 * 
-	 * @return List of ids to crawl
 	 */
-	public List<CrawlID> getSeedDispatch();
+	public void dispatchSeeds();
+	
+	/**
+	 * Sets the processor actor which will crawl ids.
+	 * 
+	 * @param processorActor {@link ProcessorActor} to crawl ids
+	 */
+	public void setProcessorActor(ProcessorActor processorActor);
 	
 	/**
 	 * Gets the {@link StopCondition} which can indicate when the crawl is

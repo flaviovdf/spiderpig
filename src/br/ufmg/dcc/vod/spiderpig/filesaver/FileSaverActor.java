@@ -1,9 +1,9 @@
 package br.ufmg.dcc.vod.spiderpig.filesaver;
 
+import br.ufmg.dcc.vod.spiderpig.common.queue.Actor;
+import br.ufmg.dcc.vod.spiderpig.common.queue.QueueProcessor;
+import br.ufmg.dcc.vod.spiderpig.common.queue.serializer.MessageLiteSerializer;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Payload.UploadMessage;
-import br.ufmg.dcc.vod.spiderpig.queue.Actor;
-import br.ufmg.dcc.vod.spiderpig.queue.QueueProcessor;
-import br.ufmg.dcc.vod.spiderpig.queue.serializer.MessageLiteSerializer;
 
 public class FileSaverActor extends Actor<UploadMessage> 
 		implements QueueProcessor<UploadMessage> {

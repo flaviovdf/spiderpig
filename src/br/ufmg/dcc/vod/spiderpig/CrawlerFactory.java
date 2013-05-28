@@ -10,9 +10,10 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
-import br.ufmg.dcc.vod.spiderpig.distributed.RemoteMessageSender;
-import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDClientActor;
-import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDServerActor;
+import br.ufmg.dcc.vod.spiderpig.common.distributed.RemoteMessageSender;
+import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.FDClientActor;
+import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.FDServerActor;
+import br.ufmg.dcc.vod.spiderpig.common.queue.QueueService;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaverActor;
 import br.ufmg.dcc.vod.spiderpig.master.DecoratorInterested;
@@ -26,7 +27,6 @@ import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerManagerImpl;
 import br.ufmg.dcc.vod.spiderpig.master.walker.Walker;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
-import br.ufmg.dcc.vod.spiderpig.queue.QueueService;
 import br.ufmg.dcc.vod.spiderpig.worker.WorkerActor;
 
 import com.google.common.cache.Cache;
@@ -69,8 +69,8 @@ public class CrawlerFactory {
 		
 		ProcessorActor processorActor = new ProcessorActor(workerManager, 
 				service, resolver, workerInterested, saver, resultCache);
-		Master master = new Master(walker, processorActor, 
-				workerManager, resultCache);
+		walker.setProcessorActor(processorActor);
+		Master master = new Master(walker, workerManager, resultCache);
 		
 		workerInterested.setLoopBack(master);
 		

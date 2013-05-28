@@ -17,6 +17,7 @@
         <dependency org="commons-logging" transitive="false" name="commons-logging" rev="1.1.1"/>
         <dependency org="com.google.code.gson" name="gson" rev="2.2.2+" />
         <dependency org="javax.mail" name="mail" rev="1.4+" />
+        <dependency org="org.mockito" name="mockito-all" rev="1.9.5" />
         <exclude type="javadoc" ext="jar"/>
     </dependencies>
 </ivy-module>

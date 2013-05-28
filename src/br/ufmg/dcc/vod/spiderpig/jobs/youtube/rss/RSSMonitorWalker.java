@@ -3,6 +3,7 @@ package br.ufmg.dcc.vod.spiderpig.jobs.youtube.rss;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -11,10 +12,9 @@ import java.util.Set;
 import org.apache.commons.configuration.Configuration;
 import org.apache.log4j.Logger;
 
-import br.ufmg.dcc.vod.spiderpig.common.config.AbstractConfigurable;
 import br.ufmg.dcc.vod.spiderpig.jobs.Requester;
 import br.ufmg.dcc.vod.spiderpig.jobs.ThroughputManager;
-import br.ufmg.dcc.vod.spiderpig.master.walker.ConfigurableWalker;
+import br.ufmg.dcc.vod.spiderpig.master.walker.AbstractWalker;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.NeverEndingCondition;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
@@ -26,8 +26,7 @@ import com.google.gdata.data.Link;
 import com.google.gdata.data.youtube.VideoEntry;
 import com.google.gdata.data.youtube.VideoFeed;
 
-public class RSSMonitorWalker extends AbstractConfigurable<Void> 
-	implements ConfigurableWalker {
+public class RSSMonitorWalker extends AbstractWalker {
 
 	private static final Logger LOG = Logger.getLogger(RSSMonitorWalker.class);
 	
@@ -42,15 +41,17 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 	private long timeBetween;
 	private List<String> feeds;
 	
-	private LinkedHashSet<CrawlID> memorySet;
+	private LinkedHashSet<CrawlID> monitoredIds;
+	private HashSet<Object> dispatched;
 	private List<CrawlID> toCrawlList;
 	
 	private ThroughputManager throughputManager;
 	private Requester<List<CrawlID>> requester;
-	private NeverEndingCondition stopCondition;
+
 	
 	public RSSMonitorWalker() {
-		this.memorySet = new LinkedHashSet<>();
+		this.monitoredIds = new LinkedHashSet<>();
+		this.dispatched = new HashSet<>();
 		this.toCrawlList = new ArrayList<>();
 		this.maxMonitor = 0;
 		this.feeds = null;
@@ -59,7 +60,8 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 	}
 	
 	@Override
-	public List<CrawlID> getToWalk(CrawlID crawled, List<CrawlID> links) {
+	protected List<CrawlID> getToWalkImpl(CrawlID crawled, List<CrawlID> links) {
+		this.dispatched.remove(crawled);
 		return getToWalk();
 	}
 
@@ -68,25 +70,34 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 		//adds new elements until it reaches totalMonitor
 		if (this.toCrawlList.size() < this.maxMonitor) {
 			try {
-				List<CrawlID> links = 
-						this.throughputManager.sleepAndPerform(null, 
-								this.requester);
-				this.memorySet.addAll(links);
-				this.toCrawlList = ImmutableList.copyOf(this.memorySet);
+				if (this.dispatched.isEmpty()) {
+					List<CrawlID> links = 
+							this.throughputManager.sleepAndPerform(null, 
+									this.requester);
+					this.monitoredIds.addAll(links);
+					this.dispatched.addAll(links);
+					this.toCrawlList = ImmutableList.copyOf(this.monitoredIds);
+					return this.toCrawlList;
+				} else {
+					return Collections.emptyList();
+				}
 			} catch (Exception e) {
 				LOG.error("Unable to parse feeds " + this.feeds, e);
+				return Collections.emptyList();
 			}
+		} else {
+			return this.toCrawlList;
 		}
 		
-		return this.toCrawlList;
 	}
 
 	@Override
-	public void addSeedID(CrawlID seed) {
+	protected void errorReceivedImpl(CrawlID crawled) {
+		this.dispatched.remove(crawled);
 	}
-
+	
 	@Override
-	public List<CrawlID> getSeedDispatch() {
+	protected List<CrawlID> filterSeeds(List<CrawlID> seeds) {
 		try {
 			return getToWalk();
 		} catch (Exception e) {
@@ -102,8 +113,8 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 	}
 
 	@Override
-	public StopCondition getStopCondition() {
-		return this.stopCondition;
+	protected StopCondition createStopCondition() {
+		return new NeverEndingCondition();
 	}
 	
 	@Override
@@ -116,9 +127,7 @@ public class RSSMonitorWalker extends AbstractConfigurable<Void>
 		String[] feedsArray = configuration.getStringArray(FEED);
 		
 		this.feeds = Lists.newArrayList(feedsArray);
-		
 		this.requester = new FeedRequester();
-		this.stopCondition = new NeverEndingCondition();
 		
 		return null;
 	}

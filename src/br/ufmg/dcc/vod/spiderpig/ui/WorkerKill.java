@@ -3,12 +3,12 @@ package br.ufmg.dcc.vod.spiderpig.ui;
 import org.apache.commons.configuration.Configuration;
 
 import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
-import br.ufmg.dcc.vod.spiderpig.distributed.RemoteMessageSender;
-import br.ufmg.dcc.vod.spiderpig.distributed.fd.CallBackKillActor;
-import br.ufmg.dcc.vod.spiderpig.distributed.fd.KillerActor;
+import br.ufmg.dcc.vod.spiderpig.common.distributed.RemoteMessageSender;
+import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.CallBackKillActor;
+import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.KillerActor;
+import br.ufmg.dcc.vod.spiderpig.common.queue.QueueService;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Fd.PingPong;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
-import br.ufmg.dcc.vod.spiderpig.queue.QueueService;
 
 public class WorkerKill extends Command {
 

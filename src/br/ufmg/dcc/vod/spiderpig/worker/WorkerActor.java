@@ -1,11 +1,11 @@
 package br.ufmg.dcc.vod.spiderpig.worker;
 
-import br.ufmg.dcc.vod.spiderpig.distributed.RemoteMessageSender;
+import br.ufmg.dcc.vod.spiderpig.common.distributed.RemoteMessageSender;
+import br.ufmg.dcc.vod.spiderpig.common.queue.Actor;
+import br.ufmg.dcc.vod.spiderpig.common.queue.QueueProcessor;
+import br.ufmg.dcc.vod.spiderpig.common.queue.serializer.MessageLiteSerializer;
 import br.ufmg.dcc.vod.spiderpig.jobs.JobExecutor;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlRequest;
-import br.ufmg.dcc.vod.spiderpig.queue.Actor;
-import br.ufmg.dcc.vod.spiderpig.queue.QueueProcessor;
-import br.ufmg.dcc.vod.spiderpig.queue.serializer.MessageLiteSerializer;
 
 public class WorkerActor extends Actor<CrawlRequest> 
 		implements QueueProcessor<CrawlRequest> {

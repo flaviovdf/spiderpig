@@ -21,8 +21,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import br.ufmg.dcc.vod.spiderpig.distributed.RemoteMessageSender;
-import br.ufmg.dcc.vod.spiderpig.distributed.fd.FDServerActor;
+import br.ufmg.dcc.vod.spiderpig.common.distributed.RemoteMessageSender;
+import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.FDServerActor;
+import br.ufmg.dcc.vod.spiderpig.common.queue.QueueService;
 import br.ufmg.dcc.vod.spiderpig.jobs.JobExecutor;
 import br.ufmg.dcc.vod.spiderpig.jobs.test.RandomizedSyncGraph;
 import br.ufmg.dcc.vod.spiderpig.jobs.test.TestFileSaver;
@@ -30,7 +31,6 @@ import br.ufmg.dcc.vod.spiderpig.jobs.test.TestJobExecutor;
 import br.ufmg.dcc.vod.spiderpig.master.walker.BFSWalker;
 import br.ufmg.dcc.vod.spiderpig.master.walker.RandomWalker;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
-import br.ufmg.dcc.vod.spiderpig.queue.QueueService;
 import br.ufmg.dcc.vod.spiderpig.worker.WorkerActor;
 
 import com.google.common.cache.Cache;

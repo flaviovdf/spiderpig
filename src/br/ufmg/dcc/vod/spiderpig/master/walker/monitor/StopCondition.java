@@ -34,6 +34,11 @@ public interface StopCondition {
 	 */
 	public void errorReceived();
 	
+	/**
+	 * Adds a listener to be notified when the crawl is considered finished.
+	 * 
+	 * @param listener Listener to notify.
+	 */
 	public void addCrawlFinishedListener(CrawlFinishedListener listener);
 	
 }

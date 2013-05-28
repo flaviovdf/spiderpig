@@ -8,12 +8,11 @@ import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 
-import br.ufmg.dcc.vod.spiderpig.common.config.AbstractConfigurable;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.ExhaustCondition;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
+import br.ufmg.dcc.vod.spiderpig.master.walker.tracker.BloomFilterTrackerFactory;
+import br.ufmg.dcc.vod.spiderpig.master.walker.tracker.Tracker;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
-import br.ufmg.dcc.vod.spiderpig.tracker.BloomFilterTrackerFactory;
-import br.ufmg.dcc.vod.spiderpig.tracker.Tracker;
 
 /**
  * A walker based on ego networks. Basically, the first ego network of a node 
@@ -23,17 +22,14 @@ import br.ufmg.dcc.vod.spiderpig.tracker.Tracker;
  * 
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
-public class EGONetWalker extends AbstractConfigurable<Void> 
-		implements ConfigurableWalker {
+public class EGONetWalker extends AbstractWalker {
 
 	public static final String NUM_NETS = "master.walkstrategy.ego.nets";
 	
 	private Tracker<String>[] trackers;
-	private ArrayList<CrawlID> seed;
-	private ExhaustCondition stopCondition;
 
 	@Override
-	public List<CrawlID> getToWalk(CrawlID crawled, List<CrawlID> links) {
+	protected List<CrawlID> getToWalkImpl(CrawlID crawled, List<CrawlID> links) {
 		
 		int crawlIDLayer = -1;
 		for (int i = 0; i < trackers.length; i++) {
@@ -70,19 +66,22 @@ public class EGONetWalker extends AbstractConfigurable<Void>
 	}
 
 	@Override
-	public void addSeedID(CrawlID seed) {
-		this.trackers[0].addCrawled(seed.getId());
-		this.seed.add(seed);
+	protected List<CrawlID> filterSeeds(List<CrawlID> seeds) {
+		List<CrawlID> toDispatch = new ArrayList<>();
+		for (CrawlID seed : seeds)
+			if (this.trackers[0].addCrawled((seed.getId())))
+				toDispatch.add(seed);
+		
+		return toDispatch;
 	}
 
 	@Override
-	public List<CrawlID> getSeedDispatch() {
-		return seed;
+	protected void errorReceivedImpl(CrawlID crawled) {
 	}
-	
+
 	@Override
-	public StopCondition getStopCondition() {
-		return this.stopCondition;
+	protected StopCondition createStopCondition() {
+		return new ExhaustCondition();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -99,8 +98,6 @@ public class EGONetWalker extends AbstractConfigurable<Void>
 		for (int i = 0; i < numEgoNets; i++)
 			this.trackers[i] = factory.createThreadSafeTracker(String.class);
 		
-		this.seed = new ArrayList<>();
-		this.stopCondition = new ExhaustCondition();
 		return null;
 	}
 
