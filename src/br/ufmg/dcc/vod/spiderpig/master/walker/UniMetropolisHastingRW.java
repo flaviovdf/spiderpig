@@ -18,6 +18,17 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
 import com.google.common.collect.Sets;
 
+/**
+ * This class implements the broad class of metropolis hastings random walks.
+ * Basically, when crawling a graph with this approach, it is guaranteed that
+ * after enough iterations node ids will be uniformly random. That is, such 
+ * nodes should have the same properties as a nodes selected with equal
+ * probability from all nodes. Since in most cases it is impossible to know
+ * all nodes in order to perform such a sample, this serves as the case where
+ * where the Metropolis Hasting algorithm implemented here should be useful.
+ * 
+ * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
+ */
 public class UniMetropolisHastingRW extends AbstractWalker {
 	
 	private Map<CrawlID, IDStruct> nodes;
@@ -25,6 +36,9 @@ public class UniMetropolisHastingRW extends AbstractWalker {
 	private long maxSteps;
 	private long steps;
 
+	/**
+	 * Creates the metropolis hasting walker
+	 */
 	public UniMetropolisHastingRW() {
 		this.nodes = new HashMap<>();
 		this.steps = 0;
@@ -59,6 +73,13 @@ public class UniMetropolisHastingRW extends AbstractWalker {
 		return returnVal;
 	}
 
+	/**
+	 * Goes to next node. To save bandwidth, this method will simulate walks in
+	 * the node cache until if finds a node not yet crawled.
+	 * 
+	 * @param id The node id where the walk is at
+	 * @return The next node to collect
+	 */
 	private CrawlID getNextUndoneStep(CrawlID id) {
 		
 		boolean stop = false;
@@ -108,7 +129,7 @@ public class UniMetropolisHastingRW extends AbstractWalker {
 		if (!idStruct.areLinksSet())
 			idStruct.initLinks(links);
 
-		//Add reverse links to self
+		//Add reverse links to current id
 		for (CrawlID link : links)
 			getStruct(link).addReverseLink(id);
 		
