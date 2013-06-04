@@ -1,8 +1,14 @@
 package br.ufmg.dcc.vod.spiderpig.jobs.vimeo;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -91,37 +97,82 @@ public class VideoAndStats extends AbstractConfigurable<Void>
 			byte[] vidHtml = this.vidGetter.getHtml(this.httpClient,
 					getMethod, header, footer);
 			
-			int year = Calendar.getInstance().get(Calendar.YEAR);
-			int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
-			int day = Calendar.getInstance().get(Calendar.DAY_OF_WEEK_IN_MONTH);
+			String uploadDayString = getDayUploadDayString(vidHtml);
+			
+			SimpleDateFormat parseFormat =
+					new SimpleDateFormat("yyyy-MM-dd");
+			Date uploadDate = parseFormat.parse(uploadDayString);
+			
+			//Substract one day
+			Calendar cal = Calendar.getInstance();
+		    cal.setTime(uploadDate);
+		    cal.add(Calendar.DAY_OF_MONTH, -1);
+		    Date dayBefore = cal.getTime();
 
+		    //Format Dates
+		    SimpleDateFormat requestFormat =
+					new SimpleDateFormat("yyyy'%2F'MM'%2F'dd");
+
+		    SimpleDateFormat cacheFormat =
+					new SimpleDateFormat("yyyyMMdd");
+		    
+		    Date now = new Date();
+			String today = requestFormat.format(now);
+		    String beforeUpload = requestFormat.format(dayBefore);
+			
+		    String cacheKey = "clip" + cacheFormat.format(dayBefore) +
+		    		cacheFormat.format(now);
+		    
+		    //Referrers
+		    String cookie = "stats_end_date=" + today + "; stats_start_date=" +
+		    		beforeUpload + "; auto_load_stats=1";
+		    
+		    builder = new URIBuilder();
+		    		builder.setScheme("http").
+		    		setHost("vimeo.com").
+		    		setPath("/" + crawlID).
+		    		setParameter("action", "stats_totals");
+		    		
+		    URI referrerUri = builder.build();
+		    getMethod = new HttpGet(referrerUri);
+		    getMethod.setHeader("Cookie", cookie);
+		    byte[] referrerHtml = this.jsonGetter.getHtml(this.httpClient,
+		    		getMethod, header, footer);
+		    
 			//stats
-			String today = year +  "%2F" + month + "%2F" + day;
 			builder = new URIBuilder();
 			builder.setScheme("http").
 					setHost("vimeo.com").
 					setPath("/stats").
-					setParameter("start_date", "2000%2F01%2F01").
+					setParameter("action", "clip").
+					setParameter("start_date", beforeUpload).
 					setParameter("end_date", today).
-					setParameter("clip_id", crawlID);
+					setParameter("update_chart", "false").
+					setParameter("clip_id", crawlID).
+					setParameter("cache_key", cacheKey);
 			URI statsUri = builder.build();
+			
 			getMethod = new HttpGet(statsUri);
-			byte[] statsHtml = this.vidGetter.getHtml(this.httpClient,
-					getMethod, header, footer);
-			
-			builder = new URIBuilder();
-			builder.setScheme("http").
-					setHost("vimeo.com").
-					setPath("/" + crawlID).
-					setParameter("action", "stats_totals");
-			
-			//Referrers
-			URI referrerUri = builder.build();
-			getMethod = new HttpGet(referrerUri);
-			byte[] referrerHtml = this.vidGetter.getHtml(this.httpClient,
+			getMethod.setHeader("Cookie", cookie);
+			byte[] statsHtml = this.jsonGetter.getHtml(this.httpClient,
 					getMethod, header, footer);
 			
 			return Arrays.asList(vidHtml, statsHtml, referrerHtml); 
+		}
+
+		private String getDayUploadDayString(byte[] vidHtml) throws IOException {
+			BufferedReader bis = 
+					new BufferedReader(new InputStreamReader(
+							new ByteArrayInputStream(vidHtml)));
+			String inputLine;
+			while ((inputLine = bis.readLine()) != null) {
+				if (inputLine.contains("uploadDate")) {
+					String[] split = inputLine.split("\"");
+					return split[3].split("T")[0];
+				}
+			}
+			
+			return "";
 		}
 	}
 	
@@ -143,9 +194,12 @@ public class VideoAndStats extends AbstractConfigurable<Void>
 	
 	public static void main(String[] args) throws Exception {
 		VimeoRequester vimeoRequester = new VimeoRequester("");
-		List<byte[]> performRequest = vimeoRequester.performRequest("67156498");
+		List<byte[]> performRequest = vimeoRequester.performRequest("49345573");
 		
 		byte[] ba = performRequest.get(2);
+		System.out.println(new String(ba));
+		
+		ba = performRequest.get(1);
 		System.out.println(new String(ba));
 	}
 }
