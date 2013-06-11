@@ -1,8 +1,10 @@
 package br.ufmg.dcc.vod.spiderpig.jobs.youtube.topics;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -16,7 +18,6 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
@@ -25,6 +26,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.youtube.YouTube;
+import com.google.api.services.youtube.model.ResourceId;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
 import com.google.common.collect.Sets;
@@ -58,7 +60,7 @@ public class TopicSearch extends AbstractConfigurable<Void>
 			cal.add(Calendar.DAY_OF_YEAR, +1);
 			String topDate = RFC3339_FMT.format(cal.getTime());
 			
-			YouTube.Search.List search = youtube.search().list("id,snippet");
+			YouTube.Search.List search = youtube.search().list("id");
 			search.setKey(this.apiKey);
 			search.setPublishedAfter(DateTime.parseRfc3339(bottomDate));
 			search.setPublishedBefore(DateTime.parseRfc3339(topDate));
@@ -68,9 +70,19 @@ public class TopicSearch extends AbstractConfigurable<Void>
 			search.setMaxResults(50l);
 			
 			SearchListResponse response = search.execute();
+			StringBuilder videoIdsBuffer = new StringBuilder();
 			String nextPageToken;
 			do {
 				List<SearchResult> items = response.getItems();
+				
+				for (SearchResult searchResult : items) {
+					ResourceId rId = searchResult.getId();
+					if (rId != null) {
+						String videoId = (String) rId.get("videoId");
+						videoIdsBuffer.append(videoId);
+						videoIdsBuffer.append(File.separatorChar);
+					}
+				}
 				
 				nextPageToken = response.getNextPageToken();
 				if (nextPageToken != null) {
@@ -79,7 +91,9 @@ public class TopicSearch extends AbstractConfigurable<Void>
 				}
 			} while (nextPageToken != null);
 			
-			interested.crawlDone(id, toQueue);
+			List<CrawlID> emptyList = Collections.emptyList();
+			saver.save(topicId, videoIdsBuffer.toString().getBytes());
+			interested.crawlDone(id, emptyList);
 		} catch (GoogleJsonResponseException e) {
 			GoogleJsonError details = e.getDetails();
 			
@@ -115,15 +129,5 @@ public class TopicSearch extends AbstractConfigurable<Void>
 		@Override
 		public void initialize(HttpRequest arg0) throws IOException {
 		}
-	}
-	
-	public static void main(String[] args) {
-		TopicSearch ts = new TopicSearch();
-		ts.apiKey = "AIzaSyBv2cM4hW0NU15-LFCgJe-0ILHj8N7_nQ0";
-		ts.buildYoutubeService();
-		
-		String topic = "/m/01yrx";
-		CrawlID id = CrawlID.newBuilder().setId(topic).build();
-		ts.crawl(id, null, null);
 	}
 }
