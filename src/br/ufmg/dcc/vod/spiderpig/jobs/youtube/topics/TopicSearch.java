@@ -51,7 +51,8 @@ public class TopicSearch extends AbstractConfigurable<Void>
 	public void crawl(CrawlID id, WorkerInterested interested, FileSaver saver) {
 		String topicIdFreebaseFmt = id.getId();
 		String[] split = topicIdFreebaseFmt.split("\\.");
-		String topicId = "/m/" + split[split.length - 1];
+		String topicName = split[split.length - 1];
+		String topicId = "/m/" + topicName;
 		
 		try {
 			
@@ -95,7 +96,7 @@ public class TopicSearch extends AbstractConfigurable<Void>
 			} while (nextPageToken != null);
 			
 			List<CrawlID> emptyList = Collections.emptyList();
-			saver.save(topicId, videoIdsBuffer.toString().getBytes());
+			saver.save(topicName, videoIdsBuffer.toString().getBytes());
 			interested.crawlDone(id, emptyList);
 		} catch (GoogleJsonResponseException e) {
 			GoogleJsonError details = e.getDetails();
