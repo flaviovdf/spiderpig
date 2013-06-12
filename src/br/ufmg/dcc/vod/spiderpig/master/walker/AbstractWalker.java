@@ -67,6 +67,7 @@ public abstract class AbstractWalker extends AbstractConfigurable<Void>
 			this.stopCondition.dispatched();
 			dispatch(id);
 		}
+		this.seeds.clear();
 	}
 	
 	protected abstract List<CrawlID> filterSeeds(List<CrawlID> seeds);
