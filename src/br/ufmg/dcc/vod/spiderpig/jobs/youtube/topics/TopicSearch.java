@@ -49,7 +49,10 @@ public class TopicSearch extends AbstractConfigurable<Void>
 	
 	@Override
 	public void crawl(CrawlID id, WorkerInterested interested, FileSaver saver) {
-		String topicId = id.getId();
+		String topicIdFreebaseFmt = id.getId();
+		String[] split = topicIdFreebaseFmt.split("\\.");
+		String topicId = "/m/" + split[split.length - 1];
+		
 		try {
 			
 			Calendar cal = Calendar.getInstance();
