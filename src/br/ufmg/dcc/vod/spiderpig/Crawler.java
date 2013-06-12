@@ -1,6 +1,7 @@
 package br.ufmg.dcc.vod.spiderpig;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -15,7 +16,6 @@ import br.ufmg.dcc.vod.spiderpig.master.ResultActor;
 import br.ufmg.dcc.vod.spiderpig.master.processor.ProcessorActor;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.CrawlFinishedListener;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
-import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
 public class Crawler {
 
@@ -45,16 +45,16 @@ public class Crawler {
 		this.fd = fd;
 	}
 	
-	public void addSeed(List<String> seed) {
-		CrawlID.Builder builder = CrawlID.newBuilder();
-		List<CrawlID> seedList = new ArrayList<>();
-		for (String crawlID : seed)
-			seedList.add(builder.setId(crawlID).build());
+	public void addSeed(List<String> seedList) {
 		master.addSeed(seedList);
 	}
 
-	public void addSeed(String... seed) {
-		addSeed(Arrays.asList(seed));
+	public void addSeed(File seedFile) throws IOException {
+		master.addSeed(seedFile);
+	}
+	
+	public void addSeed(String... seeds) {
+		master.addSeed(Arrays.asList(seeds));
 	}
 	
 	public void crawl() {

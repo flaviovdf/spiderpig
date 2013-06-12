@@ -95,9 +95,6 @@ public class MasterFactory extends AbstractConfigurable<Crawler> {
 		//Create saver
 		FileSaver saver = new FileSaverImpl(saveFolder.getAbsolutePath(), true);
 		
-		//Get seed
-		List<String> seed = FileUtil.readFileToList(seedFile);
-
 		//Create walker
 		String masterClass = configuration.getString(WALK_STRATEGY);
 		Constructor<?> constructor = Class.forName(masterClass)
@@ -128,7 +125,7 @@ public class MasterFactory extends AbstractConfigurable<Crawler> {
 				CrawlerFactory.createDistributedCrawler(hostname, port, 
 					workerAddrs, timeout, ping, queueFolder, saver, 
 					threadSafeWalker, cache);
-		crawler.addSeed(seed);
+		crawler.addSeed(seedFile);
 		return crawler;
 	}
 
