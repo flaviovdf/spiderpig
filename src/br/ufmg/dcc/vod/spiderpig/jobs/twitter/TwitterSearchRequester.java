@@ -19,6 +19,7 @@ public class TwitterSearchRequester implements Requester<byte[]> {
 	@Override
 	public byte[] performRequest(String crawlID) throws Exception {
 		Query query = new Query(crawlID);
+		query.setCount(100);
 		QueryResult result;
 		StringBuilder returnValue = new StringBuilder();
 		do {
