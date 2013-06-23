@@ -21,6 +21,7 @@
         <dependency org="org.apache.httpcomponents" name="httpclient" rev="4.2.5" />
         <dependency org="com.google.apis" name="google-api-services-youtube" rev="v3-rev55-1.15.0-rc" />
         <dependency org="com.google.http-client" name="google-http-client-jackson2" rev="1.15.0-rc"/>
+        <dependency org="org.twitter4j" name="twitter4j-core" rev="[3.0,)"/>
         <exclude type="javadoc" ext="jar"/>
     </dependencies>
 </ivy-module>
