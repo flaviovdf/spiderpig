@@ -12,17 +12,37 @@ public class ThroughputManager {
 	private static final int MIN_DELTA = 100;
 	
 	private final Stopwatch stopwatch;
+	
 	private final long timeBetweenRequests;
+	private final long backoffTime;
 
-	public ThroughputManager(long timeBetweenRequests) {
+	public ThroughputManager(long timeBetweenRequests,
+			long backoffTime) {
 		this.stopwatch = new Stopwatch();
 		this.timeBetweenRequests = timeBetweenRequests;
+		this.backoffTime = backoffTime;
 		LOG.info("Will sleep every " + timeBetweenRequests + " ms");
 	}
 	
 	private <T> T getAndStartWatch(String crawlID, Requester<T> requester) 
 			throws Exception {
-		T returnVal = requester.performRequest(crawlID);
+		
+		T returnVal = null;
+		boolean backoff = true;
+		while(backoff) {
+			try {
+				returnVal = requester.performRequest(crawlID);
+				backoff = false;
+			} catch (QuotaException qe) {
+				LOG.info("Quota Exceeded. Backing off for " +
+						this.backoffTime + "ms -" + qe);
+				
+				if (this.backoffTime > 0)
+					TimeUnit.MILLISECONDS.sleep(this.backoffTime);
+			} catch (Exception e) {
+				throw e;
+			}
+		}
 		this.stopwatch.start();
 		return returnVal;
 	}
@@ -40,6 +60,7 @@ public class ThroughputManager {
 						 + " sleeping for " + toSleep + " ms");
 				TimeUnit.MILLISECONDS.sleep(toSleep);
 			}
+			
 			return getAndStartWatch(crawlID, requester);
 		}
 	}	

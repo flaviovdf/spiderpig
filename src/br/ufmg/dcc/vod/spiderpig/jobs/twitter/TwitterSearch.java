@@ -22,6 +22,7 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 public class TwitterSearch extends AbstractConfigurable<Void> 
 		implements ConfigurableJobExecutor {
 
+	private static final String BKOFF_TIME = "worker.job.twitter.backofftime";
 	private static final String SLEEP_TIME = "worker.job.twitter.sleeptime";
 	private static final String CONKEY = "worker.job.twitter.conkey";
 	private static final String CONSECRET = "worker.job.twitter.consecret";
@@ -52,7 +53,9 @@ public class TwitterSearch extends AbstractConfigurable<Void>
 	@Override
 	public Void realConfigurate(Configuration configuration) throws Exception {
 		long timeBetweenRequests = configuration.getLong(SLEEP_TIME);
-		this.throughputManager = new ThroughputManager(timeBetweenRequests);
+		long backOffTime = configuration.getLong(BKOFF_TIME);
+		this.throughputManager = new ThroughputManager(timeBetweenRequests,
+				backOffTime);
 		
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		

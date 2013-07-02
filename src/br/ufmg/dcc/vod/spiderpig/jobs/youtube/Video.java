@@ -42,6 +42,7 @@ public class Video extends AbstractConfigurable<Void>
 
 	private static final Logger LOG = Logger.getLogger(Video.class);
 	
+	private static final String BKOFF_TIME = "worker.job.youtube.backofftime";
 	private static final String SLEEP_TIME = "worker.job.youtube.sleeptime";
 	private static final String DEV_KEY = "worker.job.youtube.devkey";
 	private static final String APP_NAME = "worker.job.youtube.appname";
@@ -84,6 +85,8 @@ public class Video extends AbstractConfigurable<Void>
 	@Override
 	public Void realConfigurate(Configuration configuration) throws Exception {
 		long timeBetweenRequests = configuration.getLong(SLEEP_TIME);
+		long backOffTime = configuration.getLong(BKOFF_TIME);
+		
 		String devKey = configuration.getString(DEV_KEY);
 		String appName = configuration.getString(APP_NAME);
 		
@@ -95,7 +98,8 @@ public class Video extends AbstractConfigurable<Void>
 			throw new ConfigurationException("Please set at least one option"
 					+ " to crawl");
 		
-		this.throughputManager = new ThroughputManager(timeBetweenRequests);
+		this.throughputManager = new ThroughputManager(timeBetweenRequests,
+				backOffTime);
 		this.requester = new MultiRequester(appName, devKey, crawlHtml, 
 				crawlApi);
 		return null;
@@ -216,11 +220,9 @@ public class Video extends AbstractConfigurable<Void>
 		MultiRequester multiRequester = 
 				new MultiRequester("", "", true, false);
 		List<Tuple<String, byte[]>> result = 
-				multiRequester.performRequest("1g_943m2zqs");
+				multiRequester.performRequest("M8dDb39MtpI");
 		
-		for (Tuple<String, byte[]> t : result) {
-			System.out.println(new String(t.second));
-		}
+		System.out.println(new String(result.get(1).second));
 		
 	}
 }

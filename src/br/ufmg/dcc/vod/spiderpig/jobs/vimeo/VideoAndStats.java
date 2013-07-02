@@ -5,6 +5,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -36,6 +38,7 @@ public class VideoAndStats extends AbstractConfigurable<Void>
 
 	private static final Logger LOG = Logger.getLogger(VideoAndStats.class);
 	
+	private static final String BKOFF_TIME = "worker.job.vimeo.backofftime";
 	private static final String SLEEP_TIME = "worker.job.vimeo.sleeptime";
 	private static final String DEV_KEY = "worker.job.youtube.devkey";
 	
@@ -82,7 +85,7 @@ public class VideoAndStats extends AbstractConfigurable<Void>
 
 		@Override
 		public List<byte[]> performRequest(String crawlID) 
-				throws Exception {
+				throws URISyntaxException, IOException, ParseException { 
 			
 			String header = "<crawledvideoid = " + crawlID + ">";
 			String footer = "</crawledvideoid>";
@@ -179,9 +182,12 @@ public class VideoAndStats extends AbstractConfigurable<Void>
 	@Override
 	public Void realConfigurate(Configuration configuration) {
 		long timeBetweenRequests = configuration.getLong(SLEEP_TIME);
+		long backOffTime = configuration.getLong(BKOFF_TIME);
+		
 		String devKey = configuration.getString(DEV_KEY);
 		
-		this.throughputManager = new ThroughputManager(timeBetweenRequests);
+		this.throughputManager = new ThroughputManager(timeBetweenRequests,
+				backOffTime);
 		this.requester = new VimeoRequester(devKey);
 		
 		return null;

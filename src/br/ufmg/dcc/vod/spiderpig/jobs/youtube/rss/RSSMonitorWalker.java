@@ -122,7 +122,7 @@ public class RSSMonitorWalker extends AbstractWalker {
 		
 		this.maxMonitor = configuration.getInt(MAX_MONITOR);
 		this.timeBetween = configuration.getLong(TIME_BETWEEN);
-		this.throughputManager = new ThroughputManager(this.timeBetween);
+		this.throughputManager = new ThroughputManager(this.timeBetween, 0);
 		
 		String[] feedsArray = configuration.getStringArray(FEED);
 		
