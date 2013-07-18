@@ -2,6 +2,7 @@ package br.ufmg.dcc.vod.spiderpig.jobs.youtube.users;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 
 public class CreateSeed {
@@ -13,21 +14,17 @@ public class CreateSeed {
 		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Z"));
 		cal.set(Calendar.YEAR, 2005);
 		cal.set(Calendar.MONTH, Calendar.APRIL);
-		cal.set(Calendar.DAY_OF_MONTH, 22);
-		cal.set(Calendar.HOUR_OF_DAY, 3); 
+		cal.set(Calendar.DAY_OF_MONTH, 21);
+		cal.set(Calendar.HOUR_OF_DAY, 0); 
 		cal.set(Calendar.MINUTE, 0);
 		cal.set(Calendar.SECOND, 0);
 		cal.set(Calendar.MILLISECOND, 0);
 		
-		String after = RFC3339_FMT.format(cal.getTime());
-		String before = null;
+		Date now = new Date();
 		
-		do {
-			cal.add(Calendar.SECOND, 30);
-			before = RFC3339_FMT.format(cal.getTime());
-			System.out.println(after + " " + before);
-			after = new String(before);
-		} while (true);
+		String after = RFC3339_FMT.format(cal.getTime());
+		String before = RFC3339_FMT.format(now);
+		System.out.println(after + " " + before);
 	}
 	
 }
