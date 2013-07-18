@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
+import org.apache.log4j.Logger;
 
+import br.ufmg.dcc.vod.spiderpig.jobs.youtube.rss.RSSMonitorWalker;
 import br.ufmg.dcc.vod.spiderpig.master.walker.AbstractWalker;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.ExhaustCondition;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
@@ -19,6 +21,9 @@ import com.google.common.collect.Lists;
 
 public class DivideAndConquerWalker  extends AbstractWalker {
 
+	private static final Logger LOG = 
+			Logger.getLogger(DivideAndConquerWalker.class);
+	
 	private int OVERFLOW_NUM = 900;
 	private static final SimpleDateFormat RFC3339_FMT = 
 			new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -37,7 +42,10 @@ public class DivideAndConquerWalker  extends AbstractWalker {
 	@Override
 	protected List<CrawlID> getToWalkImpl(CrawlID id, List<CrawlID> links) {
 		
+		LOG.info("Received " + links.size() + " users");
+		
 		if (links.size() < OVERFLOW_NUM) {
+			LOG.info("Overflow! Done");
 			return Collections.emptyList();
 		}
 		
@@ -67,6 +75,9 @@ public class DivideAndConquerWalker  extends AbstractWalker {
 
 			CrawlID secondHalfId = CrawlID.newBuilder().
 					setId(halfStr + " " + beforeStr).build();
+			
+			LOG.info("New Seed 1/2l = " + firstHalfId.getId());
+			LOG.info("New Seed 1/2r = " + secondHalfId.getId());
 			
 			return Lists.newArrayList(firstHalfId, secondHalfId);
 		} catch (ParseException e) {
