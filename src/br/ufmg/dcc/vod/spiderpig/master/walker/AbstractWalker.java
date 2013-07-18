@@ -31,12 +31,12 @@ public abstract class AbstractWalker extends AbstractConfigurable<Void>
 	
 	@Override
 	public final void dispatchNext(CrawlID crawled, List<CrawlID> links) {
-		this.stopCondition.resultReceived();
 		List<CrawlID> toWalk = getToWalkImpl(crawled, links);
 		for (CrawlID id : toWalk) {
-			this.stopCondition.dispatched();
 			dispatch(id);
+			this.stopCondition.dispatched();
 		}
+		this.stopCondition.resultReceived();
 	}
 
 	@Override
@@ -46,8 +46,8 @@ public abstract class AbstractWalker extends AbstractConfigurable<Void>
 	
 	@Override
 	public final void errorReceived(CrawlID idWithError) {
-		this.stopCondition.errorReceived();
 		errorReceivedImpl(idWithError);
+		this.stopCondition.errorReceived();
 	}
 
 	@Override
@@ -64,8 +64,8 @@ public abstract class AbstractWalker extends AbstractConfigurable<Void>
 	public final void dispatchSeeds() {
 		List<CrawlID> seedDispatch = filterSeeds(this.seeds);
 		for (CrawlID id : seedDispatch) {
-			this.stopCondition.dispatched();
 			dispatch(id);
+			this.stopCondition.dispatched();
 		}
 		this.seeds.clear();
 	}
