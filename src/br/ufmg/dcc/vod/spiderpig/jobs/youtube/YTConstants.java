@@ -18,7 +18,7 @@ public class YTConstants {
 	public static final String DEV_KEY_V2 = "worker.job.youtube.v2.devkey";
 	public static final String APP_NAME_v2 = "worker.job.youtube.v2.appname";
 	
-	public static final String API_KEY = "worker.job.youtube.topic.v3.apikey";
+	public static final String API_KEY = "worker.job.youtube.v3.apikey";
 	
 	public static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 	public static final JsonFactory JSON_FACTORY = new JacksonFactory();
