@@ -22,7 +22,6 @@ import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.log4j.Logger;
 
 import br.ufmg.dcc.vod.spiderpig.common.Tuple;
 import br.ufmg.dcc.vod.spiderpig.common.URLGetter;
@@ -40,8 +39,6 @@ import com.google.common.collect.Sets;
 public class Video extends AbstractConfigurable<Void> 
 		implements ConfigurableJobExecutor {
 
-	private static final Logger LOG = Logger.getLogger(Video.class);
-	
 	private static final String BKOFF_TIME = "worker.job.youtube.backofftime";
 	private static final String SLEEP_TIME = "worker.job.youtube.sleeptime";
 	private static final String DEV_KEY = "worker.job.youtube.devkey";
@@ -56,12 +53,11 @@ public class Video extends AbstractConfigurable<Void>
 	@Override
 	public Set<String> getRequiredParameters() {
 		return Sets.newHashSet(SLEEP_TIME, DEV_KEY, APP_NAME, CRAWL_HTML,
-				CRAWL_API);
+				CRAWL_API, BKOFF_TIME);
 	}
 
 	@Override
 	public void crawl(CrawlID id, WorkerInterested interested, FileSaver saver) {
-		LOG.info("Received id " + id + " " + id.getId());
 		try {
 			List<Tuple<String, byte[]>> result = 
 					this.throughputManager.sleepAndPerform(id.getId(), 
@@ -75,9 +71,7 @@ public class Video extends AbstractConfigurable<Void>
 					saver.save(t.first, t.second);
 			}
 			interested.crawlDone(id, null);
-			LOG.info("Sending result for id " + id);
 		} catch (Exception e) {
-			LOG.error("Error at id " + id, e);
 			interested.crawlError(id, e.toString());
 		}
 	}
@@ -183,7 +177,6 @@ public class Video extends AbstractConfigurable<Void>
 
 			ArrayList<Tuple<String, byte[]>> returnVal = new ArrayList<>();
 			if (this.crawlHtml) {
-                LOG.info("Collecting video page for id " + id);
                 HttpGet getMethod = new HttpGet(createVideoHTMLUrl(id));
 				byte[] vidHtml = performRequest(getMethod, id);
 				returnVal.add(new Tuple<String, byte[]>(id + "-content.html", 
@@ -191,7 +184,6 @@ public class Video extends AbstractConfigurable<Void>
 
 				String ajaxToken = getSessionToken(vidHtml);
 				
-                LOG.info("Collecting stats page for id " + id);
 				HttpPost postMethod = new HttpPost(createVideoStatsUrl(id));
 				List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 				formParams.add(new BasicNameValuePair("session_token", 
@@ -205,7 +197,6 @@ public class Video extends AbstractConfigurable<Void>
 			}
 			
 			if (this.crawlApi) {
-                LOG.info("Collecting api page for id " + id);
 				byte[] apiJson = this.apiRequester.performRequest(id);
 				returnVal.add(new Tuple<String, byte[]>(id + "-api.json", 
 						apiJson));

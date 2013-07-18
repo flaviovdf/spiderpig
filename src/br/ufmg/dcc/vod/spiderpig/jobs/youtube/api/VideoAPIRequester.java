@@ -25,7 +25,7 @@ import com.google.gson.Gson;
 
 public class VideoAPIRequester implements Requester<byte[]> {
 	
-	private static final int QUOTA_ERR = 403;
+	private static final String QUOTA_ERR = "yt:quota";
 	private YouTubeService service;
 
 	public VideoAPIRequester(String appName, String devKey) {
@@ -144,8 +144,7 @@ public class VideoAPIRequester implements Requester<byte[]> {
 			String json = gson.toJson(videoJson);
 			return json.getBytes();
 		} catch (ServiceException e) {
-			int code = e.getHttpErrorCodeOverride();
-			if (code == QUOTA_ERR) {
+			if (e.getMessage().contains(QUOTA_ERR)) {
 				throw new QuotaException(e);
 			} else {
 				throw e;
