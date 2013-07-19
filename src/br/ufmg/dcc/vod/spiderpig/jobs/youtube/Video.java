@@ -39,21 +39,17 @@ import com.google.common.collect.Sets;
 public class Video extends AbstractConfigurable<Void> 
 		implements ConfigurableJobExecutor {
 
-	private static final String BKOFF_TIME = "worker.job.youtube.backofftime";
-	private static final String SLEEP_TIME = "worker.job.youtube.sleeptime";
-	private static final String DEV_KEY = "worker.job.youtube.devkey";
-	private static final String APP_NAME = "worker.job.youtube.appname";
-	
-	private static final String CRAWL_HTML = "worker.job.youtube.html";
-	private static final String CRAWL_API = "worker.job.youtube.api";
+	private static final String CRAWL_HTML = "worker.job.youtube.video.html";
+	private static final String CRAWL_API = "worker.job.youtube.video.api";
 	
 	private ThroughputManager throughputManager;
 	private MultiRequester requester;
 
 	@Override
 	public Set<String> getRequiredParameters() {
-		return Sets.newHashSet(SLEEP_TIME, DEV_KEY, APP_NAME, CRAWL_HTML,
-				CRAWL_API, BKOFF_TIME);
+		return Sets.newHashSet(YTConstants.SLEEP_TIME, YTConstants.DEV_KEY_V2, 
+				YTConstants.APP_NAME_V2, CRAWL_HTML,
+				CRAWL_API, YTConstants.BKOFF_TIME);
 	}
 
 	@Override
@@ -78,11 +74,12 @@ public class Video extends AbstractConfigurable<Void>
 
 	@Override
 	public Void realConfigurate(Configuration configuration) throws Exception {
-		long timeBetweenRequests = configuration.getLong(SLEEP_TIME);
-		long backOffTime = configuration.getLong(BKOFF_TIME);
+		long timeBetweenRequests = 
+				configuration.getLong(YTConstants.SLEEP_TIME);
+		long backOffTime = configuration.getLong(YTConstants.BKOFF_TIME);
 		
-		String devKey = configuration.getString(DEV_KEY);
-		String appName = configuration.getString(APP_NAME);
+		String devKey = configuration.getString(YTConstants.DEV_KEY_V2);
+		String appName = configuration.getString(YTConstants.APP_NAME_V2);
 		
 		boolean crawlHtml = configuration.getBoolean(CRAWL_HTML);
 		boolean crawlApi = configuration.getBoolean(CRAWL_API);
