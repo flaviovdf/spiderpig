@@ -11,7 +11,6 @@ import java.util.Set;
 import org.apache.commons.configuration.Configuration;
 import org.apache.log4j.Logger;
 
-import br.ufmg.dcc.vod.spiderpig.jobs.youtube.rss.RSSMonitorWalker;
 import br.ufmg.dcc.vod.spiderpig.master.walker.AbstractWalker;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.ExhaustCondition;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
@@ -45,7 +44,7 @@ public class DivideAndConquerWalker  extends AbstractWalker {
 		LOG.info("Received " + links.size() + " users");
 		
 		if (links.size() < OVERFLOW_NUM) {
-			LOG.info("Overflow! Done");
+			LOG.info("Undeflor! Done " + id.getId());
 			return Collections.emptyList();
 		}
 		

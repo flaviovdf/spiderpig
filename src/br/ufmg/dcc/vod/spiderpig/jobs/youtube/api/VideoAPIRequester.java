@@ -144,7 +144,8 @@ public class VideoAPIRequester implements Requester<byte[]> {
 			String json = gson.toJson(videoJson);
 			return json.getBytes();
 		} catch (ServiceException e) {
-			if (e.getMessage().contains(QUOTA_ERR)) {
+			String domainName = e.getDomainName();
+			if (domainName != null && domainName.contains(QUOTA_ERR)) {
 				throw new QuotaException(e);
 			} else {
 				throw e;
