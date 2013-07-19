@@ -45,7 +45,6 @@ public class ThroughputManager {
 			}
 		}
 		
-		this.stopwatch.start();
 		return returnVal;
 	}
 
@@ -54,7 +53,6 @@ public class ThroughputManager {
 		if (!this.stopwatch.isRunning()) {
 			return getAndStartWatch(crawlID, requester);
 		} else {
-			this.stopwatch.stop();
 			long elapsedMillis = this.stopwatch.elapsedMillis();
 			long toSleep = timeBetweenRequests - elapsedMillis;
 			if (toSleep > MIN_DELTA) {
