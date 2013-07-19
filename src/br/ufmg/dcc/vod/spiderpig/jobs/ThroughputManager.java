@@ -39,11 +39,12 @@ public class ThroughputManager {
 				
 				if (this.backoffTime > 0)
 					TimeUnit.MILLISECONDS.sleep(this.backoffTime);
-			} catch (Exception e) {
+			} finally {
+				this.stopwatch.reset();
 				this.stopwatch.start();
-				throw e;
 			}
 		}
+		
 		this.stopwatch.start();
 		return returnVal;
 	}
