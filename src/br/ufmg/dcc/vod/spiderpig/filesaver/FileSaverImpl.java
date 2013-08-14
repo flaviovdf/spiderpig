@@ -75,4 +75,9 @@ public class FileSaverImpl implements FileSaver {
 	public int numSaved() {
 		return saved.get();
 	}
+
+	@Override
+	public boolean close() {
+		return true;
+	}
 }

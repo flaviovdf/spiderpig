@@ -85,6 +85,11 @@ public class Crawler {
 		} catch (InterruptedException e) {
 		}
 		
+		try {
+			this.fileSaverActor.closeSaver();
+		} catch (IOException e) {
+			LOG.warn("Unable to shutdown file saver ", e);
+		}
 		LOG.info("Crawl done!");
 	}
 }

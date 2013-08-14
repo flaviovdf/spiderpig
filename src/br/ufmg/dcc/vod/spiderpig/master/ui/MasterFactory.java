@@ -18,7 +18,7 @@ import br.ufmg.dcc.vod.spiderpig.CrawlerFactory;
 import br.ufmg.dcc.vod.spiderpig.common.FileUtil;
 import br.ufmg.dcc.vod.spiderpig.common.config.AbstractConfigurable;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
-import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaverImpl;
+import br.ufmg.dcc.vod.spiderpig.filesaver.LevelDBSaver;
 import br.ufmg.dcc.vod.spiderpig.master.walker.ConfigurableWalker;
 import br.ufmg.dcc.vod.spiderpig.master.walker.ThreadSafeWalker;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
@@ -32,7 +32,7 @@ public class MasterFactory extends AbstractConfigurable<Crawler> {
 	public static final String PORT = "service.port";
 	
 	public static final String WORKERS = "master.workersfile";
-	public static final String SAVE_FOLDER = "master.savefolder";
+	public static final String SAVE_FILE = "master.savefile";
 	public static final String QUEUE_FOLDER = "master.queuefolder";
 	public static final String SEED_FILE = "master.seed";
 
@@ -68,7 +68,7 @@ public class MasterFactory extends AbstractConfigurable<Crawler> {
 	@Override
 	public Set<String> getRequiredParameters() {
 		return new HashSet<>(Arrays.asList(HOSTNAME, PORT, WORKERS,
-				SAVE_FOLDER, QUEUE_FOLDER, SEED_FILE, CACHE_ENABLED,
+				SAVE_FILE, QUEUE_FOLDER, SEED_FILE, CACHE_ENABLED,
 				CACHE_SIZE, WALK_STRATEGY, FD_TIMEOUT, FD_PING));
 	}
 
@@ -79,7 +79,7 @@ public class MasterFactory extends AbstractConfigurable<Crawler> {
 		int port = configuration.getInt(PORT);
 		
 		File serverFile = new File(configuration.getString(WORKERS));
-		File saveFolder = new File(configuration.getString(SAVE_FOLDER));
+		File saveFile = new File(configuration.getString(SAVE_FILE));
 		File queueFolder = new File(configuration.getString(QUEUE_FOLDER));
 		File seedFile = new File(configuration.getString(SEED_FILE));
 
@@ -93,7 +93,7 @@ public class MasterFactory extends AbstractConfigurable<Crawler> {
 		Set<InetSocketAddress> workerAddrs = interpret(serverFile);
 		
 		//Create saver
-		FileSaver saver = new FileSaverImpl(saveFolder.getAbsolutePath(), true);
+		FileSaver saver = new LevelDBSaver(saveFile.getAbsolutePath(), true);
 		
 		//Create walker
 		String masterClass = configuration.getString(WALK_STRATEGY);
