@@ -19,6 +19,7 @@ import br.ufmg.dcc.vod.spiderpig.jobs.youtube.YTConstants;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
 import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonError.ErrorInfo;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.Channel;
@@ -104,19 +105,15 @@ public class UserDataRequester extends ConfigurableRequester {
 			} while (nextPageToken != null);
 			
 		} catch (GoogleJsonResponseException e) {
-			GoogleJsonError details = e.getDetails();
-			
-			if (details != null) {
-				Object statusCode = details.get("code");
-				
-				if (statusCode.equals(_403_QUOTA_ERR)) {
-					throw new QuotaException(e);
-				} else {
-					throw e;
+			List<ErrorInfo> errors = e.getDetails().getErrors();
+			if (_403_QUOTA_ERR == e.getStatusCode()) {
+				for (ErrorInfo ei : errors) {
+					if (ei.getReason().equals("dailyLimitExceeded")) {
+						throw new QuotaException(e);
+					}
 				}
-			} else {
-				throw e;
 			}
+			throw e;
 		}
 		
 		return returnValue;
