@@ -61,10 +61,10 @@ public class UserDataRequester extends ConfigurableRequester {
 					CrawlID toFollow = CrawlID.newBuilder().
 							setId(subId).
 							build();
-					links.add(toFollow);
 					payloadBuilder.addPayload(
 							"userId-sub-" +userId + "-" + subId, 
-							userChannel.toPrettyString().getBytes());
+							sub.toPrettyString().getBytes());
+					links.add(toFollow);
 				}
 			}
 			
@@ -85,7 +85,7 @@ public class UserDataRequester extends ConfigurableRequester {
 		
 		subsList.setKey(this.apiKey);
 		subsList.setMaxResults(50l);
-		subsList.setId(userID);
+		subsList.setChannelId(userID);
 		subsList.setOrder(order);
 		
 		List<Subscription> returnValue = new ArrayList<>();
@@ -132,12 +132,12 @@ public class UserDataRequester extends ConfigurableRequester {
 		
 		try {
 			ChannelListResponse response = userList.execute();
-				List<Channel> items = response.getItems();
-				if (items.isEmpty()) {
-					throw new IOException("User not found " + userID);
-				} else {
-					return items.get(0);
-				}
+			List<Channel> items = response.getItems();
+			if (items.isEmpty()) {
+				throw new IOException("User not found " + userID);
+			} else {
+				return items.get(0);
+			}
 		} catch (GoogleJsonResponseException e) {
 			GoogleJsonError details = e.getDetails();
 			
