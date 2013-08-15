@@ -2,6 +2,7 @@ package br.ufmg.dcc.vod.spiderpig.jobs.youtube.users.subs;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -110,6 +111,8 @@ public class UserDataRequester extends ConfigurableRequester {
 				for (ErrorInfo ei : errors) {
 					if (ei.getReason().equals("dailyLimitExceeded")) {
 						throw new QuotaException(e);
+					} else if (ei.getReason().equals("subscriptionForbidden")) {
+						return Collections.emptyList();
 					}
 				}
 			}
