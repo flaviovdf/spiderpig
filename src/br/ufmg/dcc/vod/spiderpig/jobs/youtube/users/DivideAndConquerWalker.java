@@ -24,7 +24,7 @@ public class DivideAndConquerWalker  extends AbstractWalker {
 	private static final Logger LOG = 
 			Logger.getLogger(DivideAndConquerWalker.class);
 	
-	private int OVERFLOW_NUM = 900;
+	private int OVERFLOW_NUM = 50;
 	private static final SimpleDateFormat RFC3339_FMT = 
 			new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 	private static final long ONE_SECOND_MS = 1000l;
@@ -45,7 +45,7 @@ public class DivideAndConquerWalker  extends AbstractWalker {
 		LOG.info("Received " + links.size() + " users");
 		
 		if (links.size() < OVERFLOW_NUM) {
-			LOG.info("Overflow! Done");
+			LOG.info("No Overflow! Done");
 			return Collections.emptyList();
 		}
 		
@@ -64,6 +64,7 @@ public class DivideAndConquerWalker  extends AbstractWalker {
 			
 			long halfDelta = ((beforeTime - afterTime) / 2);
 			if (halfDelta < ONE_SECOND_MS) {
+                LOG.info("Less than a second in next interval, done!");
 				return Collections.emptyList();
 			}
 			
