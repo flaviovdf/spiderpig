@@ -1,5 +1,7 @@
 package br.ufmg.dcc.vod.spiderpig.worker;
 
+import java.io.IOException;
+
 import br.ufmg.dcc.vod.spiderpig.common.distributed.RemoteMessageSender;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileWrapper;
@@ -25,5 +27,10 @@ public class FileSaverProxy implements FileSaver {
 	@Override
 	public int numSaved() {
 		return 0;
+	}
+
+	@Override
+	public boolean close() throws IOException {
+		return true;
 	}
 }

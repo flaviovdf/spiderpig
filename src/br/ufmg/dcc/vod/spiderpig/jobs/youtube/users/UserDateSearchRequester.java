@@ -3,10 +3,20 @@ package br.ufmg.dcc.vod.spiderpig.jobs.youtube.users;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import br.ufmg.dcc.vod.spiderpig.common.Tuple;
+import org.apache.commons.configuration.Configuration;
+
+import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
+import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResult;
+import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultBuilder;
+import br.ufmg.dcc.vod.spiderpig.jobs.PayloadBuilder;
 import br.ufmg.dcc.vod.spiderpig.jobs.QuotaException;
 import br.ufmg.dcc.vod.spiderpig.jobs.Requester;
+import br.ufmg.dcc.vod.spiderpig.jobs.youtube.UnableToCrawlException;
+import br.ufmg.dcc.vod.spiderpig.jobs.youtube.YTConstants;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -15,27 +25,24 @@ import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.ResourceId;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
+import com.google.common.collect.Sets;
 
-public class UserDateSearchRequester 
-		implements Requester<Tuple<List<String>, byte[]>> {
+public class UserDateSearchRequester extends ConfigurableRequester {
 
 	private static final int _403_QUOTA_ERR = 403;
 	
-	private final YouTube youtube;
-	private final String apiKey;
-
-	public UserDateSearchRequester(YouTube youtube, String apiKey) {
-		this.youtube = youtube;
-		this.apiKey = apiKey;
-	}
+	private YouTube youtube;
+	private String apiKey;
 
 	@Override
-	public Tuple<List<String>, byte[]> performRequest(String dates) 
-			throws IOException {
+	public CrawlResult performRequest(CrawlID crawlID) throws QuotaException {
+		String dates = crawlID.getId();
 		String[] split = dates.split("\\s");
 		
 		String afterDate = split[0];
 		String beforeDate = split[1];
+		
+		CrawlResultBuilder crawlResultBuilder = new CrawlResultBuilder(crawlID);
 		
 		try {
 			YouTube.Search.List search = youtube.search().list("id");
@@ -76,9 +83,12 @@ public class UserDateSearchRequester
 			} while (nextPageToken != null);
 			
 			channelIdsBuffer.append(numResults);
-			return new Tuple<>(channelIds, 
-					channelIdsBuffer.toString().getBytes());
+			byte[] payload = channelIdsBuffer.toString().getBytes();
 			
+			PayloadBuilder payloadBuilder = new PayloadBuilder();
+			payloadBuilder.addPayload(dates, payload);
+			Map<String, byte[]> filesToSave = payloadBuilder.build();
+			return crawlResultBuilder.buildOK(filesToSave);
 		} catch (GoogleJsonResponseException e) {
 			GoogleJsonError details = e.getDetails();
 			
@@ -86,13 +96,32 @@ public class UserDateSearchRequester
 				Object statusCode = details.get("code");
 				
 				if (statusCode.equals(_403_QUOTA_ERR)) {
-					throw new QuotaException(e);
+					QuotaException quotaException = new QuotaException(e);
+					throw quotaException;
 				} else {
-					throw e;
+					return crawlResultBuilder.buildNonQuotaError(
+							new UnableToCrawlException(e));
 				}
 			} else {
-				throw e;
+				return crawlResultBuilder.buildNonQuotaError(
+						new UnableToCrawlException(e));
 			}
+		} catch (IOException e) {
+			return crawlResultBuilder.buildNonQuotaError(
+					new UnableToCrawlException(e));
 		}
+	}
+
+	@Override
+	public Set<String> getRequiredParameters() {
+		return Sets.newHashSet(YTConstants.API_KEY);
+	}
+
+	@Override
+	public Requester realConfigurate(Configuration configuration)
+			throws Exception {
+		this.youtube = YTConstants.buildYoutubeService();
+		this.apiKey = configuration.getString(YTConstants.API_KEY);
+		return this;
 	}
 }

@@ -1,13 +1,24 @@
-package br.ufmg.dcc.vod.spiderpig.jobs.youtube.api;
+package br.ufmg.dcc.vod.spiderpig.jobs.youtube.video.api;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.configuration.Configuration;
+
+import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
+import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResult;
+import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultBuilder;
+import br.ufmg.dcc.vod.spiderpig.jobs.PayloadBuilder;
 import br.ufmg.dcc.vod.spiderpig.jobs.QuotaException;
 import br.ufmg.dcc.vod.spiderpig.jobs.Requester;
+import br.ufmg.dcc.vod.spiderpig.jobs.youtube.UnableToCrawlException;
+import br.ufmg.dcc.vod.spiderpig.jobs.youtube.YTConstants;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
+import com.google.common.collect.Sets;
 import com.google.gdata.client.youtube.YouTubeService;
 import com.google.gdata.data.DateTime;
 import com.google.gdata.data.Link;
@@ -23,18 +34,14 @@ import com.google.gdata.data.youtube.YtStatistics;
 import com.google.gdata.util.ServiceException;
 import com.google.gson.Gson;
 
-public class VideoAPIRequester implements Requester<byte[]> {
+public class VideoAPIRequester extends ConfigurableRequester {
 	
 	private static final String QUOTA_ERR = "yt:quota";
 	private YouTubeService service;
 
-	public VideoAPIRequester(String appName, String devKey) {
-		this.service = new YouTubeService(appName, devKey);
-	}
-	
 	@Override
-	public byte[] performRequest(String crawlID) 
-			throws QuotaException, ServiceException, IOException {
+	public CrawlResult performRequest(CrawlID crawlID) throws QuotaException {
+		CrawlResultBuilder resultBuilder = new CrawlResultBuilder(crawlID);
 		try {
 			VideoEntry videoEntry = service.getEntry(
 					new URL("http://gdata.youtube.com/feeds/api/videos/" + 
@@ -142,15 +149,36 @@ public class VideoAPIRequester implements Requester<byte[]> {
 			
 			Gson gson = new Gson();
 			String json = gson.toJson(videoJson);
-			return json.getBytes();
+			Map<String,byte[]> filesToSave = 
+					new PayloadBuilder().
+					addPayload(crawlID, json.getBytes(), "-api.json").
+					build();
+			return resultBuilder.buildOK(filesToSave);
 		} catch (ServiceException e) {
-			if (e.getMessage().contains(QUOTA_ERR)) {
+			String eString = e.toString();
+			if (eString != null && eString.contains(QUOTA_ERR)) {
 				throw new QuotaException(e);
 			} else {
-				throw e;
+				UnableToCrawlException cause = new UnableToCrawlException(e);
+				return resultBuilder.buildNonQuotaError(cause);
 			}
 		} catch (IOException e) {
-			throw e;
+			UnableToCrawlException cause = new UnableToCrawlException(e);
+			return resultBuilder.buildNonQuotaError(cause);
 		}
+	}
+
+	@Override
+	public Requester realConfigurate(Configuration configuration) 
+			throws Exception {
+		String devKey = configuration.getString(YTConstants.DEV_KEY_V2);
+		String appName = configuration.getString(YTConstants.APP_NAME_V2);
+		this.service = new YouTubeService(appName, devKey);
+		return this;
+	}
+
+	@Override
+	public Set<String> getRequiredParameters() {
+		return Sets.newHashSet(YTConstants.DEV_KEY_V2, YTConstants.APP_NAME_V2);
 	}
 }

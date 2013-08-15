@@ -4,6 +4,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
+
 import com.google.common.base.Stopwatch;
 
 public class ThroughputManager {
@@ -24,44 +26,49 @@ public class ThroughputManager {
 		LOG.info("Will sleep every " + timeBetweenRequests + " ms");
 	}
 	
-	private <T> T getAndStartWatch(String crawlID, Requester<T> requester) 
-			throws Exception {
+	private CrawlResult getAndStartWatch(CrawlID crawlID, Requester requester) { 
 		
-		T returnVal = null;
 		boolean backoff = true;
-		while(backoff) {
+		CrawlResult result = null;
+		do {
 			try {
-				returnVal = requester.performRequest(crawlID);
+				result = requester.performRequest(crawlID);
 				backoff = false;
-			} catch (QuotaException qe) {
-				LOG.info("Quota Exceeded. Backing off for " +
-						this.backoffTime + "ms -" + qe);
+			} catch (QuotaException e) {
+				LOG.info("Quota Exceeded. Backing off for " + 
+						this.backoffTime + "ms -" + e);
 				
-				if (this.backoffTime > 0)
-					TimeUnit.MILLISECONDS.sleep(this.backoffTime);
-			} catch (Exception e) {
-				throw e;
+				if (this.backoffTime > 0) {
+					try {
+						TimeUnit.MILLISECONDS.sleep(this.backoffTime);
+					} catch (InterruptedException ie) {
+					}
+				}
 			}
-		}
+		} while (backoff);
+		
+		this.stopwatch.reset();
 		this.stopwatch.start();
-		return returnVal;
+		
+		return result;
 	}
 
-	public <T> T sleepAndPerform(String crawlID, Requester<T> requester) 
-			throws Exception {
+	public CrawlResult sleepAndPerform(CrawlID crawlID, Requester requester) {
 		if (!this.stopwatch.isRunning()) {
 			return getAndStartWatch(crawlID, requester);
 		} else {
-			this.stopwatch.stop();
 			long elapsedMillis = this.stopwatch.elapsedMillis();
 			long toSleep = timeBetweenRequests - elapsedMillis;
 			if (toSleep > MIN_DELTA) {
 				LOG.info("" +elapsedMillis + " ms ellapsed since last request."
 						 + " sleeping for " + toSleep + " ms");
-				TimeUnit.MILLISECONDS.sleep(toSleep);
+				try {
+					TimeUnit.MILLISECONDS.sleep(toSleep);
+				} catch (InterruptedException e) {
+				}
 			}
 			
 			return getAndStartWatch(crawlID, requester);
 		}
-	}	
+	}
 }

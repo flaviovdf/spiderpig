@@ -1,7 +1,6 @@
 package br.ufmg.dcc.vod.spiderpig;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -17,6 +16,7 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.apache.commons.configuration.BaseConfiguration;
+import org.apache.commons.configuration.Configuration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,9 +25,11 @@ import br.ufmg.dcc.vod.spiderpig.common.distributed.RemoteMessageSender;
 import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.FDServerActor;
 import br.ufmg.dcc.vod.spiderpig.common.queue.QueueService;
 import br.ufmg.dcc.vod.spiderpig.jobs.JobExecutor;
+import br.ufmg.dcc.vod.spiderpig.jobs.Requester;
+import br.ufmg.dcc.vod.spiderpig.jobs.TimeBasedJobExecutor;
 import br.ufmg.dcc.vod.spiderpig.jobs.test.RandomizedSyncGraph;
 import br.ufmg.dcc.vod.spiderpig.jobs.test.TestFileSaver;
-import br.ufmg.dcc.vod.spiderpig.jobs.test.TestJobExecutor;
+import br.ufmg.dcc.vod.spiderpig.jobs.test.TestJobRequester;
 import br.ufmg.dcc.vod.spiderpig.master.walker.BFSWalker;
 import br.ufmg.dcc.vod.spiderpig.master.walker.RandomWalker;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
@@ -46,7 +48,8 @@ public class DistributedCrawlerTest  extends TestCase {
 	public void setUp() throws Exception {
 		String tmpDir = System.getProperty("java.io.tmpdir");
 		do  {
-			myTempDir = new File(tmpDir + File.separator + new Random().nextInt());
+			myTempDir = new File(tmpDir + File.separator + 
+					new Random().nextInt());
 		} while (myTempDir.exists());
 		
 		myTempDir.mkdirs();
@@ -68,11 +71,20 @@ public class DistributedCrawlerTest  extends TestCase {
 	}
 	
 	public Set<InetSocketAddress> initiateServers(int numServers, 
-			RandomizedSyncGraph g, int basePort) throws IOException {
+			RandomizedSyncGraph g, int basePort) throws Exception {
 		Set<InetSocketAddress> ids = new HashSet<>();
 		RemoteMessageSender sender = new RemoteMessageSender();
 		for (int i = 0; i < numServers; i++) {
-			JobExecutor jobExecutor = new TestJobExecutor(g);
+			Requester requester = new TestJobRequester(g);
+			
+			Configuration configuration = new BaseConfiguration();
+			configuration.addProperty(TimeBasedJobExecutor.BKOFF_TIME, 0);
+			configuration.addProperty(TimeBasedJobExecutor.SLEEP_TIME, 0);
+			
+			JobExecutor jobExecutor = 
+					new TimeBasedJobExecutor(requester).
+					configurate(configuration);
+			
 			QueueService service = new QueueService("localhost", basePort + i);
 			
 			WorkerActor actor = new WorkerActor(jobExecutor, sender);

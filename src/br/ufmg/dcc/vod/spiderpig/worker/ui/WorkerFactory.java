@@ -12,14 +12,15 @@ import br.ufmg.dcc.vod.spiderpig.common.distributed.RemoteMessageSender;
 import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.FDServerActor;
 import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.KillerActor;
 import br.ufmg.dcc.vod.spiderpig.common.queue.QueueService;
-import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableJobExecutor;
+import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
+import br.ufmg.dcc.vod.spiderpig.jobs.TimeBasedJobExecutor;
 import br.ufmg.dcc.vod.spiderpig.worker.WorkerActor;
 
 public class WorkerFactory extends AbstractConfigurable<Worker> {
 
 	public static final String HOSTNAME = "service.hostname";
 	public static final String PORT = "service.port";
-	public static final String JOB = "worker.job";
+	public static final String REQUESTER = "worker.requester";
 
 	@Override
 	public Worker realConfigurate(Configuration configuration) 
@@ -27,19 +28,22 @@ public class WorkerFactory extends AbstractConfigurable<Worker> {
 		
 		String hostname = configuration.getString(HOSTNAME);
 		int port = configuration.getInt(PORT);
-		String jobExecClass = configuration.getString(JOB);
+		String requesterClass = configuration.getString(REQUESTER);
 		
-		Constructor<?> constructor = Class.forName(jobExecClass)
+		Constructor<?> constructor = Class.forName(requesterClass)
 				.getConstructor();
-		ConfigurableJobExecutor executor = 
-				(ConfigurableJobExecutor) constructor.newInstance();
+		ConfigurableRequester requester = 
+				(ConfigurableRequester) constructor.newInstance();
 		
-		executor.configurate(configuration);
+		requester.configurate(configuration);
+		
+		TimeBasedJobExecutor jobExecutor = new TimeBasedJobExecutor(requester);
+		jobExecutor.configurate(configuration);
 		
 		QueueService service = new QueueService(hostname, port);
 		RemoteMessageSender sender = new RemoteMessageSender();
 		
-		WorkerActor workerActor = new WorkerActor(executor, sender);
+		WorkerActor workerActor = new WorkerActor(jobExecutor, sender);
 		workerActor.withSimpleQueue(service);
 		
 		KillerActor killerActor = new KillerActor(sender);
@@ -53,6 +57,6 @@ public class WorkerFactory extends AbstractConfigurable<Worker> {
 
 	@Override
 	public Set<String> getRequiredParameters() {
-		return new HashSet<>(Arrays.asList(HOSTNAME, PORT, JOB));
+		return new HashSet<>(Arrays.asList(HOSTNAME, PORT, REQUESTER));
 	}
 }

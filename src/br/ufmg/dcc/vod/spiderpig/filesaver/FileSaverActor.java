@@ -1,5 +1,7 @@
 package br.ufmg.dcc.vod.spiderpig.filesaver;
 
+import java.io.IOException;
+
 import br.ufmg.dcc.vod.spiderpig.common.queue.Actor;
 import br.ufmg.dcc.vod.spiderpig.common.queue.QueueProcessor;
 import br.ufmg.dcc.vod.spiderpig.common.queue.serializer.MessageLiteSerializer;
@@ -30,5 +32,9 @@ public class FileSaverActor extends Actor<UploadMessage>
 	public void process(UploadMessage t) {
 		FileWrapper wrapper = FileWrapper.fromProtocolBuffer(t);
 		saver.save(wrapper.getFileID(), wrapper.getFilePayload());
+	}
+	
+	public boolean closeSaver() throws IOException {
+		return this.saver.close();
 	}
 }
