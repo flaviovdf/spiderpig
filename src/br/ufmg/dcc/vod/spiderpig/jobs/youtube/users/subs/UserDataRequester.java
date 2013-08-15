@@ -3,11 +3,20 @@ package br.ufmg.dcc.vod.spiderpig.jobs.youtube.users.subs;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import br.ufmg.dcc.vod.spiderpig.common.Tuple;
+import org.apache.commons.configuration.Configuration;
+
+import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
+import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResult;
+import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultBuilder;
+import br.ufmg.dcc.vod.spiderpig.jobs.PayloadBuilder;
 import br.ufmg.dcc.vod.spiderpig.jobs.QuotaException;
 import br.ufmg.dcc.vod.spiderpig.jobs.Requester;
+import br.ufmg.dcc.vod.spiderpig.jobs.youtube.UnableToCrawlException;
+import br.ufmg.dcc.vod.spiderpig.jobs.youtube.YTConstants;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -18,8 +27,7 @@ import com.google.api.services.youtube.model.Subscription;
 import com.google.api.services.youtube.model.SubscriptionListResponse;
 import com.google.common.collect.Sets;
 
-public class UserDataRequester 
-		implements Requester<Tuple<Channel, List<Subscription>>> {
+public class UserDataRequester extends ConfigurableRequester {
 
 	private static final String SUB_DETAILS = "id,snippet,contentDetails," +
 			"subscriberSnippet";
@@ -30,28 +38,46 @@ public class UserDataRequester
 	
 	private static final int _403_QUOTA_ERR = 403;
 	
-	private final YouTube youtube;
-	private final String apiKey;
+	private YouTube youtube;
+	private String apiKey;
 	
-	public UserDataRequester(YouTube youtube, String apiKey) {
-		this.youtube = youtube;
-		this.apiKey = apiKey;
-	}
-
 	@Override
-	public Tuple<Channel, List<Subscription>> performRequest(String crawlID)
-			throws QuotaException, Exception {
-		
-		Channel userChannel = getUserChannel(crawlID);
-		List<Subscription> links = new ArrayList<>();
-		
-		for (String order : SUB_ORDERS) {
-			links.addAll(getLinks(userChannel.getId(), order));
+	public CrawlResult performRequest(CrawlID crawlID) throws QuotaException {
+		CrawlResultBuilder crawlResultBuilder = new CrawlResultBuilder(crawlID);
+		try {
+			String userId = crawlID.getId();
+			Channel userChannel = getUserChannel(userId);
+			
+			PayloadBuilder payloadBuilder = new PayloadBuilder();
+			payloadBuilder.addPayload("userId-data-" + userId, 
+					userChannel.toPrettyString().getBytes());
+			
+			List<CrawlID> links = new ArrayList<>();
+			
+			for (String order : SUB_ORDERS) {
+				List<Subscription> subs = getLinks(userChannel.getId(), order);
+				for (Subscription sub : subs) {
+					String subId = sub.getSubscriberSnippet().getChannelId();
+					CrawlID toFollow = CrawlID.newBuilder().
+							setId(subId).
+							build();
+					links.add(toFollow);
+					payloadBuilder.addPayload(
+							"userId-sub-" +userId + "-" + subId, 
+							userChannel.toPrettyString().getBytes());
+				}
+			}
+			
+			Map<String, byte[]> filesToSave = payloadBuilder.build();
+			return crawlResultBuilder.buildOK(filesToSave, links);
+		} catch (QuotaException e) {
+			throw e;
+		} catch (IOException e) {
+			return crawlResultBuilder.buildNonQuotaError(
+					new UnableToCrawlException(e));
 		}
-		
-		return new Tuple<Channel, List<Subscription>>(userChannel, links);
 	}
-
+	
 	private List<Subscription> getLinks(String userID, String order) 
 			throws IOException {
 		YouTube.Subscriptions.List subsList = 
@@ -127,5 +153,20 @@ public class UserDataRequester
 				throw e;
 			}
 		}
+	}
+
+
+	@Override
+	public Set<String> getRequiredParameters() {
+		return Sets.newHashSet(YTConstants.API_KEY);
+	}
+
+
+	@Override
+	public Requester realConfigurate(Configuration configuration)
+			throws Exception {
+		this.apiKey = configuration.getString(YTConstants.API_KEY);
+		this.youtube = YTConstants.buildYoutubeService();
+		return this;
 	}
 }

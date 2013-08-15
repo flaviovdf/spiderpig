@@ -1,7 +1,9 @@
 package br.ufmg.dcc.vod.spiderpig.jobs;
 
-public interface Requester<T> {
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
-	T performRequest(String crawlID) throws QuotaException, Exception;
+public interface Requester {
+
+	CrawlResult performRequest(CrawlID crawlID) throws QuotaException;
 
 }

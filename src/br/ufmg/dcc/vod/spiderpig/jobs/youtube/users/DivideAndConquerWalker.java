@@ -44,7 +44,7 @@ public class DivideAndConquerWalker  extends AbstractWalker {
 		LOG.info("Received " + links.size() + " users");
 		
 		if (links.size() < OVERFLOW_NUM) {
-			LOG.info("Undeflor! Done " + id.getId());
+			LOG.info("No Overflow! Done " + id.getId());
 			return Collections.emptyList();
 		}
 		
@@ -61,8 +61,9 @@ public class DivideAndConquerWalker  extends AbstractWalker {
 			long afterTime = after.getTime();
 			long beforeTime = before.getTime();
 			
-			long halfDelta = ((beforeTime - afterTime) / 2);
+			long halfDelta = (long) Math.ceil(((beforeTime - afterTime) / 2));
 			if (halfDelta < ONE_SECOND_MS) {
+				LOG.info("Less than a second left, done!" + id.getId());
 				return Collections.emptyList();
 			}
 			
