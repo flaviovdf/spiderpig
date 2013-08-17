@@ -31,8 +31,7 @@ import com.google.common.collect.Sets;
 
 public class UserDataRequester extends ConfigurableRequester {
 
-	private static final String SUB_DETAILS = "id,snippet,contentDetails," +
-			"subscriberSnippet";
+	private static final String SUB_DETAILS = "id,snippet,contentDetails";
 	private static final String USER_DETAILS = "id,snippet,brandingSettings," +
 			"contentDetails,invideoPromotion,statistics,topicDetails";
 	private final Set<String> SUB_ORDERS = 
@@ -59,12 +58,16 @@ public class UserDataRequester extends ConfigurableRequester {
 			for (String order : SUB_ORDERS) {
 				List<Subscription> subs = getLinks(userChannel.getId(), order);
 				for (Subscription sub : subs) {
-					String subId = sub.getSubscriberSnippet().getChannelId();
+					String nextChannel =
+							sub.getSnippet().getResourceId().getChannelId();
+					
 					CrawlID toFollow = CrawlID.newBuilder().
-							setId(subId).
+							setId(nextChannel).
 							build();
+					String subId = sub.getId();
 					payloadBuilder.addPayload(
-							"userId-sub-" +userId + "-" + subId, 
+							"userId-" + userId + "-other-" + nextChannel + 
+							"-sub-" + subId, 
 							sub.toPrettyString().getBytes());
 					links.add(toFollow);
 				}
