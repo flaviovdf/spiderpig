@@ -45,44 +45,56 @@ public class UserDataRequester extends ConfigurableRequester {
 	@Override
 	public CrawlResult performRequest(CrawlID crawlID) throws QuotaException {
 		CrawlResultBuilder crawlResultBuilder = new CrawlResultBuilder(crawlID);
+		CrawlResult result = null;
+		
+		String userId = crawlID.getId();
+		Channel userChannel = null;
+		PayloadBuilder payloadBuilder = null;
+		
 		try {
-			String userId = crawlID.getId();
-			Channel userChannel = getUserChannel(userId);
-			
-			PayloadBuilder payloadBuilder = new PayloadBuilder();
+			userChannel = getUserChannel(userId);
+			payloadBuilder = new PayloadBuilder();
 			payloadBuilder.addPayload("userId-data-" + userId, 
 					userChannel.toPrettyString().getBytes());
-			
-			List<CrawlID> links = new ArrayList<>();
-			
-			for (String order : SUB_ORDERS) {
-				List<Subscription> subs = getLinks(userChannel.getId(), order);
-				for (Subscription sub : subs) {
-					String nextChannel =
-							sub.getSnippet().getResourceId().getChannelId();
-					
-					CrawlID toFollow = CrawlID.newBuilder().
-							setId(nextChannel).
-							build();
-					String subId = sub.getId();
-					payloadBuilder.addPayload(
-							"userId-" + userId + "-other-" + nextChannel + 
-							"-sub-" + subId, 
-							sub.toPrettyString().getBytes());
-					links.add(toFollow);
-				}
-			}
-			
-			Map<String, byte[]> filesToSave = payloadBuilder.build();
-			return crawlResultBuilder.buildOK(filesToSave, links);
 		} catch (QuotaException e) {
 			throw e;
 		} catch (IOException e) {
-			return crawlResultBuilder.buildNonQuotaError(
+			result = crawlResultBuilder.buildNonQuotaError(
 					new UnableToCrawlException(e));
 		}
+		
+		List<CrawlID> toFollow = new ArrayList<>();
+		if (result == null) { //No error for basic user data. Get links
+			for (String order : SUB_ORDERS) {
+				try {
+					List<Subscription> subs = getLinks(userId, order);
+					for (Subscription sub : subs) {
+						String nextChannel =
+								sub.getSnippet().getResourceId().getChannelId();
+						String subId = sub.getId();
+						payloadBuilder.addPayload(
+								"userId-" + userId + "-other-" + nextChannel + 
+								"-sub-" + subId,
+								sub.toPrettyString().getBytes());
+						
+						CrawlID crawlIDtoFollow = CrawlID.newBuilder().
+								setId(nextChannel).
+								build();
+						toFollow.add(crawlIDtoFollow);
+					}
+				} catch (QuotaException e) {
+					throw e;
+				} catch (IOException e) {
+					// IGNORE we have user data
+				}
+			}
+			Map<String, byte[]> filesToSave = payloadBuilder.build();
+			result = crawlResultBuilder.buildOK(filesToSave, toFollow);
+		}
+		
+		return result;
 	}
-	
+
 	private List<Subscription> getLinks(String userID, String order) 
 			throws IOException {
 		YouTube.Subscriptions.List subsList = 
