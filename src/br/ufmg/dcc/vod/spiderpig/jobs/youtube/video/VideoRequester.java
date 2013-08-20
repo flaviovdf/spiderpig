@@ -41,13 +41,13 @@ public class VideoRequester extends ConfigurableRequester {
 		this.apiRequester.configurate(configuration);
 		this.htmlRequester.configurate(configuration);
 		
+		this.crawlHtml = configuration.getBoolean(CRAWL_HTML);
+		this.crawlApi = configuration.getBoolean(CRAWL_API);
+		
 		boolean hasOne = crawlHtml || crawlApi;
 		if (!hasOne)
 			throw new ConfigurationException("Please set at least one option"
 					+ " to crawl");
-		
-		this.crawlHtml = configuration.getBoolean(CRAWL_HTML);
-		this.crawlApi = configuration.getBoolean(CRAWL_API);
 		
 		return this;
 	}
