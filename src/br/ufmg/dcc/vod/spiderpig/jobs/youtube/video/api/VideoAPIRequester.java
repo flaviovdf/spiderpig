@@ -20,13 +20,8 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
 import com.google.common.collect.Sets;
 import com.google.gdata.client.youtube.YouTubeService;
-import com.google.gdata.data.DateTime;
-import com.google.gdata.data.Link;
-import com.google.gdata.data.extensions.Comments;
 import com.google.gdata.data.geo.impl.GeoRssWhere;
 import com.google.gdata.data.media.mediarss.MediaDescription;
-import com.google.gdata.data.youtube.CommentEntry;
-import com.google.gdata.data.youtube.CommentFeed;
 import com.google.gdata.data.youtube.VideoEntry;
 import com.google.gdata.data.youtube.YouTubeMediaGroup;
 import com.google.gdata.data.youtube.YtRating;
@@ -101,51 +96,51 @@ public class VideoAPIRequester extends ConfigurableRequester {
 			videoJson.put("likes", "" + likes);
 			videoJson.put("dislikes", "" + dislikes);
 			
-			Comments commentsObj = videoEntry.getComments();
-			boolean hasTotalComments = false;
-			long commentNum = 1;
-			if (commentsObj != null) {
-				Link commentLink = commentsObj.getFeedLink();
-				while (commentLink != null) {
-					String commentUrl = commentLink.getHref();
-					CommentFeed commentFeed = service.getFeed(
-							new URL(commentUrl), CommentFeed.class);
-					commentFeed.setItemsPerPage(1000);
-					
-					
-					if (!hasTotalComments) {
-						int totalResults = commentFeed.getTotalResults();
-						hasTotalComments = true;
-						videoJson.put("comments", "" + totalResults);
-					}
-					
-					for(CommentEntry comment : commentFeed.getEntries()) {
-						String[] split = comment.getId().split("\\/");
-						String id = split[split.length - 1];
-						String commentAuthor = comment.getAuthors().
-								get(0).getName();
-						String commentText = comment.getPlainTextContent();
-						DateTime commentDate = comment.getUpdated();
-						boolean isSpam = comment.hasSpamHint();
-						
-						videoJson.put("comment-" + commentNum + "-id", id);
-						videoJson.put("comment-" + commentNum + "-author", 
-								commentAuthor);
-						videoJson.put("comment-" + commentNum + "-text", 
-								commentText);
-						videoJson.put("comment-" + commentNum + "-date", 
-								commentDate.toString());
-						videoJson.put("comment-" + commentNum + "-spam", 
-								""+isSpam);
-						commentNum += 1;
-					}
-					
-					commentLink = commentFeed.getLink("next", 
-							"application/atom+xml");
-				}
-				
-				videoJson.put("comment-numdown", "" + (commentNum - 1));
-			}
+//			Comments commentsObj = videoEntry.getComments();
+//			boolean hasTotalComments = false;
+//			long commentNum = 1;
+//			if (commentsObj != null) {
+//				Link commentLink = commentsObj.getFeedLink();
+//				while (commentLink != null) {
+//					String commentUrl = commentLink.getHref();
+//					CommentFeed commentFeed = service.getFeed(
+//							new URL(commentUrl), CommentFeed.class);
+//					commentFeed.setItemsPerPage(1000);
+//					
+//					
+//					if (!hasTotalComments) {
+//						int totalResults = commentFeed.getTotalResults();
+//						hasTotalComments = true;
+//						videoJson.put("comments", "" + totalResults);
+//					}
+//					
+//					for(CommentEntry comment : commentFeed.getEntries()) {
+//						String[] split = comment.getId().split("\\/");
+//						String id = split[split.length - 1];
+//						String commentAuthor = comment.getAuthors().
+//								get(0).getName();
+//						String commentText = comment.getPlainTextContent();
+//						DateTime commentDate = comment.getUpdated();
+//						boolean isSpam = comment.hasSpamHint();
+//						
+//						videoJson.put("comment-" + commentNum + "-id", id);
+//						videoJson.put("comment-" + commentNum + "-author", 
+//								commentAuthor);
+//						videoJson.put("comment-" + commentNum + "-text", 
+//								commentText);
+//						videoJson.put("comment-" + commentNum + "-date", 
+//								commentDate.toString());
+//						videoJson.put("comment-" + commentNum + "-spam", 
+//								""+isSpam);
+//						commentNum += 1;
+//					}
+//					
+//					commentLink = commentFeed.getLink("next", 
+//							"application/atom+xml");
+//				}
+//				
+//				videoJson.put("comment-numdown", "" + (commentNum - 1));
+//			}
 			
 			Gson gson = new Gson();
 			String json = gson.toJson(videoJson);

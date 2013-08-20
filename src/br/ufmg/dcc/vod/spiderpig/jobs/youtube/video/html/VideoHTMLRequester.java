@@ -107,6 +107,24 @@ public class VideoHTMLRequester extends ConfigurableRequester {
 		return "";
 	}
 	
+	private byte[] extractStats(byte[] statsHtml) throws IOException {
+		BufferedReader bis = 
+				new BufferedReader(new InputStreamReader(
+						new ByteArrayInputStream(statsHtml)));
+		String inputLine;
+		while ((inputLine = bis.readLine()) != null) {
+			if (inputLine.contains("<graph_data>")) {
+				int firstIndexOf = inputLine.indexOf("{");
+				int lastIndexOf = inputLine.lastIndexOf("}");
+				String jsonData = 
+						inputLine.substring(firstIndexOf, lastIndexOf + 1);
+				return jsonData.getBytes();
+			}
+		}
+		
+		return "".getBytes();
+	}
+	
 	@Override
 	public CrawlResult performRequest(CrawlID crawlID) {
 		CrawlResultBuilder resultBuilder = new CrawlResultBuilder(crawlID);
@@ -116,9 +134,6 @@ public class VideoHTMLRequester extends ConfigurableRequester {
 		try {
 			HttpGet getMethod = new HttpGet(createVideoHTMLUrl(id));
 			byte[] vidHtml = performRequest(getMethod, id);
-			
-			payloadBuilder.addPayload(crawlID, vidHtml, "-content.html");
-			
 			String ajaxToken = getSessionToken(vidHtml);
 			
 			HttpPost postMethod = new HttpPost(createVideoStatsUrl(id));
@@ -129,7 +144,8 @@ public class VideoHTMLRequester extends ConfigurableRequester {
 					new UrlEncodedFormEntity(formParams, "UTF-8");
 			postMethod.setEntity(entity);
 			byte[] statsHtml = performRequest(postMethod, id);
-			payloadBuilder.addPayload(crawlID, statsHtml, "-stats.html");
+			byte[] statsJson = extractStats(statsHtml);
+			payloadBuilder.addPayload(crawlID, statsJson, "-stats.json");
 			return resultBuilder.buildOK(payloadBuilder.build());
 		} catch (IOException | URISyntaxException e) {
 			UnableToCrawlException cause = new UnableToCrawlException(e);
