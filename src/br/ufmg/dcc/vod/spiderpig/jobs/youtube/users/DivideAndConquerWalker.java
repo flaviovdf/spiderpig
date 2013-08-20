@@ -2,10 +2,10 @@ package br.ufmg.dcc.vod.spiderpig.jobs.youtube.users;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
@@ -34,16 +34,18 @@ public class DivideAndConquerWalker  extends AbstractWalker {
 	}
 
 	@Override
-	protected List<CrawlID> filterSeeds(List<CrawlID> seeds) {
+	protected Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
 		return seeds;
 	}
 
 	@Override
-	protected List<CrawlID> getToWalkImpl(CrawlID id, List<CrawlID> links) {
+	protected Iterable<CrawlID> getToWalkImpl(CrawlID id, 
+			Iterable<CrawlID> links) {
 		
-		LOG.info("Received " + links.size() + " users");
+		ArrayList<CrawlID> linksList = Lists.newArrayList(links);
+		LOG.info("Received " + linksList.size() + " users");
 		
-		if (links.size() < OVERFLOW_NUM) {
+		if (linksList.size() < OVERFLOW_NUM) {
 			LOG.info("No Overflow! Done " + id.getId());
 			return Collections.emptyList();
 		}

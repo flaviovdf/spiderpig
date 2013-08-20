@@ -38,11 +38,11 @@ public class IDStruct {
 		return Sets.newCopyOnWriteArraySet(waitingLinks);
 	}
 	
-	public void initLinks(List<CrawlID> links) {
+	public void initLinks(Iterable<CrawlID> links) {
 		Preconditions.checkNotNull(links);
 		
 		if (this.links == null) {
-			this.links = links;
+			this.links = Lists.newArrayList(links);
 			this.waitingLinks = Sets.newHashSet(links);
 		}
 	}

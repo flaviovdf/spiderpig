@@ -1,8 +1,5 @@
 package br.ufmg.dcc.vod.spiderpig.master.walker;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import br.ufmg.dcc.vod.spiderpig.common.config.AbstractConfigurable;
 import br.ufmg.dcc.vod.spiderpig.master.processor.ProcessorActor;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
@@ -12,12 +9,11 @@ public abstract class AbstractWalker extends AbstractConfigurable<Void>
 		implements ConfigurableWalker {
 
 	private final StopCondition stopCondition;
-	private final ArrayList<CrawlID> seeds;
+	private Iterable<CrawlID> seeds;
 	private ProcessorActor processorActor;
 
 	public AbstractWalker() {
 		this.stopCondition = createStopCondition();
-		this.seeds = new ArrayList<>();
 	}
 	
 	private void dispatch(CrawlID crawlID) {
@@ -30,8 +26,8 @@ public abstract class AbstractWalker extends AbstractConfigurable<Void>
 	}
 	
 	@Override
-	public final void dispatchNext(CrawlID crawled, List<CrawlID> links) {
-		List<CrawlID> toWalk = getToWalkImpl(crawled, links);
+	public final void dispatchNext(CrawlID crawled, Iterable<CrawlID> links) {
+		Iterable<CrawlID> toWalk = getToWalkImpl(crawled, links);
 		for (CrawlID id : toWalk) {
 			dispatch(id);
 			this.stopCondition.dispatched();
@@ -56,24 +52,23 @@ public abstract class AbstractWalker extends AbstractConfigurable<Void>
 	}
 	
 	@Override
-	public final void addSeedID(CrawlID seed) {
-		this.seeds.add(seed);
+	public final void setSeeds(Iterable<CrawlID> seeds) {
+		this.seeds = seeds;
 	}
 	
 	@Override
 	public final void dispatchSeeds() {
-		List<CrawlID> seedDispatch = filterSeeds(this.seeds);
+		Iterable<CrawlID> seedDispatch = filterSeeds(this.seeds);
 		for (CrawlID id : seedDispatch) {
 			dispatch(id);
 			this.stopCondition.dispatched();
 		}
-		this.seeds.clear();
 	}
 	
-	protected abstract List<CrawlID> filterSeeds(List<CrawlID> seeds);
+	protected abstract Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds);
 	
-	protected abstract List<CrawlID> getToWalkImpl(CrawlID crawled, 
-			List<CrawlID> links);
+	protected abstract Iterable<CrawlID> getToWalkImpl(CrawlID crawled, 
+			Iterable<CrawlID> links);
 	
 	protected abstract void errorReceivedImpl(CrawlID crawled);
 	

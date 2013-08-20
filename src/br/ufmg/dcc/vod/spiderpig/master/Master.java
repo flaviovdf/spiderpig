@@ -1,13 +1,13 @@
 package br.ufmg.dcc.vod.spiderpig.master;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import br.ufmg.dcc.vod.spiderpig.common.FileLineIterable;
+import br.ufmg.dcc.vod.spiderpig.common.StringUtils;
 import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.FDListener;
 import br.ufmg.dcc.vod.spiderpig.jobs.WorkerInterested;
 import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerManager;
@@ -34,37 +34,14 @@ public class Master implements WorkerInterested, FDListener {
 		this.cache = cache;
 	}
 	
-	public void addSeed(List<String> seeds) {
-		CrawlID.Builder builder = CrawlID.newBuilder();
-		for (String seed : seeds) {
-			CrawlID crawlID = builder.setId(seed).build();
-			LOG.info("Adding Seed " + crawlID);
-			this.walker.addSeedID(crawlID);
-		}
-		
+	public void setSeeds(Iterable<String> seeds) {
+		Iterable<CrawlID> seedIds = StringUtils.toCrawlIdIterable(seeds);
+		this.walker.setSeeds(seedIds);
 		this.walker.dispatchSeeds();
 	}
 	
-	public void addSeed(File seedFile) throws IOException {
-		BufferedReader br = null;
-		String line;
-		CrawlID.Builder builder = CrawlID.newBuilder();
-		try	{
-			br = new BufferedReader(new FileReader(seedFile));
-			while((line = br.readLine()) != null) {
-				CrawlID crawlID = builder.setId(line).build();
-				LOG.info("Adding Seed " + crawlID);
-				this.walker.addSeedID(crawlID);
-			}
-			
-			br.close();
-		} finally {
-			if(br != null) {
-				br.close();
-			}
-		}
-		
-		this.walker.dispatchSeeds();
+	public void setSeeds(File seedFile) throws IOException {
+		setSeeds(new FileLineIterable(seedFile));
 	}
 	
 	@Override

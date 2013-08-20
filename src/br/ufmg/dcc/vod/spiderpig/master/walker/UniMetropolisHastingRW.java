@@ -45,7 +45,8 @@ public class UniMetropolisHastingRW extends AbstractWalker {
 	}
 	
 	@Override
-	protected List<CrawlID> getToWalkImpl(CrawlID crawled, List<CrawlID> links) {
+	protected Iterable<CrawlID> getToWalkImpl(CrawlID crawled, 
+			Iterable<CrawlID> links) {
 		
 		if (this.steps == this.maxSteps)
 			return Collections.emptyList();
@@ -119,7 +120,7 @@ public class UniMetropolisHastingRW extends AbstractWalker {
 	}
 
 	private Set<CrawlID> initAndMarkReverseLinksDone(CrawlID id, 
-			List<CrawlID> links) {
+			Iterable<CrawlID> links) {
 		
 		Set<CrawlID> returnVal = Sets.newHashSet(links);
 		returnVal.add(id);
@@ -160,7 +161,8 @@ public class UniMetropolisHastingRW extends AbstractWalker {
 		return struct;
 	}
 
-	protected List<CrawlID> filterSeeds(List<CrawlID> seeds) {
+	@Override
+	protected Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
 		return seeds;
 	}
 

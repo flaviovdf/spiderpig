@@ -15,7 +15,7 @@ public class TestFileSaver implements FileSaver {
 	private AtomicInteger saved = new AtomicInteger(0);
 	
 	@Override
-	public void save(String fileID, byte[] payload) {
+	public synchronized void save(String fileID, byte[] payload) {
 		this.crawled.put(Integer.parseInt(fileID), payload);
 		this.saved.incrementAndGet();
 	}

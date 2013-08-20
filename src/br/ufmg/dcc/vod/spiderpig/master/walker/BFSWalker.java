@@ -28,7 +28,8 @@ public class BFSWalker extends AbstractWalker {
 	private Tracker<String> tracker;
 
 	@Override
-	protected List<CrawlID> getToWalkImpl(CrawlID crawled, List<CrawlID> links) {
+	protected Iterable<CrawlID> getToWalkImpl(CrawlID crawled, 
+			Iterable<CrawlID> links) {
 		List<CrawlID> rv = new ArrayList<>();
 
 		if (!tracker.wasCrawled(crawled.getId())) {
@@ -48,7 +49,7 @@ public class BFSWalker extends AbstractWalker {
 	
 	
 	@Override
-	protected List<CrawlID> filterSeeds(List<CrawlID> seeds) {
+	protected Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
 		List<CrawlID> toDispatch = new ArrayList<>();
 		for (CrawlID seed : seeds)
 			if (tracker.addCrawled((seed.getId())))

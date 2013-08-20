@@ -1,6 +1,5 @@
 package br.ufmg.dcc.vod.spiderpig.master.walker;
 
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -21,7 +20,7 @@ public class ThreadSafeWalker implements ConfigurableWalker {
 	}
 	
 	@Override
-	public void dispatchNext(CrawlID crawled, List<CrawlID> links) {
+	public void dispatchNext(CrawlID crawled, Iterable<CrawlID> links) {
 		try {
 			lock.lock();
 			this.walker.dispatchNext(crawled, links);
@@ -42,10 +41,10 @@ public class ThreadSafeWalker implements ConfigurableWalker {
 	}
 	
 	@Override
-	public void addSeedID(CrawlID seed) {
+	public void setSeeds(Iterable<CrawlID> seeds) {
 		try {
 			lock.lock();
-			this.walker.addSeedID(seed);
+			this.walker.setSeeds(seeds);
 		} finally {
 			lock.unlock();
 		}

@@ -1,7 +1,5 @@
 package br.ufmg.dcc.vod.spiderpig.master.walker;
 
-import java.util.List;
-
 import br.ufmg.dcc.vod.spiderpig.master.processor.ProcessorActor;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
@@ -23,7 +21,7 @@ public interface Walker {
 	 * @param crawled ID crawled.
 	 * @param links Links discovered
 	 */
-	public void dispatchNext(CrawlID crawled, List<CrawlID> links);
+	public void dispatchNext(CrawlID crawled, Iterable<CrawlID> links);
 	
 	/**
 	 * Indicates to the walker that the following id produced an error.
@@ -44,9 +42,9 @@ public interface Walker {
 	 * Add seed ID the walker. Seeds are initial ids which may require special
 	 * treatment by different walkers.
 	 * 
-	 * @param seed seed ID.
+	 * @param seeds seeds to iterate ID.
 	 */
-	public void addSeedID(CrawlID seed);
+	public void setSeeds(Iterable<CrawlID> seeds);
 
 	/**
 	 * After seeds are indicated, this method will dispatch the ids which

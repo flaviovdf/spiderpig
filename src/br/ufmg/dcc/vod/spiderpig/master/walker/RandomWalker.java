@@ -1,9 +1,9 @@
 package br.ufmg.dcc.vod.spiderpig.master.walker;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -13,6 +13,8 @@ import org.apache.commons.configuration.Configuration;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.ExhaustCondition;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
+
+import com.google.common.collect.Lists;
 
 /**
  * Simulates a random walker which performs a limited number of steps. Moreover,
@@ -36,21 +38,27 @@ public class RandomWalker extends AbstractWalker {
 	}
 	
 	@Override
-	protected List<CrawlID> getToWalkImpl(CrawlID crawled, List<CrawlID> links) {
+	protected Iterable<CrawlID> getToWalkImpl(CrawlID crawled, 
+			Iterable<CrawlID> links) {
 		double pStop = this.random.nextDouble();
 		this.steps.incrementAndGet();
-		if (links == null || links.isEmpty() || 
+		
+		ArrayList<CrawlID> linksList = null;
+		if (links != null)
+			linksList = Lists.newArrayList(links);
+		
+		if (linksList == null || linksList.isEmpty() || 
 				this.steps.get() == this.maxSteps || 
 				pStop < this.stopProbability) {
 			return Collections.emptyList();
 		} else {
-			int rand = this.random.nextInt(links.size());
-			return Arrays.asList(links.get(rand));
+			int rand = this.random.nextInt(linksList.size());
+			return Arrays.asList(linksList.get(rand));
 		}
 	}
 
 	@Override
-	protected List<CrawlID> filterSeeds(List<CrawlID> seeds) {
+	protected Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
 		return seeds;
 	}
 

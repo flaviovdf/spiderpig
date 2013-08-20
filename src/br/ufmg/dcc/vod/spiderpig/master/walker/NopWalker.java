@@ -1,7 +1,6 @@
 package br.ufmg.dcc.vod.spiderpig.master.walker;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
@@ -19,12 +18,13 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 public class NopWalker extends AbstractWalker {
 
 	@Override
-	protected List<CrawlID> getToWalkImpl(CrawlID crawled, List<CrawlID> links) {
+	protected Iterable<CrawlID> getToWalkImpl(CrawlID crawled, 
+			Iterable<CrawlID> links) {
 		return Collections.emptyList();
 	}
 	
 	@Override
-	protected List<CrawlID> filterSeeds(List<CrawlID> seeds) {
+	protected Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
 		return seeds;
 	}
 

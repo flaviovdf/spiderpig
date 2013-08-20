@@ -29,7 +29,8 @@ public class EGONetWalker extends AbstractWalker {
 	private Tracker<String>[] trackers;
 
 	@Override
-	protected List<CrawlID> getToWalkImpl(CrawlID crawled, List<CrawlID> links) {
+	protected Iterable<CrawlID> getToWalkImpl(CrawlID crawled, 
+			Iterable<CrawlID> links) {
 		
 		int crawlIDLayer = -1;
 		for (int i = 0; i < trackers.length; i++) {
@@ -66,7 +67,7 @@ public class EGONetWalker extends AbstractWalker {
 	}
 
 	@Override
-	protected List<CrawlID> filterSeeds(List<CrawlID> seeds) {
+	protected Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
 		List<CrawlID> toDispatch = new ArrayList<>();
 		for (CrawlID seed : seeds)
 			if (this.trackers[0].addCrawled((seed.getId())))

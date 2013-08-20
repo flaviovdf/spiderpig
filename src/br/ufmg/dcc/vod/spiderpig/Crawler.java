@@ -3,7 +3,6 @@ package br.ufmg.dcc.vod.spiderpig;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.log4j.Logger;
@@ -45,16 +44,16 @@ public class Crawler {
 		this.fd = fd;
 	}
 	
-	public void addSeed(List<String> seedList) {
-		master.addSeed(seedList);
+	public void addSeed(Iterable<String> seeds) {
+		master.setSeeds(seeds);
 	}
 
 	public void addSeed(File seedFile) throws IOException {
-		master.addSeed(seedFile);
+		master.setSeeds(seedFile);
 	}
 	
 	public void addSeed(String... seeds) {
-		master.addSeed(Arrays.asList(seeds));
+		master.setSeeds(Arrays.asList(seeds));
 	}
 	
 	public void crawl() {
