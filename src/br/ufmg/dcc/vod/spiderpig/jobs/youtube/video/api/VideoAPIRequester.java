@@ -40,7 +40,7 @@ public class VideoAPIRequester extends ConfigurableRequester {
 		try {
 			VideoEntry videoEntry = service.getEntry(
 					new URL("http://gdata.youtube.com/feeds/api/videos/" + 
-							crawlID), VideoEntry.class);
+							crawlID.getId()), VideoEntry.class);
 			Map<String, String> videoJson = new LinkedHashMap<String, String>();
 			
 			String title = videoEntry.getTitle().getPlainText();
