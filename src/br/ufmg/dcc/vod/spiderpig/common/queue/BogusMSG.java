@@ -6,8 +6,14 @@ import java.io.OutputStream;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.MessageLite;
+import com.google.protobuf.Parser;
 
 class BogusMSG implements MessageLite {
+    
+    @Override 
+    public Parser<? extends MessageLite> getParserForType() {
+        return null;
+    }
 
 	@Override
 	public MessageLite getDefaultInstanceForType() {
