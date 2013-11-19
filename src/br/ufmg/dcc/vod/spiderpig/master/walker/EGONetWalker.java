@@ -8,6 +8,8 @@ import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 
+import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
+import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.ExhaustCondition;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.master.walker.tracker.BloomFilterTrackerFactory;
@@ -22,15 +24,16 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
  * 
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
-public class EGONetWalker extends AbstractWalker {
+public class EGONetWalker implements ConfigurableWalker {
+
+	private static final ExhaustCondition CONDITION = new ExhaustCondition();
 
 	public static final String NUM_NETS = "master.walkstrategy.ego.nets";
 	
 	private Tracker<String>[] trackers;
 
 	@Override
-	protected Iterable<CrawlID> getToWalkImpl(CrawlID crawled, 
-			Iterable<CrawlID> links) {
+	public Iterable<CrawlID> walk(CrawlID crawled, Iterable<CrawlID> links) {
 		
 		int crawlIDLayer = -1;
 		for (int i = 0; i < trackers.length; i++) {
@@ -67,7 +70,7 @@ public class EGONetWalker extends AbstractWalker {
 	}
 
 	@Override
-	protected Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
+	public Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
 		List<CrawlID> toDispatch = new ArrayList<>();
 		for (CrawlID seed : seeds)
 			if (this.trackers[0].addCrawled((seed.getId())))
@@ -77,17 +80,18 @@ public class EGONetWalker extends AbstractWalker {
 	}
 
 	@Override
-	protected void errorReceivedImpl(CrawlID crawled) {
+	public void errorReceived(CrawlID crawled) {
 	}
 
 	@Override
-	protected StopCondition createStopCondition() {
-		return new ExhaustCondition();
+	public StopCondition getStopCondition() {
+		return CONDITION;
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public Void realConfigurate(Configuration configuration) {
+	public void configurate(Configuration configuration, 
+			ConfigurableBuilder builder) throws BuildException {
 		
 		int numEgoNets = configuration.getInt(NUM_NETS) + 1;
 		
@@ -98,8 +102,6 @@ public class EGONetWalker extends AbstractWalker {
 		this.trackers = new Tracker[numEgoNets];
 		for (int i = 0; i < numEgoNets; i++)
 			this.trackers[i] = factory.createThreadSafeTracker(String.class);
-		
-		return null;
 	}
 
 	@Override

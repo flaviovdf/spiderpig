@@ -12,6 +12,8 @@ import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 
+import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
+import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.ExhaustCondition;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
@@ -29,8 +31,9 @@ import com.google.common.collect.Sets;
  * 
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
-public class UniMetropolisHastingRW extends AbstractWalker {
+public class UniMetropolisHastingRW implements ConfigurableWalker {
 	
+	private static final ExhaustCondition CONDITION = new ExhaustCondition();
 	private Map<CrawlID, IDStruct> nodes;
 	private Random random;
 	private long maxSteps;
@@ -45,8 +48,7 @@ public class UniMetropolisHastingRW extends AbstractWalker {
 	}
 	
 	@Override
-	protected Iterable<CrawlID> getToWalkImpl(CrawlID crawled, 
-			Iterable<CrawlID> links) {
+	public Iterable<CrawlID> walk(CrawlID crawled, Iterable<CrawlID> links) {
 		
 		if (this.steps == this.maxSteps)
 			return Collections.emptyList();
@@ -162,21 +164,22 @@ public class UniMetropolisHastingRW extends AbstractWalker {
 	}
 
 	@Override
-	protected Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
+	public Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
 		return seeds;
 	}
 
 	@Override
-	protected void errorReceivedImpl(CrawlID crawled) {
+	public void errorReceived(CrawlID crawled) {
 	}
 
 	@Override
-	protected StopCondition createStopCondition() {
-		return new ExhaustCondition();
+	public StopCondition getStopCondition() {
+		return CONDITION;
 	}
 	
 	@Override
-	public Void realConfigurate(Configuration configuration) throws Exception {
+	public void configurate(Configuration configuration, 
+			ConfigurableBuilder configurableBuilder) throws BuildException {
 		configuration.setProperty(RandomWalker.STOP_PROB, 0);
 		long seed = configuration.getLong(RandomWalker.RANDOM_SEED);
 		if (seed != 0)
@@ -185,7 +188,6 @@ public class UniMetropolisHastingRW extends AbstractWalker {
 			this.random = new Random();
 		
 		this.maxSteps = configuration.getLong(RandomWalker.STEPS);
-		return null;
 	}
 
 	@Override

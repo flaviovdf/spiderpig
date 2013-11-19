@@ -7,15 +7,16 @@ import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 
+import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
+import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
 import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
-import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResult;
-import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultBuilder;
-import br.ufmg.dcc.vod.spiderpig.jobs.PayloadBuilder;
+import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultFactory;
+import br.ufmg.dcc.vod.spiderpig.jobs.PayloadsFactory;
 import br.ufmg.dcc.vod.spiderpig.jobs.QuotaException;
-import br.ufmg.dcc.vod.spiderpig.jobs.Requester;
 import br.ufmg.dcc.vod.spiderpig.jobs.youtube.UnableToCrawlException;
 import br.ufmg.dcc.vod.spiderpig.jobs.youtube.YTConstants;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
 
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -25,7 +26,7 @@ import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
 import com.google.common.collect.Sets;
 
-public class TopicSearchRequester extends ConfigurableRequester {
+public class TopicSearchRequester implements ConfigurableRequester {
 
 	private static final int _400_ERR = 400;
 	private static final int _403_ERR = 403;
@@ -41,8 +42,8 @@ public class TopicSearchRequester extends ConfigurableRequester {
 		String topicName = split[split.length - 1];
 		String topicId = "/m/" + topicName;
 		
-		CrawlResultBuilder crawlResultBuilder = new CrawlResultBuilder(crawlID);
-		PayloadBuilder payloadBuilder = new PayloadBuilder();
+		CrawlResultFactory crawlResultBuilder = new CrawlResultFactory(crawlID);
+		PayloadsFactory payloadBuilder = new PayloadsFactory();
 		
 		try {
 			YouTube.Search.List search = this.youtube.search().list("id");
@@ -76,7 +77,7 @@ public class TopicSearchRequester extends ConfigurableRequester {
 			
 			payloadBuilder.addPayload(topicName, 
 					videoIdsBuffer.toString().getBytes());
-			return crawlResultBuilder.buildOK(payloadBuilder.build());
+			return crawlResultBuilder.buildOK(payloadBuilder.build(), null);
 		} catch (GoogleJsonResponseException e) {
 			GoogleJsonError details = e.getDetails();
 			
@@ -111,10 +112,9 @@ public class TopicSearchRequester extends ConfigurableRequester {
 	}
 
 	@Override
-	public Requester realConfigurate(Configuration configuration)
-			throws Exception {
+	public void configurate(Configuration configuration, 
+			ConfigurableBuilder builder) throws BuildException {
 		this.youtube = YTConstants.buildYoutubeService();
 		this.apiKey = configuration.getString(YTConstants.API_KEY);
-		return this;
 	}
 }

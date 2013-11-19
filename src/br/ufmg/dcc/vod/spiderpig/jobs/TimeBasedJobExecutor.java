@@ -1,70 +1,49 @@
 package br.ufmg.dcc.vod.spiderpig.jobs;
 
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 
+import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
 import br.ufmg.dcc.vod.spiderpig.common.config.Configurable;
-import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
-import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResult.ResultState;
+import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
 
 import com.google.common.collect.Sets;
 
-public class TimeBasedJobExecutor 
-		implements Configurable<JobExecutor>, JobExecutor {
+public class TimeBasedJobExecutor implements Configurable, JobExecutor {
 
 	public static final String BKOFF_TIME = "worker.job.backofftime";
 	public static final String SLEEP_TIME = "worker.job.sleeptime";
+	public static final String REQUESTER = "worker.requester";
 	
-	private final Requester requester;
+	private Requester requester;
 	private ThroughputManager manager;
 
-	public TimeBasedJobExecutor(Requester requester) {
-		this.requester = requester;
-	}
-	
 	@Override
-	public void crawl(CrawlID id, WorkerInterested interested, 
-			FileSaver saver) {
+	public void crawl(CrawlID id, WorkerInterested interested) {
 		CrawlResult result = manager.sleepAndPerform(id, requester);
-		ResultState state = result.getState();
-		switch (state) {
-		case OK:
-			okResult(id, interested, saver, result);
-			break;
-		default:
-			interested.crawlError(id, result.getErrorCause().toString());
-			break;
-		}
-	}
-
-	private void okResult(CrawlID id, WorkerInterested interested, 
-			FileSaver saver, CrawlResult result) {
-		
-		for (Entry<String, byte[]> e : result.getFilesToSave().entrySet()) {
-			String fileID = e.getKey();
-			byte[] payload = e.getValue();
-			saver.save(fileID, payload);
-		}
-		interested.crawlDone(id, result.getToQueue());
+		interested.crawlDone(result);
 	}
 
 	@Override
-	public JobExecutor configurate(Configuration configuration)
-			throws Exception {
+	public void configurate(Configuration configuration, 
+			ConfigurableBuilder configurableBuilder) throws BuildException {
 		long timeBetweenRequests = 
 				configuration.getLong(SLEEP_TIME);
 		long backOffTime = configuration.getLong(BKOFF_TIME);
 		
+		String requesterClass = configuration.getString(REQUESTER);
+		this.requester = 
+				configurableBuilder.build(requesterClass, 
+						configuration);
 		this.manager = new ThroughputManager(timeBetweenRequests,
 				backOffTime);
-		return this;
 	}
 
 	@Override
 	public Set<String> getRequiredParameters() {
-		return Sets.newHashSet(SLEEP_TIME, BKOFF_TIME);
+		return Sets.newHashSet(SLEEP_TIME, BKOFF_TIME, REQUESTER);
 	}
 }

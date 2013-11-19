@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 class LineIterator implements Iterator<String> {
 
@@ -49,7 +50,7 @@ class LineIterator implements Iterator<String> {
 	}
 
 	@Override
-	public String next() {
+	public String next() throws NoSuchElementException {
 		return this.nextLine;
 	}
 

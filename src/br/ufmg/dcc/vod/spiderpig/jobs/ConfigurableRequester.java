@@ -1,6 +1,5 @@
 package br.ufmg.dcc.vod.spiderpig.jobs;
 
-import br.ufmg.dcc.vod.spiderpig.common.config.AbstractConfigurable;
 import br.ufmg.dcc.vod.spiderpig.common.config.Configurable;
 
 /**
@@ -9,7 +8,7 @@ import br.ufmg.dcc.vod.spiderpig.common.config.Configurable;
  * 
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
-public abstract class ConfigurableRequester
-		extends AbstractConfigurable<Requester> implements Requester {
+public interface ConfigurableRequester 
+		extends Configurable, Requester {
 
 }

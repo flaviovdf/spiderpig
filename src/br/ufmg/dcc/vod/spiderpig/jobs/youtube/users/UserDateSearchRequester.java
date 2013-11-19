@@ -3,20 +3,20 @@ package br.ufmg.dcc.vod.spiderpig.jobs.youtube.users;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 
+import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
+import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
 import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
-import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResult;
-import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultBuilder;
-import br.ufmg.dcc.vod.spiderpig.jobs.PayloadBuilder;
+import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultFactory;
+import br.ufmg.dcc.vod.spiderpig.jobs.PayloadsFactory;
 import br.ufmg.dcc.vod.spiderpig.jobs.QuotaException;
-import br.ufmg.dcc.vod.spiderpig.jobs.Requester;
 import br.ufmg.dcc.vod.spiderpig.jobs.youtube.UnableToCrawlException;
 import br.ufmg.dcc.vod.spiderpig.jobs.youtube.YTConstants;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
 
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -27,7 +27,7 @@ import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
 import com.google.common.collect.Sets;
 
-public class UserDateSearchRequester extends ConfigurableRequester {
+public class UserDateSearchRequester implements ConfigurableRequester {
 
 	private static final int _403_QUOTA_ERR = 403;
 	
@@ -42,7 +42,7 @@ public class UserDateSearchRequester extends ConfigurableRequester {
 		String afterDate = split[0];
 		String beforeDate = split[1];
 		
-		CrawlResultBuilder crawlResultBuilder = new CrawlResultBuilder(crawlID);
+		CrawlResultFactory crawlResultBuilder = new CrawlResultFactory(crawlID);
 		
 		try {
 			YouTube.Search.List search = youtube.search().list("id");
@@ -85,10 +85,9 @@ public class UserDateSearchRequester extends ConfigurableRequester {
 			channelIdsBuffer.append(numResults);
 			byte[] payload = channelIdsBuffer.toString().getBytes();
 			
-			PayloadBuilder payloadBuilder = new PayloadBuilder();
+			PayloadsFactory payloadBuilder = new PayloadsFactory();
 			payloadBuilder.addPayload(dates, payload);
-			Map<String, byte[]> filesToSave = payloadBuilder.build();
-			return crawlResultBuilder.buildOK(filesToSave);
+			return crawlResultBuilder.buildOK(payloadBuilder.build(), null);
 		} catch (GoogleJsonResponseException e) {
 			GoogleJsonError details = e.getDetails();
 			
@@ -118,10 +117,9 @@ public class UserDateSearchRequester extends ConfigurableRequester {
 	}
 
 	@Override
-	public Requester realConfigurate(Configuration configuration)
-			throws Exception {
+	public void configurate(Configuration configuration,
+				ConfigurableBuilder builder) throws BuildException {
 		this.youtube = YTConstants.buildYoutubeService();
 		this.apiKey = configuration.getString(YTConstants.API_KEY);
-		return this;
 	}
 }

@@ -5,10 +5,10 @@ import java.io.IOException;
 import br.ufmg.dcc.vod.spiderpig.common.queue.Actor;
 import br.ufmg.dcc.vod.spiderpig.common.queue.QueueProcessor;
 import br.ufmg.dcc.vod.spiderpig.common.queue.serializer.MessageLiteSerializer;
-import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Payload.UploadMessage;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.Payload;
 
-public class FileSaverActor extends Actor<UploadMessage> 
-		implements QueueProcessor<UploadMessage> {
+public class FileSaverActor extends Actor<Payload> 
+		implements QueueProcessor<Payload> {
 
 	public static final String HANDLE = "FileSaverActor";
 	private final FileSaver saver;
@@ -19,17 +19,17 @@ public class FileSaverActor extends Actor<UploadMessage>
 	}
 	
 	@Override
-	public QueueProcessor<UploadMessage> getQueueProcessor() {
+	public QueueProcessor<Payload> getQueueProcessor() {
 		return this;
 	}
 
 	@Override
-	public MessageLiteSerializer<UploadMessage> newMsgSerializer() {
-		return new MessageLiteSerializer<>(UploadMessage.newBuilder());
+	public MessageLiteSerializer<Payload> newMsgSerializer() {
+		return new MessageLiteSerializer<>(Payload.newBuilder());
 	}
 
 	@Override
-	public void process(UploadMessage t) {
+	public void process(Payload t) {
 		FileWrapper wrapper = FileWrapper.fromProtocolBuffer(t);
 		saver.save(wrapper.getFileID(), wrapper.getFilePayload());
 	}

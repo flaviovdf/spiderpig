@@ -11,14 +11,18 @@ import java.util.Set;
 import org.apache.commons.configuration.Configuration;
 import org.apache.log4j.Logger;
 
-import br.ufmg.dcc.vod.spiderpig.master.walker.AbstractWalker;
+import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
+import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
+import br.ufmg.dcc.vod.spiderpig.master.walker.ConfigurableWalker;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.ExhaustCondition;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
 import com.google.common.collect.Lists;
 
-public class DivideAndConquerWalker  extends AbstractWalker {
+public class DivideAndConquerWalker implements ConfigurableWalker {
+
+	private static final ExhaustCondition CONDITION = new ExhaustCondition();
 
 	private static final Logger LOG = 
 			Logger.getLogger(DivideAndConquerWalker.class);
@@ -34,13 +38,12 @@ public class DivideAndConquerWalker  extends AbstractWalker {
 	}
 
 	@Override
-	protected Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
+	public Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
 		return seeds;
 	}
 
 	@Override
-	protected Iterable<CrawlID> getToWalkImpl(CrawlID id, 
-			Iterable<CrawlID> links) {
+	public Iterable<CrawlID> walk(CrawlID id, Iterable<CrawlID> links) {
 		
 		ArrayList<CrawlID> linksList = Lists.newArrayList(links);
 		LOG.info("Received " + linksList.size() + " users");
@@ -61,7 +64,7 @@ public class DivideAndConquerWalker  extends AbstractWalker {
 			Date before = RFC3339_FMT.parse(beforeStr);
 			
 			long afterTime = after.getTime();
-			long beforeTime = before.getTime();
+			double beforeTime = before.getTime();
 			
 			long halfDelta = (long) Math.ceil(((beforeTime - afterTime) / 2));
 			if (halfDelta < ONE_SECOND_MS) {
@@ -88,16 +91,16 @@ public class DivideAndConquerWalker  extends AbstractWalker {
 	}
 
 	@Override
-	protected void errorReceivedImpl(CrawlID crawled) {
+	public void errorReceived(CrawlID crawled) {
 	}
 
 	@Override
-	protected StopCondition createStopCondition() {
-		return new ExhaustCondition();
+	public StopCondition getStopCondition() {
+		return CONDITION;
 	}
 
 	@Override
-	public Void realConfigurate(Configuration configuration) throws Exception {
-		return null;
+	public void configurate(Configuration configuration, 
+			ConfigurableBuilder builder) throws BuildException {
 	}
 }

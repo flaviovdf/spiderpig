@@ -75,7 +75,6 @@ Ant build file for spiderpig
 		<exec executable="${protoc.cmd}">
             <arg value="--proto_path=${src.proto.dir}"/>
 			<arg value="${src.proto.dir}/worker.proto"/>
-			<arg value="${src.proto.dir}/payload.proto"/>
 			<arg value="${src.proto.dir}/ids.proto"/>
 			<arg value="${src.proto.dir}/fd.proto"/>
 			<arg value="--java_out=${src.gen.dir}"/>

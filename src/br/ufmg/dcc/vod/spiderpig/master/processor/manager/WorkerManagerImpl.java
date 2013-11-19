@@ -52,6 +52,7 @@ public class WorkerManagerImpl implements WorkerManager {
 	public ServiceID allocateAvailableExecutor(CrawlID crawlID) 
 			throws InterruptedException {
 		try {
+			assert lock.getHoldCount() == 0;
 			this.lock.lock();
 		
 			if (this.allocMap.containsKey(crawlID))
@@ -79,6 +80,7 @@ public class WorkerManagerImpl implements WorkerManager {
 	@Override
 	public boolean freeExecutor(CrawlID crawlID) {
 		try {
+			assert lock.getHoldCount() == 0;
 			this.lock.lock();
 			ServiceID workerID = this.allocMap.remove(crawlID);
 			if (workerID != null) {
@@ -103,6 +105,7 @@ public class WorkerManagerImpl implements WorkerManager {
 	@Override
 	public CrawlID executorSuspected(ServiceID workerID) {
 		try {
+			assert lock.getHoldCount() == 0;
 			this.lock.lock();
 			CrawlID crawlID = this.inverseAllocMap.remove(workerID);
 			if (crawlID != null) {
@@ -126,6 +129,7 @@ public class WorkerManagerImpl implements WorkerManager {
 	@Override
 	public void markAvailable(ServiceID workerID) {
 		try {
+			assert lock.getHoldCount() == 0;
 			this.lock.lock();
 			
 			if (this.stateMap.get(WorkerState.SUSPECTED).remove(workerID)) {

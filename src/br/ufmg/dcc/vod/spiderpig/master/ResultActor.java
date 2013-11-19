@@ -4,10 +4,10 @@ import br.ufmg.dcc.vod.spiderpig.common.queue.Actor;
 import br.ufmg.dcc.vod.spiderpig.common.queue.QueueProcessor;
 import br.ufmg.dcc.vod.spiderpig.common.queue.serializer.MessageLiteSerializer;
 import br.ufmg.dcc.vod.spiderpig.jobs.WorkerInterested;
-import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.BaseResult;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
 
-public class ResultActor extends Actor<BaseResult> 
-		implements QueueProcessor<BaseResult> {
+public class ResultActor extends Actor<CrawlResult> 
+		implements QueueProcessor<CrawlResult> {
 
 	public static final String HANDLE = "ResultServer";
 	private final WorkerInterested workerInterested;
@@ -18,22 +18,17 @@ public class ResultActor extends Actor<BaseResult>
 	}
 	
 	@Override
-	public QueueProcessor<BaseResult> getQueueProcessor() {
+	public QueueProcessor<CrawlResult> getQueueProcessor() {
 		return this;
 	}
 
 	@Override
-	public MessageLiteSerializer<BaseResult> newMsgSerializer() {
-		return new MessageLiteSerializer<>(BaseResult.newBuilder());
+	public MessageLiteSerializer<CrawlResult> newMsgSerializer() {
+		return new MessageLiteSerializer<>(CrawlResult.newBuilder());
 	}
 
 	@Override
-	public void process(BaseResult msg) {
-		if (msg.getIsError()) {
-			workerInterested.crawlError(msg.getId(), msg.getErrorMessage());
-		} else {
-			workerInterested.crawlDone(msg.getId(), msg.getToQueueList());
-		}	
+	public void process(CrawlResult msg) {
+		this.workerInterested.crawlDone(msg);
 	}
-
 }

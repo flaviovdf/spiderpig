@@ -13,7 +13,12 @@ public class TestFileSaver implements FileSaver {
 	private Map<Integer, byte[]> crawled = 
 			Collections.synchronizedMap(new HashMap<Integer, byte[]>());
 	private AtomicInteger saved = new AtomicInteger(0);
+	private final int expectedCalls;
 	
+	public TestFileSaver(int expectedCalls) {
+		this.expectedCalls = expectedCalls;
+	}
+
 	@Override
 	public synchronized void save(String fileID, byte[] payload) {
 		this.crawled.put(Integer.parseInt(fileID), payload);
@@ -24,6 +29,11 @@ public class TestFileSaver implements FileSaver {
 		return crawled;
 	}
 
+	public boolean isConsistent() {
+		System.out.println(this.saved.get());
+		return this.saved.get() == this.expectedCalls;
+	}
+	
 	@Override
 	public int numSaved() {
 		return this.saved.get();

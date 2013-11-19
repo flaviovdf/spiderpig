@@ -33,7 +33,6 @@ public class WorkerActor extends Actor<CrawlRequest>
 	@Override
 	public void process(CrawlRequest msg) {
 		this.executor.crawl(msg.getId(),
-				new InterestedProxy(msg.getCallBackID(), sender), 
-				new FileSaverProxy(msg.getFileSaverID(), sender));
+				new InterestedProxy(msg.getCallBackID(), sender));
 	}
 }

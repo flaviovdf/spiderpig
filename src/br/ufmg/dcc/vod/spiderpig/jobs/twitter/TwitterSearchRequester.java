@@ -12,18 +12,18 @@ import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
+import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
 import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
-import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResult;
-import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultBuilder;
-import br.ufmg.dcc.vod.spiderpig.jobs.PayloadBuilder;
+import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultFactory;
+import br.ufmg.dcc.vod.spiderpig.jobs.PayloadsFactory;
 import br.ufmg.dcc.vod.spiderpig.jobs.QuotaException;
-import br.ufmg.dcc.vod.spiderpig.jobs.Requester;
 import br.ufmg.dcc.vod.spiderpig.jobs.youtube.UnableToCrawlException;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
 
 import com.google.common.collect.Sets;
 
-public class TwitterSearchRequester extends ConfigurableRequester {
+public class TwitterSearchRequester implements ConfigurableRequester {
 
 	private static final int QUOTA_ERROR = 429;
 	
@@ -41,7 +41,7 @@ public class TwitterSearchRequester extends ConfigurableRequester {
 	@Override
 	public CrawlResult performRequest(CrawlID crawlID) throws QuotaException {
 		
-		CrawlResultBuilder crawlResult = new CrawlResultBuilder(crawlID);
+		CrawlResultFactory crawlResult = new CrawlResultFactory(crawlID);
 		String id = crawlID.getId();
 		
 		Query query = new Query(id);
@@ -71,9 +71,9 @@ public class TwitterSearchRequester extends ConfigurableRequester {
 			}
 		}
 		
-		PayloadBuilder payloadBuilder = new PayloadBuilder();
+		PayloadsFactory payloadBuilder = new PayloadsFactory();
 		payloadBuilder.addPayload(crawlID, returnValue.toString().getBytes());
-		return crawlResult.buildOK(payloadBuilder.build());
+		return crawlResult.buildOK(payloadBuilder.build(), null);
 	}
 
 	@Override
@@ -82,8 +82,8 @@ public class TwitterSearchRequester extends ConfigurableRequester {
 	}
 
 	@Override
-	public Requester realConfigurate(Configuration configuration) 
-			throws Exception {
+	public void configurate(Configuration configuration, 
+			ConfigurableBuilder configurableBuilder) {
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		
 		cb.setOAuthConsumerKey(configuration.getString(CONKEY));
@@ -92,7 +92,5 @@ public class TwitterSearchRequester extends ConfigurableRequester {
 		cb.setOAuthAccessTokenSecret(configuration.getString(TOKENSECRET));
 		
 		this.twitter = new TwitterFactory(cb.build()).getInstance();
-		
-		return this;
 	}
 }

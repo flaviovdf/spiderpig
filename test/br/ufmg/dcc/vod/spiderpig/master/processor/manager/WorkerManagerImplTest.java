@@ -151,12 +151,9 @@ public class WorkerManagerImplTest {
 		
 		while(allocator.getState() != Thread.State.WAITING);
 		
+		Assert.assertEquals(2, busy.size());
 		wmi.freeExecutor(build("1"));
-		
-		Assert.assertEquals(1, busy.size());
-		
 		allocator.join();
-		
 		Assert.assertEquals(2, busy.size());
 	}
 	

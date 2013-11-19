@@ -4,20 +4,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 
+import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
 import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
-import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResult;
-import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultBuilder;
-import br.ufmg.dcc.vod.spiderpig.jobs.PayloadBuilder;
+import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultFactory;
+import br.ufmg.dcc.vod.spiderpig.jobs.PayloadsFactory;
 import br.ufmg.dcc.vod.spiderpig.jobs.QuotaException;
-import br.ufmg.dcc.vod.spiderpig.jobs.Requester;
 import br.ufmg.dcc.vod.spiderpig.jobs.youtube.UnableToCrawlException;
 import br.ufmg.dcc.vod.spiderpig.jobs.youtube.YTConstants;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
 
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonError.ErrorInfo;
@@ -29,7 +28,7 @@ import com.google.api.services.youtube.model.Subscription;
 import com.google.api.services.youtube.model.SubscriptionListResponse;
 import com.google.common.collect.Sets;
 
-public class UserDataRequester extends ConfigurableRequester {
+public class UserDataRequester implements ConfigurableRequester {
 
 	private static final String SUB_DETAILS = "id,snippet,contentDetails";
 	private static final String USER_DETAILS = "id,snippet,brandingSettings," +
@@ -44,16 +43,16 @@ public class UserDataRequester extends ConfigurableRequester {
 	
 	@Override
 	public CrawlResult performRequest(CrawlID crawlID) throws QuotaException {
-		CrawlResultBuilder crawlResultBuilder = new CrawlResultBuilder(crawlID);
+		CrawlResultFactory crawlResultBuilder = new CrawlResultFactory(crawlID);
 		CrawlResult result = null;
 		
 		String userId = crawlID.getId();
 		Channel userChannel = null;
-		PayloadBuilder payloadBuilder = null;
+		PayloadsFactory payloadBuilder = null;
 		
 		try {
 			userChannel = getUserChannel(userId);
-			payloadBuilder = new PayloadBuilder();
+			payloadBuilder = new PayloadsFactory();
 			payloadBuilder.addPayload("userId-data-" + userId, 
 					userChannel.toPrettyString().getBytes());
 		} catch (QuotaException e) {
@@ -88,8 +87,8 @@ public class UserDataRequester extends ConfigurableRequester {
 					// IGNORE we have user data
 				}
 			}
-			Map<String, byte[]> filesToSave = payloadBuilder.build();
-			result = crawlResultBuilder.buildOK(filesToSave, toFollow);
+			result = crawlResultBuilder.buildOK(payloadBuilder.build(), 
+					toFollow);
 		}
 		
 		return result;
@@ -178,10 +177,9 @@ public class UserDataRequester extends ConfigurableRequester {
 
 
 	@Override
-	public Requester realConfigurate(Configuration configuration)
-			throws Exception {
+	public void configurate(Configuration configuration, 
+			ConfigurableBuilder configurableBuilder) {
 		this.apiKey = configuration.getString(YTConstants.API_KEY);
 		this.youtube = YTConstants.buildYoutubeService();
-		return this;
 	}
 }

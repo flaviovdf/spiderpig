@@ -18,7 +18,7 @@ import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaverActor;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaverImpl;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileWrapper;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
-import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Payload.UploadMessage;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.Payload;
 
 import com.google.common.io.Files;
 
@@ -35,7 +35,7 @@ public class FileSaverUnitTest {
 		}
 
 		@Override
-		public void process(UploadMessage msg) {
+		public void process(Payload msg) {
 			super.process(msg);
 			try {
 				queue.put(new Object());

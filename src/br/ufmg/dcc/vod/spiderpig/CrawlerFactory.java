@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -16,7 +15,6 @@ import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.FDServerActor;
 import br.ufmg.dcc.vod.spiderpig.common.queue.QueueService;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaverActor;
-import br.ufmg.dcc.vod.spiderpig.master.DecoratorInterested;
 import br.ufmg.dcc.vod.spiderpig.master.Master;
 import br.ufmg.dcc.vod.spiderpig.master.ResultActor;
 import br.ufmg.dcc.vod.spiderpig.master.processor.ProcessorActor;
@@ -24,12 +22,10 @@ import br.ufmg.dcc.vod.spiderpig.master.processor.manager.RemoteResolver;
 import br.ufmg.dcc.vod.spiderpig.master.processor.manager.Resolver;
 import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerManager;
 import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerManagerImpl;
+import br.ufmg.dcc.vod.spiderpig.master.walker.ThreadSafeWalker;
 import br.ufmg.dcc.vod.spiderpig.master.walker.Walker;
-import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
 import br.ufmg.dcc.vod.spiderpig.worker.WorkerActor;
-
-import com.google.common.cache.Cache;
 
 /**
  * Contains auxiliary methods for starting crawlers.
@@ -41,8 +37,7 @@ public class CrawlerFactory {
 	public static Crawler createDistributedCrawler(String hostname, int port, 
 			Set<InetSocketAddress> workerAddrs, int fdTimeOutSeconds, 
 			int fdPingTimeSeconds, File queueDir, FileSaver saver,
-			Walker walker, Cache<CrawlID, List<CrawlID>> resultCache) 
-					throws FileNotFoundException, IOException {
+			Walker walker) throws FileNotFoundException, IOException {
 		
 		QueueService service = new QueueService(hostname, port);
 		int numThreads = workerAddrs.size();
@@ -61,21 +56,21 @@ public class CrawlerFactory {
 			workerIDs.add(workerID);
 		}
 		
+		FileSaverActor fileSaverActor = new FileSaverActor(saver);
+		
 		RemoteMessageSender sender = new RemoteMessageSender();
 		
 		WorkerManager workerManager = new WorkerManagerImpl(workerIDs);
 		Resolver resolver = new RemoteResolver(callBackID, fileSaverID, sender);
-		DecoratorInterested workerInterested = new DecoratorInterested();
 		
+		ThreadSafeWalker threadSafeWalker = new ThreadSafeWalker(walker);
+		Master master = new Master(threadSafeWalker, workerManager, 
+				fileSaverActor);
 		ProcessorActor processorActor = new ProcessorActor(workerManager, 
-				service, resolver, workerInterested, saver, resultCache);
-		walker.setProcessorActor(processorActor);
-		Master master = new Master(walker, workerManager, resultCache);
-		
-		workerInterested.setLoopBack(master);
+				service, resolver, master);
+		master.setProcessorActor(processorActor);
 		
 		ResultActor resultActor = new ResultActor(master);
-		FileSaverActor fileSaverActor = new FileSaverActor(saver);
 		FDClientActor fd = new FDClientActor(fdTimeOutSeconds, 
 				fdPingTimeSeconds, TimeUnit.SECONDS, master, sender);
 		

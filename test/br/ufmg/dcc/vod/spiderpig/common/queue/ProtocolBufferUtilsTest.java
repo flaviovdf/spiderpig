@@ -10,8 +10,8 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import br.ufmg.dcc.vod.spiderpig.common.queue.common.ProtocolBufferUtils;
-import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Payload.UploadMessage;
-import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Payload.UploadMessage.Builder;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.Payload;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.Payload.Builder;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -24,12 +24,12 @@ public class ProtocolBufferUtilsTest {
 	@Test
 	public void testAll() throws InvalidProtocolBufferException, 
 			InterruptedException, ExecutionException, IOException {
-		Builder newBuilder = UploadMessage.newBuilder()
-				.setFileName("bah")
-				.setPayload(ByteString.copyFrom(new byte[]{1, 2, 3}));
+		Builder newBuilder = Payload.newBuilder()
+				.setPayloadFileName("bah")
+				.setPayloadFile(ByteString.copyFrom(new byte[]{1, 2, 3}));
 		
 		String handle = "JackTheKiller";
-		UploadMessage msg = newBuilder.build();
+		Payload msg = newBuilder.build();
 		
 		PipedInputStream snk = new PipedInputStream();
 		PipedOutputStream piped = new PipedOutputStream(snk);
@@ -41,9 +41,9 @@ public class ProtocolBufferUtilsTest {
 		Assert.assertEquals(newHandle, handle);
 		
 		piped.close();
-		UploadMessage newMsg =
+		Payload newMsg =
 				ProtocolBufferUtils.readFromStream(snk, 
-						UploadMessage.newBuilder(), null);
+						Payload.newBuilder(), null);
 		
 		Assert.assertTrue(newMsg != msg);
 		Assert.assertEquals(newMsg, msg);

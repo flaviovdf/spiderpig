@@ -2,21 +2,24 @@ package br.ufmg.dcc.vod.spiderpig.jobs.youtube.video.api;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 
+import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
+import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
 import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
-import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResult;
-import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultBuilder;
-import br.ufmg.dcc.vod.spiderpig.jobs.PayloadBuilder;
+import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultFactory;
+import br.ufmg.dcc.vod.spiderpig.jobs.PayloadsFactory;
 import br.ufmg.dcc.vod.spiderpig.jobs.QuotaException;
-import br.ufmg.dcc.vod.spiderpig.jobs.Requester;
 import br.ufmg.dcc.vod.spiderpig.jobs.youtube.UnableToCrawlException;
 import br.ufmg.dcc.vod.spiderpig.jobs.youtube.YTConstants;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.Payload;
 
 import com.google.common.collect.Sets;
 import com.google.gdata.client.youtube.YouTubeService;
@@ -29,14 +32,14 @@ import com.google.gdata.data.youtube.YtStatistics;
 import com.google.gdata.util.ServiceException;
 import com.google.gson.Gson;
 
-public class VideoAPIRequester extends ConfigurableRequester {
+public class VideoAPIRequester implements ConfigurableRequester {
 	
 	private static final String QUOTA_ERR = "yt:quota";
 	private YouTubeService service;
 
 	@Override
 	public CrawlResult performRequest(CrawlID crawlID) throws QuotaException {
-		CrawlResultBuilder resultBuilder = new CrawlResultBuilder(crawlID);
+		CrawlResultFactory resultBuilder = new CrawlResultFactory(crawlID);
 		try {
 			VideoEntry videoEntry = service.getEntry(
 					new URL("http://gdata.youtube.com/feeds/api/videos/" + 
@@ -144,11 +147,11 @@ public class VideoAPIRequester extends ConfigurableRequester {
 			
 			Gson gson = new Gson();
 			String json = gson.toJson(videoJson);
-			Map<String,byte[]> filesToSave = 
-					new PayloadBuilder().
+			Collection<Payload> payloads = 
+					new PayloadsFactory().
 					addPayload(crawlID, json.getBytes(), "-api.json").
 					build();
-			return resultBuilder.buildOK(filesToSave);
+			return resultBuilder.buildOK(payloads, null);
 		} catch (ServiceException e) {
 			String eString = e.toString();
 			if (eString != null && eString.contains(QUOTA_ERR)) {
@@ -164,12 +167,11 @@ public class VideoAPIRequester extends ConfigurableRequester {
 	}
 
 	@Override
-	public Requester realConfigurate(Configuration configuration) 
-			throws Exception {
+	public void configurate(Configuration configuration, 
+			ConfigurableBuilder builder) throws BuildException {
 		String devKey = configuration.getString(YTConstants.DEV_KEY_V2);
 		String appName = configuration.getString(YTConstants.APP_NAME_V2);
 		this.service = new YouTubeService(appName, devKey);
-		return this;
 	}
 
 	@Override

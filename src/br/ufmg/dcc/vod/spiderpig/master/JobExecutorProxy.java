@@ -1,7 +1,6 @@
 package br.ufmg.dcc.vod.spiderpig.master;
 
 import br.ufmg.dcc.vod.spiderpig.common.distributed.RemoteMessageSender;
-import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
 import br.ufmg.dcc.vod.spiderpig.jobs.JobExecutor;
 import br.ufmg.dcc.vod.spiderpig.jobs.WorkerInterested;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
@@ -25,7 +24,7 @@ public class JobExecutorProxy implements JobExecutor {
 	}
 	
 	@Override
-	public void crawl(CrawlID id, WorkerInterested interested, FileSaver saver) {
+	public void crawl(CrawlID id, WorkerInterested interested) {
 		CrawlRequest.Builder builder = CrawlRequest.newBuilder();
 		builder.setId(id);
 		

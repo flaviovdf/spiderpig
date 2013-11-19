@@ -5,6 +5,8 @@ import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 
+import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
+import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.ExhaustCondition;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
@@ -15,26 +17,27 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
  * 
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
-public class NopWalker extends AbstractWalker {
+public class NopWalker implements ConfigurableWalker {
+
+	private static final ExhaustCondition CONDITION = new ExhaustCondition();
 
 	@Override
-	protected Iterable<CrawlID> getToWalkImpl(CrawlID crawled, 
-			Iterable<CrawlID> links) {
+	public Iterable<CrawlID> walk(CrawlID crawled, Iterable<CrawlID> links) {
 		return Collections.emptyList();
 	}
 	
 	@Override
-	protected Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
+	public Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
 		return seeds;
 	}
 
 	@Override
-	protected void errorReceivedImpl(CrawlID crawled) {
+	public void errorReceived(CrawlID crawled) {
 	}
 
 	@Override
-	protected StopCondition createStopCondition() {
-		return new ExhaustCondition();
+	public StopCondition getStopCondition() {
+		return CONDITION;
 	}
 
 	@Override
@@ -42,10 +45,7 @@ public class NopWalker extends AbstractWalker {
 		return Collections.emptySet();
 	}
 
-	@Override
-	public Void realConfigurate(Configuration configuration) throws Exception {
-		return null;
-	}
-
-	
+	public void configurate(Configuration configuration, 
+			ConfigurableBuilder builder) throws BuildException {
+	}	
 }

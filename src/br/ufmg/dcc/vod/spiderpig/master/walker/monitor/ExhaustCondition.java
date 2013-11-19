@@ -1,6 +1,7 @@
 package br.ufmg.dcc.vod.spiderpig.master.walker.monitor;
 
 import java.util.concurrent.atomic.AtomicIntegerArray;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The {@link ExhaustCondition} stops the crawl when the queue is empty. It
@@ -25,27 +26,44 @@ public class ExhaustCondition extends AbstractStopCondition {
 	}
 	
 	private final AtomicIntegerArray counters = new AtomicIntegerArray(4);
+	private final ReentrantLock lock = new ReentrantLock();
 	
 	@Override
 	public void dispatched() {
-		counters.incrementAndGet(CounterType.DISPATCHED.pos);
-		counters.incrementAndGet(CounterType.DONE_CONDITION.pos);
+		try {
+			this.lock.lock();
+			counters.incrementAndGet(CounterType.DISPATCHED.pos);
+			counters.incrementAndGet(CounterType.DONE_CONDITION.pos);
+		} finally {
+			this.lock.unlock();
+		}
 	}
 
 	@Override
 	public void resultReceived() {
-		counters.incrementAndGet(CounterType.OK.pos);
-		decrementDoneCondition();
+		try {
+			this.lock.lock();
+			counters.incrementAndGet(CounterType.OK.pos);
+			decrementDoneCondition();
+		} finally {
+			this.lock.unlock();
+		}
 	}
 
 	@Override
 	public void errorReceived() {
-		counters.incrementAndGet(CounterType.ERROR.pos);
-		decrementDoneCondition();	
+		try {
+			this.lock.lock();
+			counters.incrementAndGet(CounterType.ERROR.pos);
+			decrementDoneCondition();
+		} finally {
+			this.lock.unlock();
+		}
 	}
 
 	private void decrementDoneCondition() {
-		if (counters.decrementAndGet(CounterType.DONE_CONDITION.pos) == 0)
+		if (counters.decrementAndGet(CounterType.DONE_CONDITION.pos) == 0) {
 			super.notifyAllListeners();
+		}
 	}
 }

@@ -6,7 +6,7 @@ import br.ufmg.dcc.vod.spiderpig.common.distributed.RemoteMessageSender;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaver;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileWrapper;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
-import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Payload.UploadMessage;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.Payload;
 
 public class FileSaverProxy implements FileSaver {
 
@@ -20,7 +20,7 @@ public class FileSaverProxy implements FileSaver {
 
 	@Override
 	public void save(String fileID, byte[] payload) {
-		UploadMessage msg = FileWrapper.toProtocolBuffer(fileID, payload);
+		Payload msg = FileWrapper.toProtocolBuffer(fileID, payload);
 		this.messageSender.send(this.fileSaverID, msg);
 	}
 

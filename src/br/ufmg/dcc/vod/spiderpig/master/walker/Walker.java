@@ -1,6 +1,5 @@
 package br.ufmg.dcc.vod.spiderpig.master.walker;
 
-import br.ufmg.dcc.vod.spiderpig.master.processor.ProcessorActor;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
@@ -15,13 +14,15 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 public interface Walker {
 
 	/**
-	 * Indicates that the current id was crawled and dispatches new ids based 
+	 * Indicates that the current id was crawled and returns new ids based 
 	 * on current result
 	 * 
 	 * @param crawled ID crawled.
 	 * @param links Links discovered
+	 * 
+	 * @returns id's to crawl
 	 */
-	public void dispatchNext(CrawlID crawled, Iterable<CrawlID> links);
+	public Iterable<CrawlID> walk(CrawlID crawled, Iterable<CrawlID> links);
 	
 	/**
 	 * Indicates to the walker that the following id produced an error.
@@ -31,34 +32,13 @@ public interface Walker {
 	public void errorReceived(CrawlID idWithError);
 
 	/**
-	 * Indicates to the walker that the following id was not crawled because
-	 * a worker has died. The default approach here is to re-dispatch the id.
-	 * 
-	 * @param id ID crawled.
-	 */
-	public void workerFailedWithID(CrawlID id);
-	
-	/**
-	 * Add seed ID the walker. Seeds are initial ids which may require special
-	 * treatment by different walkers.
+	 * Filter seed ID the walker. Seeds are initial ids which may require 
+	 * special treatment by different walkers.
 	 * 
 	 * @param seeds seeds to iterate ID.
 	 */
-	public void setSeeds(Iterable<CrawlID> seeds);
+	public Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds);
 
-	/**
-	 * After seeds are indicated, this method will dispatch the ids which
-	 * should be crawled.
-	 */
-	public void dispatchSeeds();
-	
-	/**
-	 * Sets the processor actor which will crawl ids.
-	 * 
-	 * @param processorActor {@link ProcessorActor} to crawl ids
-	 */
-	public void setProcessorActor(ProcessorActor processorActor);
-	
 	/**
 	 * Gets the {@link StopCondition} which can indicate when the crawl is
 	 * done.

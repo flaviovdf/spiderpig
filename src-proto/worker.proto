@@ -8,16 +8,20 @@ message CrawlRequest {
     required CrawlID id = 1;
     required ServiceID fileSaverID = 2;
     required ServiceID callBackID = 3;
-    
 }
 
-message BaseResult {
+
+message Payload {
+
+    required string payloadFileName = 2;
+    required bytes payloadFile = 3;    
+}
+
+message CrawlResult {
 
     required bool isError = 1;
-    
     required CrawlID id = 2;
     repeated CrawlID toQueue = 3;
-
     optional string errorMessage = 4;
-    
+    repeated Payload payLoad = 5;
 }

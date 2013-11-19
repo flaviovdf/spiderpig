@@ -62,9 +62,9 @@ public class Crawler {
 		//Starting Processors
 		resultActor.startProcessors(numThreads);
 		fileSaverActor.startProcessors(numThreads);
+		processorActor.startProcessors(numThreads);
 		fd.startProcessors(1);
 		fd.startTimer();
-		processorActor.startProcessors(numThreads);
 		
 		//Waiting until crawl ends
 		LOG.info("Waiting until crawl ends");
@@ -79,9 +79,10 @@ public class Crawler {
 		
 		try {
 			latch.await();
-			service.waitUntilWorkIsDoneAndStop(1);
 			fd.stopTimer();
+			service.waitUntilWorkIsDoneAndStop(1);
 		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
 		}
 		
 		try {

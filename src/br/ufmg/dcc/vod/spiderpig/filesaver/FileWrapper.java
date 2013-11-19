@@ -1,6 +1,6 @@
 package br.ufmg.dcc.vod.spiderpig.filesaver;
 
-import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Payload.UploadMessage;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.Payload;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -23,29 +23,29 @@ public class FileWrapper {
 		return filePayload;
 	}
 	
-	public UploadMessage toProtocolBuffer() {
-		return UploadMessage.newBuilder()
-				.setFileName(this.fileID)
-				.setPayload(ByteString.copyFrom(this.filePayload))
+	public Payload toProtocolBuffer() {
+		return Payload.newBuilder()
+				.setPayloadFileName(this.fileID)
+				.setPayloadFile(ByteString.copyFrom(this.filePayload))
 				.build();
 	}
 	
 	public static FileWrapper fromByteArray(byte[] data) 
 			throws InvalidProtocolBufferException {
-		return fromProtocolBuffer(UploadMessage.parseFrom(data));
+		return fromProtocolBuffer(Payload.parseFrom(data));
 	}
 
-	public static FileWrapper fromProtocolBuffer(UploadMessage uploadMessage) {
-		String fileID = uploadMessage.getFileName();
-		byte[] filePayload = uploadMessage.getPayload().toByteArray();
+	public static FileWrapper fromProtocolBuffer(Payload uploadMessage) {
+		String fileID = uploadMessage.getPayloadFileName();
+		byte[] filePayload = uploadMessage.getPayloadFile().toByteArray();
 		return new FileWrapper(fileID, filePayload);
 	}
 	
-	public static UploadMessage toProtocolBuffer(String fileID,
+	public static Payload toProtocolBuffer(String fileID,
 			byte[] filePayload) {
-		return UploadMessage.newBuilder()
-				.setFileName(fileID)
-				.setPayload(ByteString.copyFrom(filePayload))
+		return Payload.newBuilder()
+				.setPayloadFileName(fileID)
+				.setPayloadFile(ByteString.copyFrom(filePayload))
 				.build();
 	}
 }

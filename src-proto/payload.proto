@@ -1,9 +1,0 @@
-option optimize_for = SPEED;
-option java_package = "br.ufmg.dcc.vod.spiderpig.protocol_buffers";
-
-message UploadMessage {
-
-    required string fileName = 1;
-    required bytes payload = 2;
-
-}

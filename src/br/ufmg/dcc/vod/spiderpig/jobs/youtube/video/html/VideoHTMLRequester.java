@@ -23,25 +23,26 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
 import br.ufmg.dcc.vod.spiderpig.common.URLGetter;
+import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
+import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
 import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
-import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResult;
-import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultBuilder;
-import br.ufmg.dcc.vod.spiderpig.jobs.PayloadBuilder;
-import br.ufmg.dcc.vod.spiderpig.jobs.Requester;
+import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultFactory;
+import br.ufmg.dcc.vod.spiderpig.jobs.PayloadsFactory;
 import br.ufmg.dcc.vod.spiderpig.jobs.youtube.UnableToCrawlException;
 import br.ufmg.dcc.vod.spiderpig.jobs.youtube.YTConstants;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
 
 import com.google.common.collect.Sets;
 
-public class VideoHTMLRequester extends ConfigurableRequester {
+public class VideoHTMLRequester implements ConfigurableRequester {
 	
 	private DefaultHttpClient httpClient;
 	private URLGetter urlGetter;
 
 	@Override
-	public Requester realConfigurate(Configuration configuration) 
-			throws Exception {
+	public void configurate(Configuration configuration, 
+			ConfigurableBuilder builder) throws BuildException {
 		String devKey = configuration.getString(YTConstants.DEV_KEY_V2);
 		String appName = configuration.getString(YTConstants.APP_NAME_V2);
 		
@@ -51,7 +52,6 @@ public class VideoHTMLRequester extends ConfigurableRequester {
 				CookiePolicy.BROWSER_COMPATIBILITY);
 		this.urlGetter = new URLGetter("Research-Crawler-APIDEVKEY-" + devKey +
 				"APPNAME-" + appName);
-		return this;
 	}
 
 	@Override
@@ -127,8 +127,8 @@ public class VideoHTMLRequester extends ConfigurableRequester {
 	
 	@Override
 	public CrawlResult performRequest(CrawlID crawlID) {
-		CrawlResultBuilder resultBuilder = new CrawlResultBuilder(crawlID);
-		PayloadBuilder payloadBuilder = new PayloadBuilder();
+		CrawlResultFactory resultBuilder = new CrawlResultFactory(crawlID);
+		PayloadsFactory payloadBuilder = new PayloadsFactory();
 		String id = crawlID.getId();
 		
 		try {
@@ -146,7 +146,7 @@ public class VideoHTMLRequester extends ConfigurableRequester {
 			byte[] statsHtml = performRequest(postMethod, id);
 			byte[] statsJson = extractStats(statsHtml);
 			payloadBuilder.addPayload(crawlID, statsJson, "-stats.json");
-			return resultBuilder.buildOK(payloadBuilder.build());
+			return resultBuilder.buildOK(payloadBuilder.build(), null);
 		} catch (IOException | URISyntaxException e) {
 			UnableToCrawlException cause = new UnableToCrawlException(e);
 			return resultBuilder.buildNonQuotaError(cause);

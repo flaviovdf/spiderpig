@@ -10,6 +10,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.configuration.Configuration;
 
+import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
+import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.ExhaustCondition;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
@@ -22,8 +24,10 @@ import com.google.common.collect.Lists;
  * 
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
-public class RandomWalker extends AbstractWalker {
+public class RandomWalker implements ConfigurableWalker {
 
+	private static final ExhaustCondition CONDITION = new ExhaustCondition();
+	
 	public static final String STEPS = "master.walkstrategy.rw.steps";
 	public static final String STOP_PROB = "master.walkstrategy.rw.stopprob";
 	public static final String RANDOM_SEED = "master.walkstrategy.rw.seed";
@@ -38,8 +42,7 @@ public class RandomWalker extends AbstractWalker {
 	}
 	
 	@Override
-	protected Iterable<CrawlID> getToWalkImpl(CrawlID crawled, 
-			Iterable<CrawlID> links) {
+	public Iterable<CrawlID> walk(CrawlID crawled, Iterable<CrawlID> links) {
 		double pStop = this.random.nextDouble();
 		this.steps.incrementAndGet();
 		
@@ -58,21 +61,22 @@ public class RandomWalker extends AbstractWalker {
 	}
 
 	@Override
-	protected Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
+	public Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
 		return seeds;
 	}
 
 	@Override
-	protected void errorReceivedImpl(CrawlID crawled) {
+	public void errorReceived(CrawlID crawled) {
 	}
 
 	@Override
-	protected StopCondition createStopCondition() {
-		return new ExhaustCondition();
+	public StopCondition getStopCondition() {
+		return CONDITION;
 	}
 	
 	@Override
-	public Void realConfigurate(Configuration configuration) {
+	public void configurate(Configuration configuration, 
+			ConfigurableBuilder builder) throws BuildException {
 		this.stopProbability = configuration.getDouble(STOP_PROB);
 		
 		long seed = configuration.getLong(RANDOM_SEED);
@@ -82,7 +86,6 @@ public class RandomWalker extends AbstractWalker {
 			this.random = new Random();
 		
 		this.maxSteps = configuration.getLong(STEPS);
-		return null;
 	}
 
 	@Override
