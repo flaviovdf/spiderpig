@@ -8,31 +8,31 @@ package br.ufmg.dcc.vod.spiderpig.master.walker.tracker;
  */
 public class ThreadSafeTracker<T> implements Tracker<T> {
 
-	private final Tracker<T> tracker;
+    private final Tracker<T> tracker;
 
-	/**
-	 * Creates this this tracker which will basically decorate the 
-	 * one given as parameter.
-	 * 
-	 * @param tracker {@code Tracker} to decorate
-	 */
-	protected ThreadSafeTracker(Tracker<T> tracker) {
-		this.tracker = tracker;
-	}
-	
-	@Override
-	public synchronized boolean addCrawled(T t) {
-		return this.tracker.addCrawled(t);
-	}
+    /**
+     * Creates this this tracker which will basically decorate the 
+     * one given as parameter.
+     * 
+     * @param tracker {@code Tracker} to decorate
+     */
+    protected ThreadSafeTracker(Tracker<T> tracker) {
+        this.tracker = tracker;
+    }
+    
+    @Override
+    public synchronized boolean addCrawled(T t) {
+        return this.tracker.addCrawled(t);
+    }
 
-	@Override
-	public synchronized boolean wasCrawled(T t) {
-		return this.tracker.wasCrawled(t);
-	}
+    @Override
+    public synchronized boolean wasCrawled(T t) {
+        return this.tracker.wasCrawled(t);
+    }
 
-	@Override
-	public synchronized int numCrawled() {
-		return this.tracker.numCrawled();
-	}
-	
+    @Override
+    public synchronized int numCrawled() {
+        return this.tracker.numCrawled();
+    }
+    
 }

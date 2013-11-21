@@ -9,30 +9,30 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlRequest;
 
 public class JobExecutorProxy implements JobExecutor {
 
-	private final ServiceID workerID;
-	private final ServiceID callBackID;
-	private final ServiceID fileSaverID;
-	
-	private final RemoteMessageSender sender;
+    private final ServiceID workerID;
+    private final ServiceID callBackID;
+    private final ServiceID fileSaverID;
+    
+    private final RemoteMessageSender sender;
 
-	public JobExecutorProxy(ServiceID workerID, ServiceID callBackID,
-			ServiceID fileSaverID, RemoteMessageSender sender) {
-		this.workerID = workerID;
-		this.callBackID = callBackID;
-		this.fileSaverID = fileSaverID;
-		this.sender = sender;
-	}
-	
-	@Override
-	public void crawl(CrawlID id, WorkerInterested interested) {
-		CrawlRequest.Builder builder = CrawlRequest.newBuilder();
-		builder.setId(id);
-		
-		builder.setCallBackID(callBackID);
-		builder.setFileSaverID(fileSaverID);
-		
-		CrawlRequest msg = builder.build();
-		sender.send(workerID, msg);
-	}
+    public JobExecutorProxy(ServiceID workerID, ServiceID callBackID,
+            ServiceID fileSaverID, RemoteMessageSender sender) {
+        this.workerID = workerID;
+        this.callBackID = callBackID;
+        this.fileSaverID = fileSaverID;
+        this.sender = sender;
+    }
+    
+    @Override
+    public void crawl(CrawlID id, WorkerInterested interested) {
+        CrawlRequest.Builder builder = CrawlRequest.newBuilder();
+        builder.setId(id);
+        
+        builder.setCallBackID(callBackID);
+        builder.setFileSaverID(fileSaverID);
+        
+        CrawlRequest msg = builder.build();
+        sender.send(workerID, msg);
+    }
 
 }

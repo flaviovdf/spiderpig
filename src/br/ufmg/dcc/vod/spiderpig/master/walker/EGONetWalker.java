@@ -26,87 +26,87 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
  */
 public class EGONetWalker implements ConfigurableWalker {
 
-	private static final ExhaustCondition CONDITION = new ExhaustCondition();
+    private static final ExhaustCondition CONDITION = new ExhaustCondition();
 
-	public static final String NUM_NETS = "master.walkstrategy.ego.nets";
-	
-	private Tracker<String>[] trackers;
+    public static final String NUM_NETS = "master.walkstrategy.ego.nets";
+    
+    private Tracker<String>[] trackers;
 
-	@Override
-	public Iterable<CrawlID> walk(CrawlID crawled, Iterable<CrawlID> links) {
-		
-		int crawlIDLayer = -1;
-		for (int i = 0; i < trackers.length; i++) {
-			if (this.trackers[i].wasCrawled(crawled.getId())) {
-				crawlIDLayer = i;
-				break;
-			}
-		}
-		
-		if (crawlIDLayer == -1)
-			throw new RuntimeException("Unable to find " + crawled + 
-					". This should only happen if seed was not added");
-		
-		List<CrawlID> rv = new ArrayList<>();
-		if (crawlIDLayer < trackers.length - 1 && links != null)
-			for (CrawlID link : links) {
-				
-				boolean linkPrevCrawled = false;
-				for (int i = 0; i < trackers.length; i++) {
-					if (this.trackers[i].wasCrawled(link.getId())) {
-						linkPrevCrawled = true;
-						break;
-					}
-				}
-				
-				boolean added = 
-						this.trackers[crawlIDLayer + 1]
-								.addCrawled(link.getId());
-				if (added && !linkPrevCrawled)
-					rv.add(link);
-			}
-			
-		return rv;
-	}
+    @Override
+    public Iterable<CrawlID> walk(CrawlID crawled, Iterable<CrawlID> links) {
+        
+        int crawlIDLayer = -1;
+        for (int i = 0; i < trackers.length; i++) {
+            if (this.trackers[i].wasCrawled(crawled.getId())) {
+                crawlIDLayer = i;
+                break;
+            }
+        }
+        
+        if (crawlIDLayer == -1)
+            throw new RuntimeException("Unable to find " + crawled + 
+                    ". This should only happen if seed was not added");
+        
+        List<CrawlID> rv = new ArrayList<>();
+        if (crawlIDLayer < trackers.length - 1 && links != null)
+            for (CrawlID link : links) {
+                
+                boolean linkPrevCrawled = false;
+                for (int i = 0; i < trackers.length; i++) {
+                    if (this.trackers[i].wasCrawled(link.getId())) {
+                        linkPrevCrawled = true;
+                        break;
+                    }
+                }
+                
+                boolean added = 
+                        this.trackers[crawlIDLayer + 1]
+                                .addCrawled(link.getId());
+                if (added && !linkPrevCrawled)
+                    rv.add(link);
+            }
+            
+        return rv;
+    }
 
-	@Override
-	public Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
-		List<CrawlID> toDispatch = new ArrayList<>();
-		for (CrawlID seed : seeds)
-			if (this.trackers[0].addCrawled((seed.getId())))
-				toDispatch.add(seed);
-		
-		return toDispatch;
-	}
+    @Override
+    public Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
+        List<CrawlID> toDispatch = new ArrayList<>();
+        for (CrawlID seed : seeds)
+            if (this.trackers[0].addCrawled((seed.getId())))
+                toDispatch.add(seed);
+        
+        return toDispatch;
+    }
 
-	@Override
-	public void errorReceived(CrawlID crawled) {
-	}
+    @Override
+    public void errorReceived(CrawlID crawled) {
+    }
 
-	@Override
-	public StopCondition getStopCondition() {
-		return CONDITION;
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public void configurate(Configuration configuration, 
-			ConfigurableBuilder builder) throws BuildException {
-		
-		int numEgoNets = configuration.getInt(NUM_NETS) + 1;
-		
-		int expectedInserts = configuration.getInt(BFSWalker.BLOOM_INSERTS);
-		BloomFilterTrackerFactory<String> factory = 
-				new BloomFilterTrackerFactory<String>(expectedInserts);
-		
-		this.trackers = new Tracker[numEgoNets];
-		for (int i = 0; i < numEgoNets; i++)
-			this.trackers[i] = factory.createThreadSafeTracker(String.class);
-	}
+    @Override
+    public StopCondition getStopCondition() {
+        return CONDITION;
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public void configurate(Configuration configuration, 
+            ConfigurableBuilder builder) throws BuildException {
+        
+        int numEgoNets = configuration.getInt(NUM_NETS) + 1;
+        
+        int expectedInserts = configuration.getInt(BFSWalker.BLOOM_INSERTS);
+        BloomFilterTrackerFactory<String> factory = 
+                new BloomFilterTrackerFactory<String>(expectedInserts);
+        
+        this.trackers = new Tracker[numEgoNets];
+        for (int i = 0; i < numEgoNets; i++)
+            this.trackers[i] = factory.createThreadSafeTracker(String.class);
+    }
 
-	@Override
-	public Set<String> getRequiredParameters() {
-		return new HashSet<String>(Arrays.asList(BFSWalker.BLOOM_INSERTS, 
-				NUM_NETS));
-	}
+    @Override
+    public Set<String> getRequiredParameters() {
+        return new HashSet<String>(Arrays.asList(BFSWalker.BLOOM_INSERTS, 
+                NUM_NETS));
+    }
 }

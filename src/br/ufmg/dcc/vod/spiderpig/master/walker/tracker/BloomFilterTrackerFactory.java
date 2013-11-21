@@ -17,48 +17,48 @@ import com.google.common.hash.Funnels;
  */
 public class BloomFilterTrackerFactory<T> extends TrackerFactory<T> {
 
-	private static final HashMap<Class<?>, Funnel<?>> FUNNELS = new HashMap<>();
-	private static final int TEN_MILLION = 10000000;
-	private final int expectedInserts;
-	
-	static {
-		FUNNELS.put(String.class, Funnels.stringFunnel());
-		FUNNELS.put(CharSequence.class, Funnels.stringFunnel());
-		FUNNELS.put(byte[].class, Funnels.byteArrayFunnel());
-		FUNNELS.put(Integer.class, Funnels.integerFunnel());
-		FUNNELS.put(Long.class, Funnels.longFunnel());
-	}
-	
-	/**
-	 * Creates a tracker factory where each bloom filter will expect the
-	 * given amount of inserts
-	 * 
-	 * @param expectedInserts Number of inserts expected
-	 */
-	public BloomFilterTrackerFactory(int expectedInserts) {
-		this.expectedInserts = expectedInserts;
-	}
+    private static final HashMap<Class<?>, Funnel<?>> FUNNELS = new HashMap<>();
+    private static final int TEN_MILLION = 10000000;
+    private final int expectedInserts;
+    
+    static {
+        FUNNELS.put(String.class, Funnels.stringFunnel());
+        FUNNELS.put(CharSequence.class, Funnels.stringFunnel());
+        FUNNELS.put(byte[].class, Funnels.byteArrayFunnel());
+        FUNNELS.put(Integer.class, Funnels.integerFunnel());
+        FUNNELS.put(Long.class, Funnels.longFunnel());
+    }
+    
+    /**
+     * Creates a tracker factory where each bloom filter will expect the
+     * given amount of inserts
+     * 
+     * @param expectedInserts Number of inserts expected
+     */
+    public BloomFilterTrackerFactory(int expectedInserts) {
+        this.expectedInserts = expectedInserts;
+    }
 
-	/**
-	 * Creates a tracker factory where each bloom filter will expect 10million
-	 * inserts
-	 */
-	public BloomFilterTrackerFactory() {
-		this(TEN_MILLION);
-	}
-	
-	@Override
-	public Tracker<T> createTracker(Class<T> clazz) {
-		if (!FUNNELS.containsKey(clazz)) {
-			throw new InstatiationException(String.format(
-					"Only %s classes can be used as parameters", 
-					FUNNELS.keySet().toString())); 
-		}
-		
-		@SuppressWarnings("unchecked") Funnel<T> funnel =
-				(Funnel<T>) FUNNELS.get(clazz);
-		BloomFilter<T> bf = BloomFilter.create(funnel, expectedInserts);
-		return new BloomFilterTracker<>(bf);
-	}
+    /**
+     * Creates a tracker factory where each bloom filter will expect 10million
+     * inserts
+     */
+    public BloomFilterTrackerFactory() {
+        this(TEN_MILLION);
+    }
+    
+    @Override
+    public Tracker<T> createTracker(Class<T> clazz) {
+        if (!FUNNELS.containsKey(clazz)) {
+            throw new InstatiationException(String.format(
+                    "Only %s classes can be used as parameters", 
+                    FUNNELS.keySet().toString())); 
+        }
+        
+        @SuppressWarnings("unchecked") Funnel<T> funnel =
+                (Funnel<T>) FUNNELS.get(clazz);
+        BloomFilter<T> bf = BloomFilter.create(funnel, expectedInserts);
+        return new BloomFilterTracker<>(bf);
+    }
 
 }

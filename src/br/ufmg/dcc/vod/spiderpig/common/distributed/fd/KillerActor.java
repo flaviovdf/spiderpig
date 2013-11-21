@@ -10,46 +10,46 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
 import br.ufmg.dcc.vod.spiderpig.ui.EXIT_CODES;
 
 public class KillerActor extends Actor<PingPong> 
-		implements QueueProcessor<PingPong> {
+        implements QueueProcessor<PingPong> {
 
-	public static final String HANDLE = "Killer";
-	private final RemoteMessageSender sender;
+    public static final String HANDLE = "Killer";
+    private final RemoteMessageSender sender;
 
-	public KillerActor(RemoteMessageSender sender) {
-		super(HANDLE);
-		this.sender = sender;
-	}
+    public KillerActor(RemoteMessageSender sender) {
+        super(HANDLE);
+        this.sender = sender;
+    }
 
-	@Override
-	public QueueProcessor<PingPong> getQueueProcessor() {
-		return this;
-	}
+    @Override
+    public QueueProcessor<PingPong> getQueueProcessor() {
+        return this;
+    }
 
-	@Override
-	public MessageLiteSerializer<PingPong> newMsgSerializer() {
-		return new MessageLiteSerializer<>(PingPong.newBuilder());
-	}
+    @Override
+    public MessageLiteSerializer<PingPong> newMsgSerializer() {
+        return new MessageLiteSerializer<>(PingPong.newBuilder());
+    }
 
-	@Override
-	public void process(PingPong t) {
-		new Thread(new KillerRunnable(t.getCallBackID())).start();
-	}
+    @Override
+    public void process(PingPong t) {
+        new Thread(new KillerRunnable(t.getCallBackID())).start();
+    }
 
-	private class KillerRunnable implements Runnable {
+    private class KillerRunnable implements Runnable {
 
-		private final ServiceID callBackID;
+        private final ServiceID callBackID;
 
-		public KillerRunnable(ServiceID callBackID) {
-			this.callBackID = callBackID;
-		}
+        public KillerRunnable(ServiceID callBackID) {
+            this.callBackID = callBackID;
+        }
 
-		@Override
-		public void run() {
-			sender.send(callBackID, 
-					KillResult.newBuilder().setExitcode(EXIT_CODES.OK).build());
-			service.waitUntilWorkIsDoneAndStop(1);
-			System.exit(EXIT_CODES.OK);
-		}
-		
-	}
+        @Override
+        public void run() {
+            sender.send(callBackID, 
+                    KillResult.newBuilder().setExitcode(EXIT_CODES.OK).build());
+            service.waitUntilWorkIsDoneAndStop(1);
+            System.exit(EXIT_CODES.OK);
+        }
+        
+    }
 }

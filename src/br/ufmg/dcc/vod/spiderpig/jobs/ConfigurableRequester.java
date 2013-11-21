@@ -9,6 +9,6 @@ import br.ufmg.dcc.vod.spiderpig.common.config.Configurable;
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
 public interface ConfigurableRequester 
-		extends Configurable, Requester {
+        extends Configurable, Requester {
 
 }

@@ -9,6 +9,6 @@ import br.ufmg.dcc.vod.spiderpig.common.config.Configurable;
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
 public interface ConfigurableWalker 
-		extends Walker, Configurable {
+        extends Walker, Configurable {
 
 }

@@ -21,56 +21,56 @@ import com.google.common.collect.Sets;
 
 public class VideoRequester implements ConfigurableRequester {
 
-	private static final String CRAWL_HTML = "worker.job.youtube.video.html";
-	private static final String CRAWL_API = "worker.job.youtube.video.api";
-	
-	private boolean crawlHtml;
-	private boolean crawlApi;
-	
-	private VideoAPIRequester apiRequester;
-	private VideoHTMLRequester htmlRequester;
-	
-	@Override
-	public void configurate(Configuration configuration, 
-			ConfigurableBuilder builder) throws BuildException {
-		
-		this.apiRequester = 
-				builder.build(VideoAPIRequester.class, configuration);
-		this.htmlRequester = 
-				builder.build(VideoHTMLRequester.class, configuration);
-		
-		this.crawlHtml = configuration.getBoolean(CRAWL_HTML);
-		this.crawlApi = configuration.getBoolean(CRAWL_API);
-		
-		boolean hasOne = crawlHtml || crawlApi;
-		if (!hasOne)
-			throw new BuildException("Please set at least one option"
-					+ " to crawl", null);
-	}
+    private static final String CRAWL_HTML = "worker.job.youtube.video.html";
+    private static final String CRAWL_API = "worker.job.youtube.video.api";
+    
+    private boolean crawlHtml;
+    private boolean crawlApi;
+    
+    private VideoAPIRequester apiRequester;
+    private VideoHTMLRequester htmlRequester;
+    
+    @Override
+    public void configurate(Configuration configuration, 
+            ConfigurableBuilder builder) throws BuildException {
+        
+        this.apiRequester = 
+                builder.build(VideoAPIRequester.class, configuration);
+        this.htmlRequester = 
+                builder.build(VideoHTMLRequester.class, configuration);
+        
+        this.crawlHtml = configuration.getBoolean(CRAWL_HTML);
+        this.crawlApi = configuration.getBoolean(CRAWL_API);
+        
+        boolean hasOne = crawlHtml || crawlApi;
+        if (!hasOne)
+            throw new BuildException("Please set at least one option"
+                    + " to crawl", null);
+    }
 
-	@Override
-	public Set<String> getRequiredParameters() {
-		Set<String> req = Sets.newHashSet(CRAWL_HTML, CRAWL_API);
-		return req;
-	}
+    @Override
+    public Set<String> getRequiredParameters() {
+        Set<String> req = Sets.newHashSet(CRAWL_HTML, CRAWL_API);
+        return req;
+    }
 
-	@Override
-	public CrawlResult performRequest(CrawlID crawlID) throws QuotaException {
-		CrawlResult apiResult = this.apiRequester.performRequest(crawlID);
-		if (apiResult.hasIsError()) {
-			return apiResult;
-		}
-		
-		CrawlResult htmlResult = this.htmlRequester.performRequest(crawlID);
-		if (htmlResult.hasIsError()) {
-			return htmlResult;
-		}
-		
-		CrawlResultFactory resultBuilder = new CrawlResultFactory(crawlID);
-		List<Payload> payloads = new ArrayList<>();
-		payloads.addAll(apiResult.getPayLoadList());
-		payloads.addAll(htmlResult.getPayLoadList());
-		
-		return resultBuilder.buildOK(payloads, null);
-	}
+    @Override
+    public CrawlResult performRequest(CrawlID crawlID) throws QuotaException {
+        CrawlResult apiResult = this.apiRequester.performRequest(crawlID);
+        if (apiResult.hasIsError()) {
+            return apiResult;
+        }
+        
+        CrawlResult htmlResult = this.htmlRequester.performRequest(crawlID);
+        if (htmlResult.hasIsError()) {
+            return htmlResult;
+        }
+        
+        CrawlResultFactory resultBuilder = new CrawlResultFactory(crawlID);
+        List<Payload> payloads = new ArrayList<>();
+        payloads.addAll(apiResult.getPayLoadList());
+        payloads.addAll(htmlResult.getPayLoadList());
+        
+        return resultBuilder.buildOK(payloads, null);
+    }
 }

@@ -13,41 +13,41 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
  */
 public interface WorkerManager {
 
-	/**
-	 * Get's an available {@link ServiceID} blocking if necessary.
-	 * 
-	 * @param crawlID The id of the crawl the worker will execute
-	 * 
-	 * @return a {@link ServiceID}
-	 * @throws InterruptedException Thrown if blocking fails 
-	 */
-	public ServiceID allocateAvailableExecutor(CrawlID crawlID) 
-			throws InterruptedException;
-	
-	/**
-	 * Free's a {@link ServiceID} marking it as available to execute new
-	 * crawls. 
-	 * 
-	 * @param crawlID The id of the crawl the worker was executing
-	 */
-	public boolean freeExecutor(CrawlID crawlID);
-	
-	/**
-	 * Mark's a {@link ServiceID} as suspected. Suspected executors will
-	 * not be used to execute crawls unless they are re-inserted with the
-	 * {@code WorkerManager#markAvailable} method.
-	 * 
-	 * @param jobExecutor to mark as suspected
-	 * 
-	 * @param crawlID The id of the crawl the worker was executing if any
-	 */
-	public CrawlID executorSuspected(ServiceID jobExecutor);
-	
-	/**
-	 * Mark's a {@link WorkerID} as available for executing tasks.
-	 * 
-	 * @param jobExecutor {@link ServiceID} to mark as available
-	 */ 
-	public void markAvailable(ServiceID jobExecutor);
-	
+    /**
+     * Get's an available {@link ServiceID} blocking if necessary.
+     * 
+     * @param crawlID The id of the crawl the worker will execute
+     * 
+     * @return a {@link ServiceID}
+     * @throws InterruptedException Thrown if blocking fails 
+     */
+    public ServiceID allocateAvailableExecutor(CrawlID crawlID) 
+            throws InterruptedException;
+    
+    /**
+     * Free's a {@link ServiceID} marking it as available to execute new
+     * crawls. 
+     * 
+     * @param crawlID The id of the crawl the worker was executing
+     */
+    public boolean freeExecutor(CrawlID crawlID);
+    
+    /**
+     * Mark's a {@link ServiceID} as suspected. Suspected executors will
+     * not be used to execute crawls unless they are re-inserted with the
+     * {@code WorkerManager#markAvailable} method.
+     * 
+     * @param jobExecutor to mark as suspected
+     * 
+     * @param crawlID The id of the crawl the worker was executing if any
+     */
+    public CrawlID executorSuspected(ServiceID jobExecutor);
+    
+    /**
+     * Mark's a {@link WorkerID} as available for executing tasks.
+     * 
+     * @param jobExecutor {@link ServiceID} to mark as available
+     */ 
+    public void markAvailable(ServiceID jobExecutor);
+    
 }

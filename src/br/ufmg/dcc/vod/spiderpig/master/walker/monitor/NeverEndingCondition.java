@@ -8,16 +8,16 @@ package br.ufmg.dcc.vod.spiderpig.master.walker.monitor;
  */
 public class NeverEndingCondition extends AbstractStopCondition {
 
-	@Override
-	public void dispatched() {
-	}
+    @Override
+    public void dispatched() {
+    }
 
-	@Override
-	public void resultReceived() {
-	}
+    @Override
+    public void resultReceived() {
+    }
 
-	@Override
-	public void errorReceived() {
-	}
+    @Override
+    public void errorReceived() {
+    }
 
 }

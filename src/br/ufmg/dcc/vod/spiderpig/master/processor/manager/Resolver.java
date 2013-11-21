@@ -11,13 +11,13 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
  */
 public interface Resolver {
 
-	/**
-	 * Resolves this id to an executor.
-	 * 
-	 * @param {@link ServiceID} a service ID to resolve
-	 *  
-	 * @return a {@link JobExecutor} object
-	 */
-	public JobExecutor resolve(ServiceID serviceID);
-	
+    /**
+     * Resolves this id to an executor.
+     * 
+     * @param {@link ServiceID} a service ID to resolve
+     *  
+     * @return a {@link JobExecutor} object
+     */
+    public JobExecutor resolve(ServiceID serviceID);
+    
 }

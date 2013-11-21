@@ -19,33 +19,33 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
  */
 public class NopWalker implements ConfigurableWalker {
 
-	private static final ExhaustCondition CONDITION = new ExhaustCondition();
+    private static final ExhaustCondition CONDITION = new ExhaustCondition();
 
-	@Override
-	public Iterable<CrawlID> walk(CrawlID crawled, Iterable<CrawlID> links) {
-		return Collections.emptyList();
-	}
-	
-	@Override
-	public Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
-		return seeds;
-	}
+    @Override
+    public Iterable<CrawlID> walk(CrawlID crawled, Iterable<CrawlID> links) {
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
+        return seeds;
+    }
 
-	@Override
-	public void errorReceived(CrawlID crawled) {
-	}
+    @Override
+    public void errorReceived(CrawlID crawled) {
+    }
 
-	@Override
-	public StopCondition getStopCondition() {
-		return CONDITION;
-	}
+    @Override
+    public StopCondition getStopCondition() {
+        return CONDITION;
+    }
 
-	@Override
-	public Set<String> getRequiredParameters() {
-		return Collections.emptySet();
-	}
+    @Override
+    public Set<String> getRequiredParameters() {
+        return Collections.emptySet();
+    }
 
-	public void configurate(Configuration configuration, 
-			ConfigurableBuilder builder) throws BuildException {
-	}	
+    public void configurate(Configuration configuration, 
+            ConfigurableBuilder builder) throws BuildException {
+    }   
 }

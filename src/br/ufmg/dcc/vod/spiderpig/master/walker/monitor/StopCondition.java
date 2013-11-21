@@ -19,26 +19,26 @@ import br.ufmg.dcc.vod.spiderpig.master.Master;
  */
 public interface StopCondition {
 
-	/**
-	 * Indicates that an id has been dispatched for crawling.
-	 */
-	public void dispatched();
+    /**
+     * Indicates that an id has been dispatched for crawling.
+     */
+    public void dispatched();
 
-	/**
-	 * Indicates that an 
-	 */
-	public void resultReceived();
+    /**
+     * Indicates that an 
+     */
+    public void resultReceived();
 
-	/**
-	 * Indicates that an error has been received.
-	 */
-	public void errorReceived();
-	
-	/**
-	 * Adds a listener to be notified when the crawl is considered finished.
-	 * 
-	 * @param listener Listener to notify.
-	 */
-	public void addCrawlFinishedListener(CrawlFinishedListener listener);
-	
+    /**
+     * Indicates that an error has been received.
+     */
+    public void errorReceived();
+    
+    /**
+     * Adds a listener to be notified when the crawl is considered finished.
+     * 
+     * @param listener Listener to notify.
+     */
+    public void addCrawlFinishedListener(CrawlFinishedListener listener);
+    
 }

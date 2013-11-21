@@ -9,9 +9,9 @@ import br.ufmg.dcc.vod.spiderpig.common.Constants;
  */
 public class QuotaException extends IOException {
 
-	private static final long serialVersionUID = Constants.SERIAL_UID;
-	
-	public QuotaException(Exception cause) {
-		super(cause);
-	}
+    private static final long serialVersionUID = Constants.SERIAL_UID;
+    
+    public QuotaException(Exception cause) {
+        super(cause);
+    }
 }

@@ -7,9 +7,9 @@ package br.ufmg.dcc.vod.spiderpig.master.walker.monitor;
  */
 public interface CrawlFinishedListener {
 
-	/**
-	 * Notification of crawl done!
-	 */
-	public void crawlDone();
+    /**
+     * Notification of crawl done!
+     */
+    public void crawlDone();
 
 }

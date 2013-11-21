@@ -9,12 +9,12 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
  */
 public interface WorkerInterested {
 
-	/**
-	 * Indicates that the given id as successfully crawled. The {@code toQueue}
-	 * object indicates discovered ids during crawl.
-	 * 
-	 * @param crawlResult Result that was crawled.
-	 */
-	public void crawlDone(CrawlResult crawlResult);
-	
+    /**
+     * Indicates that the given id as successfully crawled. The {@code toQueue}
+     * object indicates discovered ids during crawl.
+     * 
+     * @param crawlResult Result that was crawled.
+     */
+    public void crawlDone(CrawlResult crawlResult);
+    
 }

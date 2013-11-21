@@ -15,60 +15,60 @@ class BogusMSG implements MessageLite {
         return null;
     }
 
-	@Override
-	public MessageLite getDefaultInstanceForType() {
-		return null;
-	}
+    @Override
+    public MessageLite getDefaultInstanceForType() {
+        return null;
+    }
 
-	@Override
-	public boolean isInitialized() {
-		return false;
-	}
+    @Override
+    public boolean isInitialized() {
+        return false;
+    }
 
-	@Override
-	public void writeTo(CodedOutputStream output) throws IOException {
-	}
+    @Override
+    public void writeTo(CodedOutputStream output) throws IOException {
+    }
 
-	@Override
-	public int getSerializedSize() {
-		return 0;
-	}
+    @Override
+    public int getSerializedSize() {
+        return 0;
+    }
 
-	@Override
-	public ByteString toByteString() {
-		return null;
-	}
+    @Override
+    public ByteString toByteString() {
+        return null;
+    }
 
-	@Override
-	public byte[] toByteArray() {
-		return null;
-	}
+    @Override
+    public byte[] toByteArray() {
+        return null;
+    }
 
-	@Override
-	public void writeTo(OutputStream output) throws IOException {
-	}
+    @Override
+    public void writeTo(OutputStream output) throws IOException {
+    }
 
-	@Override
-	public void writeDelimitedTo(OutputStream output) throws IOException {
-	}
+    @Override
+    public void writeDelimitedTo(OutputStream output) throws IOException {
+    }
 
-	@Override
-	public Builder newBuilderForType() {
-		return null;
-	}
+    @Override
+    public Builder newBuilderForType() {
+        return null;
+    }
 
-	@Override
-	public Builder toBuilder() {
-		return null;
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		return obj instanceof BogusMSG;
-	}
-	
-	@Override
-	public int hashCode() {
-		return 1;
-	}
+    @Override
+    public Builder toBuilder() {
+        return null;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof BogusMSG;
+    }
+    
+    @Override
+    public int hashCode() {
+        return 1;
+    }
 }

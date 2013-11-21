@@ -14,36 +14,36 @@ import com.google.common.collect.Sets;
 
 public class TimeBasedJobExecutor implements Configurable, JobExecutor {
 
-	public static final String BKOFF_TIME = "worker.job.backofftime";
-	public static final String SLEEP_TIME = "worker.job.sleeptime";
-	public static final String REQUESTER = "worker.requester";
-	
-	private Requester requester;
-	private ThroughputManager manager;
+    public static final String BKOFF_TIME = "worker.job.backofftime";
+    public static final String SLEEP_TIME = "worker.job.sleeptime";
+    public static final String REQUESTER = "worker.requester";
+    
+    private Requester requester;
+    private ThroughputManager manager;
 
-	@Override
-	public void crawl(CrawlID id, WorkerInterested interested) {
-		CrawlResult result = manager.sleepAndPerform(id, requester);
-		interested.crawlDone(result);
-	}
+    @Override
+    public void crawl(CrawlID id, WorkerInterested interested) {
+        CrawlResult result = manager.sleepAndPerform(id, requester);
+        interested.crawlDone(result);
+    }
 
-	@Override
-	public void configurate(Configuration configuration, 
-			ConfigurableBuilder configurableBuilder) throws BuildException {
-		long timeBetweenRequests = 
-				configuration.getLong(SLEEP_TIME);
-		long backOffTime = configuration.getLong(BKOFF_TIME);
-		
-		String requesterClass = configuration.getString(REQUESTER);
-		this.requester = 
-				configurableBuilder.build(requesterClass, 
-						configuration);
-		this.manager = new ThroughputManager(timeBetweenRequests,
-				backOffTime);
-	}
+    @Override
+    public void configurate(Configuration configuration, 
+            ConfigurableBuilder configurableBuilder) throws BuildException {
+        long timeBetweenRequests = 
+                configuration.getLong(SLEEP_TIME);
+        long backOffTime = configuration.getLong(BKOFF_TIME);
+        
+        String requesterClass = configuration.getString(REQUESTER);
+        this.requester = 
+                configurableBuilder.build(requesterClass, 
+                        configuration);
+        this.manager = new ThroughputManager(timeBetweenRequests,
+                backOffTime);
+    }
 
-	@Override
-	public Set<String> getRequiredParameters() {
-		return Sets.newHashSet(SLEEP_TIME, BKOFF_TIME, REQUESTER);
-	}
+    @Override
+    public Set<String> getRequiredParameters() {
+        return Sets.newHashSet(SLEEP_TIME, BKOFF_TIME, REQUESTER);
+    }
 }

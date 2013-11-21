@@ -24,63 +24,63 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
  */
 public class BFSWalker implements ConfigurableWalker {
 
-	private static final ExhaustCondition CONDITION = new ExhaustCondition();
+    private static final ExhaustCondition CONDITION = new ExhaustCondition();
 
-	public static final String BLOOM_INSERTS = 
-			"master.walkstrategy.bloomfilter_expected_inserts";
+    public static final String BLOOM_INSERTS = 
+            "master.walkstrategy.bloomfilter_expected_inserts";
 
-	private Tracker<String> tracker;
-	
-	@Override
-	public Iterable<CrawlID> walk(CrawlID crawled, Iterable<CrawlID> links) {
-		
-		List<CrawlID> rv = new ArrayList<>();
+    private Tracker<String> tracker;
+    
+    @Override
+    public Iterable<CrawlID> walk(CrawlID crawled, Iterable<CrawlID> links) {
+        
+        List<CrawlID> rv = new ArrayList<>();
 
-		if (!tracker.wasCrawled(crawled.getId())) {
-			throw new RuntimeException("ID not foun in tracker. This can"
-					+ " only happen if id was not signalled as seed");
-		}
+        if (!tracker.wasCrawled(crawled.getId())) {
+            throw new RuntimeException("ID not foun in tracker. This can"
+                    + " only happen if id was not signalled as seed");
+        }
 
-		if (links != null)
-			for (CrawlID link : links) {
-				if (this.tracker.addCrawled(link.getId())) {
-					rv.add(link);
-				}
-			}
+        if (links != null)
+            for (CrawlID link : links) {
+                if (this.tracker.addCrawled(link.getId())) {
+                    rv.add(link);
+                }
+            }
 
-		return rv;
-	}
+        return rv;
+    }
 
-	@Override
-	public Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
-		List<CrawlID> toDispatch = new ArrayList<>();
-		for (CrawlID seed : seeds)
-			if (tracker.addCrawled((seed.getId())))
-				toDispatch.add(seed);
+    @Override
+    public Iterable<CrawlID> filterSeeds(Iterable<CrawlID> seeds) {
+        List<CrawlID> toDispatch = new ArrayList<>();
+        for (CrawlID seed : seeds)
+            if (tracker.addCrawled((seed.getId())))
+                toDispatch.add(seed);
 
-		return toDispatch;
-	}
+        return toDispatch;
+    }
 
-	@Override
-	public void errorReceived(CrawlID crawled) {
-		tracker.wasCrawled(crawled.getId());
-	}
+    @Override
+    public void errorReceived(CrawlID crawled) {
+        tracker.wasCrawled(crawled.getId());
+    }
 
-	@Override
-	public StopCondition getStopCondition() {
-		return CONDITION;
-	}
+    @Override
+    public StopCondition getStopCondition() {
+        return CONDITION;
+    }
 
-	@Override
-	public void configurate(Configuration configuration, 
-			ConfigurableBuilder builder) throws BuildException {
-		int expectedInserts = configuration.getInt(BLOOM_INSERTS);
-		this.tracker = new BloomFilterTrackerFactory<String>(expectedInserts)
-				.createTracker(String.class);
-	}
+    @Override
+    public void configurate(Configuration configuration, 
+            ConfigurableBuilder builder) throws BuildException {
+        int expectedInserts = configuration.getInt(BLOOM_INSERTS);
+        this.tracker = new BloomFilterTrackerFactory<String>(expectedInserts)
+                .createTracker(String.class);
+    }
 
-	@Override
-	public Set<String> getRequiredParameters() {
-		return new HashSet<String>(Arrays.asList(BLOOM_INSERTS));
-	}
+    @Override
+    public Set<String> getRequiredParameters() {
+        return new HashSet<String>(Arrays.asList(BLOOM_INSERTS));
+    }
 }

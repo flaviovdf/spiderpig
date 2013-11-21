@@ -10,10 +10,10 @@ import br.ufmg.dcc.vod.spiderpig.common.Constants;
  */
 public class InstatiationException extends RuntimeException {
 
-	private static final long serialVersionUID = Constants.SERIAL_UID;
-	
-	public InstatiationException(String msg) {
-		super(msg);
-	}
+    private static final long serialVersionUID = Constants.SERIAL_UID;
+    
+    public InstatiationException(String msg) {
+        super(msg);
+    }
 
 }

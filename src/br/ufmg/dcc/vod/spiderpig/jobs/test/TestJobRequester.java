@@ -19,40 +19,40 @@ import com.google.common.collect.Sets;
 
 public class TestJobRequester implements ConfigurableRequester {
 
-	private static final int INT_SIZE = Integer.SIZE / 8;
-	public static final String GRAPH = "G";
-	
-	private RandomizedSyncGraph g;
+    private static final int INT_SIZE = Integer.SIZE / 8;
+    public static final String GRAPH = "G";
+    
+    private RandomizedSyncGraph g;
 
-	@Override
-	public CrawlResult performRequest(CrawlID crawlID) {
-		int vertex = Integer.parseInt(crawlID.getId());
-		int[] neighbours = g.getNeighbours(vertex);
-		
-		ByteBuffer buff = ByteBuffer.allocate(neighbours.length * INT_SIZE);
-		List<CrawlID> toQueue = new LinkedList<>();
-		for (int n : neighbours) {
-			toQueue.add(CrawlID.newBuilder().setId(""+n).build());
-			buff.putInt(n);
-		}
-			
-		buff.rewind();
-		
-		PayloadsFactory payloadBuilder = new PayloadsFactory();
-		payloadBuilder.addPayload(crawlID.getId(), buff.array());
-		return new CrawlResultFactory(crawlID).buildOK(payloadBuilder.build(),
-				toQueue);
-	}
+    @Override
+    public CrawlResult performRequest(CrawlID crawlID) {
+        int vertex = Integer.parseInt(crawlID.getId());
+        int[] neighbours = g.getNeighbours(vertex);
+        
+        ByteBuffer buff = ByteBuffer.allocate(neighbours.length * INT_SIZE);
+        List<CrawlID> toQueue = new LinkedList<>();
+        for (int n : neighbours) {
+            toQueue.add(CrawlID.newBuilder().setId(""+n).build());
+            buff.putInt(n);
+        }
+            
+        buff.rewind();
+        
+        PayloadsFactory payloadBuilder = new PayloadsFactory();
+        payloadBuilder.addPayload(crawlID.getId(), buff.array());
+        return new CrawlResultFactory(crawlID).buildOK(payloadBuilder.build(),
+                toQueue);
+    }
 
-	@Override
-	public void configurate(Configuration configuration,
-			ConfigurableBuilder builder) throws BuildException {
-		this.g = (RandomizedSyncGraph) configuration.getProperty(GRAPH);
-		
-	}
+    @Override
+    public void configurate(Configuration configuration,
+            ConfigurableBuilder builder) throws BuildException {
+        this.g = (RandomizedSyncGraph) configuration.getProperty(GRAPH);
+        
+    }
 
-	@Override
-	public Set<String> getRequiredParameters() {
-		return Sets.newHashSet(GRAPH);
-	}
+    @Override
+    public Set<String> getRequiredParameters() {
+        return Sets.newHashSet(GRAPH);
+    }
 }

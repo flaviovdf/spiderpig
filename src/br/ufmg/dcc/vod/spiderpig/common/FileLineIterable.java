@@ -6,14 +6,14 @@ import java.util.Iterator;
 
 public class FileLineIterable implements Iterable<String> {
 
-	private File file;
+    private File file;
 
-	public FileLineIterable(File file) throws IOException {
-		this.file = file;
-	}
-	
-	@Override
-	public Iterator<String> iterator() {
-		return new LineIterator(file);
-	}
+    public FileLineIterable(File file) throws IOException {
+        this.file = file;
+    }
+    
+    @Override
+    public Iterator<String> iterator() {
+        return new LineIterator(file);
+    }
 }

@@ -8,31 +8,31 @@ import br.ufmg.dcc.vod.spiderpig.jobs.JobExecutor;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlRequest;
 
 public class WorkerActor extends Actor<CrawlRequest> 
-		implements QueueProcessor<CrawlRequest> {
+        implements QueueProcessor<CrawlRequest> {
 
-	public static final String HANDLE = "Worker";
-	private final JobExecutor executor;
-	private final RemoteMessageSender sender;
+    public static final String HANDLE = "Worker";
+    private final JobExecutor executor;
+    private final RemoteMessageSender sender;
 
-	public WorkerActor(JobExecutor executor, RemoteMessageSender sender) {
-		super(HANDLE);
-		this.executor = executor;
-		this.sender = sender;
-	}
-	
-	@Override
-	public QueueProcessor<CrawlRequest> getQueueProcessor() {
-		return this;
-	}
+    public WorkerActor(JobExecutor executor, RemoteMessageSender sender) {
+        super(HANDLE);
+        this.executor = executor;
+        this.sender = sender;
+    }
+    
+    @Override
+    public QueueProcessor<CrawlRequest> getQueueProcessor() {
+        return this;
+    }
 
-	@Override
-	public MessageLiteSerializer<CrawlRequest> newMsgSerializer() {
-		return new MessageLiteSerializer<>(CrawlRequest.newBuilder());
-	}
+    @Override
+    public MessageLiteSerializer<CrawlRequest> newMsgSerializer() {
+        return new MessageLiteSerializer<>(CrawlRequest.newBuilder());
+    }
 
-	@Override
-	public void process(CrawlRequest msg) {
-		this.executor.crawl(msg.getId(),
-				new InterestedProxy(msg.getCallBackID(), sender));
-	}
+    @Override
+    public void process(CrawlRequest msg) {
+        this.executor.crawl(msg.getId(),
+                new InterestedProxy(msg.getCallBackID(), sender));
+    }
 }

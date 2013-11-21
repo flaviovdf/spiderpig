@@ -12,34 +12,34 @@ import com.google.common.hash.BloomFilter;
  */
 public class BloomFilterTracker<T> implements Tracker<T> {
 
-	private final BloomFilter<T> bloomFilter;
-	private int size;
+    private final BloomFilter<T> bloomFilter;
+    private int size;
 
-	/**
-	 * Creates an empty tracker backed by a bloom filter. 
-	 */
-	protected BloomFilterTracker(BloomFilter<T> bloomFilter) {
-		this.bloomFilter = bloomFilter;
-		this.size = 0;
-	}
+    /**
+     * Creates an empty tracker backed by a bloom filter. 
+     */
+    protected BloomFilterTracker(BloomFilter<T> bloomFilter) {
+        this.bloomFilter = bloomFilter;
+        this.size = 0;
+    }
 
-	@Override
-	public boolean addCrawled(T t) {
-		boolean returnVal = this.bloomFilter.put(t);
-		if (returnVal) {
-			this.size++;
-		}
-		return returnVal;
-	}
+    @Override
+    public boolean addCrawled(T t) {
+        boolean returnVal = this.bloomFilter.put(t);
+        if (returnVal) {
+            this.size++;
+        }
+        return returnVal;
+    }
 
-	@Override
-	public boolean wasCrawled(T t) {
-		return this.bloomFilter.mightContain(t);
-	}
+    @Override
+    public boolean wasCrawled(T t) {
+        return this.bloomFilter.mightContain(t);
+    }
 
-	@Override
-	public int numCrawled() {
-		return this.size;
-	}
+    @Override
+    public int numCrawled() {
+        return this.size;
+    }
 
 }

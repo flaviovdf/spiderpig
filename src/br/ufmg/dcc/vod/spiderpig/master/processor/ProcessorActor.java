@@ -22,45 +22,45 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
  * @author Flavio Figueiredo - flaviovdf 'at' gmail.com
  */
 public class ProcessorActor extends Actor<CrawlID> 
-		implements QueueProcessor<CrawlID> {
+        implements QueueProcessor<CrawlID> {
 
-	private static final String HANDLE = "Processor";
+    private static final String HANDLE = "Processor";
 
-	private static final Logger LOG = 
-			Logger.getLogger(ProcessorActor.class);
-	
-	private final WorkerManager manager;
-	private final Resolver resolver;
-	private final WorkerInterested interested;
+    private static final Logger LOG = 
+            Logger.getLogger(ProcessorActor.class);
+    
+    private final WorkerManager manager;
+    private final Resolver resolver;
+    private final WorkerInterested interested;
 
 
-	public ProcessorActor(WorkerManager manager, QueueService service, 
-			Resolver resolver, WorkerInterested interested) 
-					throws FileNotFoundException, IOException {
-		super(HANDLE);
-		this.manager = manager;
-		this.resolver = resolver;
-		this.interested = interested;
-	}
-	
-	@Override
-	public void process(CrawlID crawlID) {
-		try {
-			ServiceID sid = this.manager.allocateAvailableExecutor(crawlID);
-			LOG.info("Sending " + crawlID + " to worker " + sid);
-			resolver.resolve(sid).crawl(crawlID, interested);
-		} catch (InterruptedException e) {
-			LOG.error("Unexcpected interruption", e);
-		}
-	}
+    public ProcessorActor(WorkerManager manager, QueueService service, 
+            Resolver resolver, WorkerInterested interested) 
+                    throws FileNotFoundException, IOException {
+        super(HANDLE);
+        this.manager = manager;
+        this.resolver = resolver;
+        this.interested = interested;
+    }
+    
+    @Override
+    public void process(CrawlID crawlID) {
+        try {
+            ServiceID sid = this.manager.allocateAvailableExecutor(crawlID);
+            LOG.info("Sending " + crawlID + " to worker " + sid);
+            resolver.resolve(sid).crawl(crawlID, interested);
+        } catch (InterruptedException e) {
+            LOG.error("Unexcpected interruption", e);
+        }
+    }
 
-	@Override
-	public QueueProcessor<CrawlID> getQueueProcessor() {
-		return this;
-	}
+    @Override
+    public QueueProcessor<CrawlID> getQueueProcessor() {
+        return this;
+    }
 
-	@Override
-	public MessageLiteSerializer<CrawlID> newMsgSerializer() {
-		return new MessageLiteSerializer<>(CrawlID.newBuilder());
-	}
+    @Override
+    public MessageLiteSerializer<CrawlID> newMsgSerializer() {
+        return new MessageLiteSerializer<>(CrawlID.newBuilder());
+    }
 }

@@ -19,51 +19,51 @@ import org.iq80.leveldb.Options;
  */
 public class LevelDBSaver implements FileSaver {
 
-	private static final Logger LOG = Logger.getLogger(LevelDBSaver.class);
-	private final boolean appendDate;
-	private final AtomicInteger saved;
-	private final DB db;
+    private static final Logger LOG = Logger.getLogger(LevelDBSaver.class);
+    private final boolean appendDate;
+    private final AtomicInteger saved;
+    private final DB db;
 
-	/**
-	 * Creates a new file saver which will store crawled data at the given 
-	 * file database.
-	 * 
-	 * @param fileName File to store crawled data
-	 * @param appendDate Appends date to beginning of each key
-	 */
-	public LevelDBSaver(String fileName, boolean appendDate) 
-			throws IOException {
-		this.appendDate = appendDate;
-		this.saved = new AtomicInteger(0);
-		Options options = new Options();
-		options.createIfMissing(true);
-		DBFactory factory = new JniDBFactory();
-		this.db = factory.open(new File(fileName), options);
-	}
-	
-	@Override
-	public void save(String fileID, byte[] payload) {
-		LOG.info("Received file " + fileID + " " + payload.length + " bytes ");
-		String fileName = null;
-		
-		if (appendDate)
-			fileName = new Date().getTime() + "-" + fileID;
-		else
-			fileName = fileID;
-		
-		this.db.put(fileName.getBytes(), payload);
-		this.saved.incrementAndGet();
-	}
+    /**
+     * Creates a new file saver which will store crawled data at the given 
+     * file database.
+     * 
+     * @param fileName File to store crawled data
+     * @param appendDate Appends date to beginning of each key
+     */
+    public LevelDBSaver(String fileName, boolean appendDate) 
+            throws IOException {
+        this.appendDate = appendDate;
+        this.saved = new AtomicInteger(0);
+        Options options = new Options();
+        options.createIfMissing(true);
+        DBFactory factory = new JniDBFactory();
+        this.db = factory.open(new File(fileName), options);
+    }
+    
+    @Override
+    public void save(String fileID, byte[] payload) {
+        LOG.info("Received file " + fileID + " " + payload.length + " bytes ");
+        String fileName = null;
+        
+        if (appendDate)
+            fileName = new Date().getTime() + "-" + fileID;
+        else
+            fileName = fileID;
+        
+        this.db.put(fileName.getBytes(), payload);
+        this.saved.incrementAndGet();
+    }
 
-	@Override
-	public int numSaved() {
-		return this.saved.get();
-	}
+    @Override
+    public int numSaved() {
+        return this.saved.get();
+    }
 
-	@Override
-	public boolean close() throws IOException {
-		this.db.close();
-		return true;
-	}
+    @Override
+    public boolean close() throws IOException {
+        this.db.close();
+        return true;
+    }
 
 }

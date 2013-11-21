@@ -23,33 +23,33 @@ import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
  */
 public class LoggerInitiator implements Configurable {
 
-	public static final String LOG_FILE = "log.logfile";
-	public static final String LOG_LEVEL = "log.level";
-	
-	public LoggerInitiator() {
-		Logger.getRootLogger().setLevel(Level.OFF);
-	}
-	
-	@Override
-	public void configurate(Configuration configuration, 
-			ConfigurableBuilder builder) throws BuildException {
-		
-		try {
-			String logPath = configuration.getString(LOG_FILE);
-			String logLevel = configuration.getString(LOG_LEVEL);
-			Level level = Level.toLevel(logLevel);
-			BasicConfigurator.configure(new DailyRollingFileAppender(
-					new PatternLayout("%d [%t] %-5p %c - %m%n"), logPath, 
-					"'.'yyyy-MM-dd"));
-			Logger.getRootLogger().setLevel(level);
-		} catch (IOException e) {
-			throw new BuildException("Unable to create logger", e);
-		}
-	}
+    public static final String LOG_FILE = "log.logfile";
+    public static final String LOG_LEVEL = "log.level";
+    
+    public LoggerInitiator() {
+        Logger.getRootLogger().setLevel(Level.OFF);
+    }
+    
+    @Override
+    public void configurate(Configuration configuration, 
+            ConfigurableBuilder builder) throws BuildException {
+        
+        try {
+            String logPath = configuration.getString(LOG_FILE);
+            String logLevel = configuration.getString(LOG_LEVEL);
+            Level level = Level.toLevel(logLevel);
+            BasicConfigurator.configure(new DailyRollingFileAppender(
+                    new PatternLayout("%d [%t] %-5p %c - %m%n"), logPath, 
+                    "'.'yyyy-MM-dd"));
+            Logger.getRootLogger().setLevel(level);
+        } catch (IOException e) {
+            throw new BuildException("Unable to create logger", e);
+        }
+    }
 
-	@Override
-	public Set<String> getRequiredParameters() {
-		return new HashSet<String>(Arrays.asList(LOG_FILE, LOG_LEVEL));
-	}
-	
+    @Override
+    public Set<String> getRequiredParameters() {
+        return new HashSet<String>(Arrays.asList(LOG_FILE, LOG_LEVEL));
+    }
+    
 }

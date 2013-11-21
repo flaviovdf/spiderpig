@@ -22,95 +22,95 @@ import java.util.zip.GZIPOutputStream;
  */
 public class FileUtil {
 
-	/**
-	 * Reads the given file to a {@link List} where each line is an element.
-	 * 
-	 * @param file File to read
-	 * @return List with each line as an element
-	 * @throws IOException If file cannot be read
-	 */
-	public static List<String> readFileToList(File file) throws IOException	{
-		
-		LinkedList<String> queue = new LinkedList<String>();
-		BufferedReader br = null;
-		String line;
-		
-		try	{
-			br = new BufferedReader(new FileReader(file));
-			while((line = br.readLine()) != null) {
-				queue.add(line);
-			}
-			
-			br.close();
-		} finally {
-			if(br != null) {
-				br.close();
-			}
-		}
-		return queue;
-	}
+    /**
+     * Reads the given file to a {@link List} where each line is an element.
+     * 
+     * @param file File to read
+     * @return List with each line as an element
+     * @throws IOException If file cannot be read
+     */
+    public static List<String> readFileToList(File file) throws IOException {
+        
+        LinkedList<String> queue = new LinkedList<String>();
+        BufferedReader br = null;
+        String line;
+        
+        try {
+            br = new BufferedReader(new FileReader(file));
+            while((line = br.readLine()) != null) {
+                queue.add(line);
+            }
+            
+            br.close();
+        } finally {
+            if(br != null) {
+                br.close();
+            }
+        }
+        return queue;
+    }
 
-	/**
-	 * Saves data from an {@line InputStream} to a gzipped file.
-	 * 
-	 * @param inputStream Stream of data
-	 * @param filePath File to save (will be gzipped)
-	 * @throws IOException If cannot read stream or write file
-	 */
-	public static void saveStreamAsGzip(InputStream inputStream, File filePath) 
-			throws IOException {
-		
-	    BufferedReader in = null;
-	    PrintStream out = null;
-	    
-	    try {
-		    in = new BufferedReader(new InputStreamReader(inputStream));
-			out = new PrintStream(new BufferedOutputStream(
-					new GZIPOutputStream(new FileOutputStream(filePath))));
-		    
-		    String inputLine;
-		    while ((inputLine = in.readLine()) != null) {
-		    	out.println(inputLine);
-		    }
-		    
-		    out.flush();
-		    out.close();
-	    } finally {
-	    	if (in != null) {
-				in.close();
-	    	}
-	    	if (out != null) {
-	    		out.close();
-	    	}
-	    }
-	}
-	
-	/**
-	 * Reads the given file to a {@link LinkedHashSet} where each line is an 
-	 * element.
-	 * 
-	 * @param file File to read
-	 * @return LinkedHashSet with each line as an element
-	 * @throws IOException If file cannot be read
-	 */
-	public static LinkedHashSet<String> readFileToSet(File file) 
-			throws IOException {
-		LinkedHashSet<String> queue = new LinkedHashSet<String>();
-		BufferedReader br = null;
-		String line;
-		
-		try	{
-			br = new BufferedReader(new FileReader(file));
-			while((line = br.readLine()) != null) {
-				queue.add(line);
-			}
-			
-			br.close();
-		} finally {
-			if(br != null) {
-				br.close();
-			}
-		}
-		return queue;
-	}
+    /**
+     * Saves data from an {@line InputStream} to a gzipped file.
+     * 
+     * @param inputStream Stream of data
+     * @param filePath File to save (will be gzipped)
+     * @throws IOException If cannot read stream or write file
+     */
+    public static void saveStreamAsGzip(InputStream inputStream, File filePath) 
+            throws IOException {
+        
+        BufferedReader in = null;
+        PrintStream out = null;
+        
+        try {
+            in = new BufferedReader(new InputStreamReader(inputStream));
+            out = new PrintStream(new BufferedOutputStream(
+                    new GZIPOutputStream(new FileOutputStream(filePath))));
+            
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                out.println(inputLine);
+            }
+            
+            out.flush();
+            out.close();
+        } finally {
+            if (in != null) {
+                in.close();
+            }
+            if (out != null) {
+                out.close();
+            }
+        }
+    }
+    
+    /**
+     * Reads the given file to a {@link LinkedHashSet} where each line is an 
+     * element.
+     * 
+     * @param file File to read
+     * @return LinkedHashSet with each line as an element
+     * @throws IOException If file cannot be read
+     */
+    public static LinkedHashSet<String> readFileToSet(File file) 
+            throws IOException {
+        LinkedHashSet<String> queue = new LinkedHashSet<String>();
+        BufferedReader br = null;
+        String line;
+        
+        try {
+            br = new BufferedReader(new FileReader(file));
+            while((line = br.readLine()) != null) {
+                queue.add(line);
+            }
+            
+            br.close();
+        } finally {
+            if(br != null) {
+                br.close();
+            }
+        }
+        return queue;
+    }
 }

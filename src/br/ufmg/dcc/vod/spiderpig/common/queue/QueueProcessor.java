@@ -4,6 +4,6 @@ import com.google.protobuf.MessageLite;
 
 public interface QueueProcessor<T extends MessageLite> {
 
-	public void process(T t);
+    public void process(T t);
 
 }

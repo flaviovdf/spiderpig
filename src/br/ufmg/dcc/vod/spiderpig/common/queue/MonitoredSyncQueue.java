@@ -30,95 +30,95 @@ import com.google.protobuf.MessageLite;
  */
 public class MonitoredSyncQueue implements EventQueue<MessageLite> {
 
-	public static final MessageLite POISON = new BogusMSG();
-	private volatile boolean poisoned = false;
-	
-	//Stamps
-	private final AtomicInteger workHandle = new AtomicInteger(0);
-	private final AtomicInteger timeStamp = new AtomicInteger(0);
-	private final ReentrantReadWriteLock stampLock;
-	
-	//Get lock
-	private final ReentrantLock lock;
-	private final Condition getCondition;
-	
-	private final EventQueue<MessageLite> e;
+    public static final MessageLite POISON = new BogusMSG();
+    private volatile boolean poisoned = false;
+    
+    //Stamps
+    private final AtomicInteger workHandle = new AtomicInteger(0);
+    private final AtomicInteger timeStamp = new AtomicInteger(0);
+    private final ReentrantReadWriteLock stampLock;
+    
+    //Get lock
+    private final ReentrantLock lock;
+    private final Condition getCondition;
+    
+    private final EventQueue<MessageLite> e;
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	public MonitoredSyncQueue(EventQueue e) {
-		this.e = e;
-		this.stampLock = new ReentrantReadWriteLock(true);
-		this.lock = new ReentrantLock();
-		this.getCondition = lock.newCondition();
-	}
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public MonitoredSyncQueue(EventQueue e) {
+        this.e = e;
+        this.stampLock = new ReentrantReadWriteLock(true);
+        this.lock = new ReentrantLock();
+        this.getCondition = lock.newCondition();
+    }
 
-	@Override
-	public void put(MessageLite t) {
-		Preconditions.checkNotNull(t);
-		
-		try {
-			stampLock.writeLock().lock();
-			this.workHandle.incrementAndGet();
-			this.timeStamp.incrementAndGet();
-		} finally {
-			stampLock.writeLock().unlock();
-		}
-		
-		try {
-			lock.lock();
-			e.put(t);
-			getCondition.signal();
-		} finally {
-			lock.unlock();
-		}
-	}
+    @Override
+    public void put(MessageLite t) {
+        Preconditions.checkNotNull(t);
+        
+        try {
+            stampLock.writeLock().lock();
+            this.workHandle.incrementAndGet();
+            this.timeStamp.incrementAndGet();
+        } finally {
+            stampLock.writeLock().unlock();
+        }
+        
+        try {
+            lock.lock();
+            e.put(t);
+            getCondition.signal();
+        } finally {
+            lock.unlock();
+        }
+    }
 
-	@Override
-	public MessageLite take() {
-		try {
-			lock.lock();
-			while (e.size() == 0 && !poisoned)
-				try {
-					getCondition.await();
-				} catch (InterruptedException e) {
-				}
+    @Override
+    public MessageLite take() {
+        try {
+            lock.lock();
+            while (e.size() == 0 && !poisoned)
+                try {
+                    getCondition.await();
+                } catch (InterruptedException e) {
+                }
 
-			if (!poisoned) {
-				MessageLite take = e.take();
-				return take;
-			} else
-				return POISON;
-		} finally {
-			lock.unlock();
-		}
-	}
+            if (!poisoned) {
+                MessageLite take = e.take();
+                return take;
+            } else
+                return POISON;
+        } finally {
+            lock.unlock();
+        }
+    }
 
-	public void done(Object claimed) {
-		try {
-			stampLock.writeLock().lock();
-			this.workHandle.decrementAndGet();
-		} finally {
-			stampLock.writeLock().unlock();
-		}
-	}
+    public void done(Object claimed) {
+        try {
+            stampLock.writeLock().lock();
+            this.workHandle.decrementAndGet();
+        } finally {
+            stampLock.writeLock().unlock();
+        }
+    }
 
-	public int size() {
-		return e.size();
-	}
+    public int size() {
+        return e.size();
+    }
 
-	public Tuple<Integer, Integer> synchronizationData() {
-		try {
-			stampLock.readLock().lock();
-			return new Tuple<Integer, Integer>(workHandle.get(), timeStamp.get());
-		} finally {
-			stampLock.readLock().unlock();
-		}
-	}
-	
-	public void poison() {
-		lock.lock();
-		poisoned = true;
-		getCondition.signalAll();
-		lock.unlock();
-	}
+    public Tuple<Integer, Integer> synchronizationData() {
+        try {
+            stampLock.readLock().lock();
+            return new Tuple<Integer, Integer>(workHandle.get(), timeStamp.get());
+        } finally {
+            stampLock.readLock().unlock();
+        }
+    }
+    
+    public void poison() {
+        lock.lock();
+        poisoned = true;
+        getCondition.signalAll();
+        lock.unlock();
+    }
 }

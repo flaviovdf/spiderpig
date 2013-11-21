@@ -34,58 +34,58 @@ import br.ufmg.dcc.vod.spiderpig.worker.WorkerActor;
  */
 public class CrawlerFactory {
 
-	public static Crawler createDistributedCrawler(String hostname, int port, 
-			Set<InetSocketAddress> workerAddrs, int fdTimeOutSeconds, 
-			int fdPingTimeSeconds, File queueDir, FileSaver saver,
-			Walker walker) throws FileNotFoundException, IOException {
-		
-		QueueService service = new QueueService(hostname, port);
-		int numThreads = workerAddrs.size();
-		Set<ServiceID> workerIDs = new HashSet<>();
-		
-		ServiceID callBackID = ServiceIDUtils.
-				toResolvedServiceID(hostname, port, ResultActor.HANDLE);
-		ServiceID fileSaverID = ServiceIDUtils.
-				toResolvedServiceID(hostname, port, FileSaverActor.HANDLE);
-		
-		for (InetSocketAddress socketAddr : workerAddrs) {
-			ServiceID workerID = 
-					ServiceIDUtils.toResolvedServiceID(
-					socketAddr.getHostName(), 
-					socketAddr.getPort(), WorkerActor.HANDLE);
-			workerIDs.add(workerID);
-		}
-		
-		FileSaverActor fileSaverActor = new FileSaverActor(saver);
-		
-		RemoteMessageSender sender = new RemoteMessageSender();
-		
-		WorkerManager workerManager = new WorkerManagerImpl(workerIDs);
-		Resolver resolver = new RemoteResolver(callBackID, fileSaverID, sender);
-		
-		ThreadSafeWalker threadSafeWalker = new ThreadSafeWalker(walker);
-		Master master = new Master(threadSafeWalker, workerManager, 
-				fileSaverActor);
-		ProcessorActor processorActor = new ProcessorActor(workerManager, 
-				service, resolver, master);
-		master.setProcessorActor(processorActor);
-		
-		ResultActor resultActor = new ResultActor(master);
-		FDClientActor fd = new FDClientActor(fdTimeOutSeconds, 
-				fdPingTimeSeconds, TimeUnit.SECONDS, master, sender);
-		
-		fd.withSimpleQueue(service);
-		processorActor.withFileQueue(service, queueDir);
-		fileSaverActor.withSimpleQueue(service);
-		resultActor.withSimpleQueue(service);
-		
-		for (ServiceID sid : workerIDs)
-			fd.watch(
-					ServiceIDUtils
-					.toResolvedServiceID(sid.getHostname(), sid.getPort(), 
-					 FDServerActor.HANDLE));
-		
-		return new Crawler(processorActor, service, master, resultActor, 
-				fileSaverActor, fd, numThreads);
-	}
+    public static Crawler createDistributedCrawler(String hostname, int port, 
+            Set<InetSocketAddress> workerAddrs, int fdTimeOutSeconds, 
+            int fdPingTimeSeconds, File queueDir, FileSaver saver,
+            Walker walker) throws FileNotFoundException, IOException {
+        
+        QueueService service = new QueueService(hostname, port);
+        int numThreads = workerAddrs.size();
+        Set<ServiceID> workerIDs = new HashSet<>();
+        
+        ServiceID callBackID = ServiceIDUtils.
+                toResolvedServiceID(hostname, port, ResultActor.HANDLE);
+        ServiceID fileSaverID = ServiceIDUtils.
+                toResolvedServiceID(hostname, port, FileSaverActor.HANDLE);
+        
+        for (InetSocketAddress socketAddr : workerAddrs) {
+            ServiceID workerID = 
+                    ServiceIDUtils.toResolvedServiceID(
+                    socketAddr.getHostName(), 
+                    socketAddr.getPort(), WorkerActor.HANDLE);
+            workerIDs.add(workerID);
+        }
+        
+        FileSaverActor fileSaverActor = new FileSaverActor(saver);
+        
+        RemoteMessageSender sender = new RemoteMessageSender();
+        
+        WorkerManager workerManager = new WorkerManagerImpl(workerIDs);
+        Resolver resolver = new RemoteResolver(callBackID, fileSaverID, sender);
+        
+        ThreadSafeWalker threadSafeWalker = new ThreadSafeWalker(walker);
+        Master master = new Master(threadSafeWalker, workerManager, 
+                fileSaverActor);
+        ProcessorActor processorActor = new ProcessorActor(workerManager, 
+                service, resolver, master);
+        master.setProcessorActor(processorActor);
+        
+        ResultActor resultActor = new ResultActor(master);
+        FDClientActor fd = new FDClientActor(fdTimeOutSeconds, 
+                fdPingTimeSeconds, TimeUnit.SECONDS, master, sender);
+        
+        fd.withSimpleQueue(service);
+        processorActor.withFileQueue(service, queueDir);
+        fileSaverActor.withSimpleQueue(service);
+        resultActor.withSimpleQueue(service);
+        
+        for (ServiceID sid : workerIDs)
+            fd.watch(
+                    ServiceIDUtils
+                    .toResolvedServiceID(sid.getHostname(), sid.getPort(), 
+                     FDServerActor.HANDLE));
+        
+        return new Crawler(processorActor, service, master, resultActor, 
+                fileSaverActor, fd, numThreads);
+    }
 }

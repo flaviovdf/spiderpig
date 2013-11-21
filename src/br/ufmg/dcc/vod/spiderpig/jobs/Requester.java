@@ -5,6 +5,6 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
 
 public interface Requester {
 
-	CrawlResult performRequest(CrawlID crawlID) throws QuotaException;
+    CrawlResult performRequest(CrawlID crawlID) throws QuotaException;
 
 }
