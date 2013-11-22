@@ -62,7 +62,7 @@ Ant build file for spiderpig
 
             <manifest>
                 <attribute name="Main-Class"
-                    value="br.ufmg.dcc.vod.spiderpig.ui.Command"/>
+                    value="br.ufmg.dcc.vod.spiderpig.ui.Main"/>
                 <attribute name="Class-Path" value="${manifest.classpath}" />
             </manifest>
         </jar>

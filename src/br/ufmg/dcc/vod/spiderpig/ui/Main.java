@@ -16,6 +16,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import br.ufmg.dcc.vod.spiderpig.common.Constants;
 import br.ufmg.dcc.vod.spiderpig.common.LoggerInitiator;
@@ -115,6 +117,7 @@ public class Main {
                 throw new IOException("Unable to find configuration file " 
                             +configFile);
             
+            Logger.getRootLogger().setLevel(Level.OFF);
             PropertiesConfiguration props = 
                     new PropertiesConfiguration(configFile);
             props.setListDelimiter(Constants.LIST_DELIM);

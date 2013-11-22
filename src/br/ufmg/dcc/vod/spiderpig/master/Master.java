@@ -23,6 +23,8 @@ import br.ufmg.dcc.vod.spiderpig.worker.WorkerActor;
 
 public class Master implements WorkerInterested, FDListener {
 
+    private static final int BUFFER_SIZE = 5 * 1024 * 1024;
+
     private static final Logger LOG = Logger.getLogger(Master.class);
     
     private final Walker walker;
@@ -49,7 +51,7 @@ public class Master implements WorkerInterested, FDListener {
     }
     
     public void setSeeds(File seedFile) throws IOException {
-        setSeeds(new FileLineIterable(seedFile));
+        setSeeds(new FileLineIterable(seedFile, BUFFER_SIZE));
     }
     
     @Override

@@ -26,10 +26,6 @@ public class LoggerInitiator implements Configurable {
     public static final String LOG_FILE = "log.logfile";
     public static final String LOG_LEVEL = "log.level";
     
-    public LoggerInitiator() {
-        Logger.getRootLogger().setLevel(Level.OFF);
-    }
-    
     @Override
     public void configurate(Configuration configuration, 
             ConfigurableBuilder builder) throws BuildException {

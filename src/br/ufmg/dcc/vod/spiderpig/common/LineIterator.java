@@ -7,25 +7,28 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-class LineIterator implements Iterator<String> {
+public class LineIterator implements Iterator<String> {
 
     private final File file;
+    private int bufferSize;
     private BufferedReader reader;
     private boolean closed;
     private String nextLine;
 
-    public LineIterator(File file) {
+    public LineIterator(File file, int bufferSize) {
         this.file = file;
+        this.bufferSize = bufferSize;
         this.reader = null;
         this.closed = false;
         this.nextLine = null;
     }
 
     @Override
-    public boolean hasNext() {      
+    public boolean hasNext() { 
         try {
             if (this.reader == null) {
-                this.reader = new BufferedReader(new FileReader(this.file));
+                this.reader = new BufferedReader(new FileReader(this.file),
+                        this.bufferSize);
             }
             
             this.nextLine = reader.readLine();
@@ -35,6 +38,7 @@ class LineIterator implements Iterator<String> {
         } catch (IOException e) {
             try {
                 close();
+                throw new RuntimeException(e);
             } catch (IOException e1) {
             }
         }
@@ -51,6 +55,8 @@ class LineIterator implements Iterator<String> {
 
     @Override
     public String next() throws NoSuchElementException {
+        if (this.nextLine == null && this.closed)
+            throw new NoSuchElementException();
         return this.nextLine;
     }
 
