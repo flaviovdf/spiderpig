@@ -34,10 +34,6 @@ public class TwitterSearchRequester implements ConfigurableRequester {
     
     private Twitter twitter;
     
-    public TwitterSearchRequester(Twitter twitter) {
-        this.twitter = twitter;
-    }
-    
     @Override
     public CrawlResult performRequest(CrawlID crawlID) throws QuotaException {
         
