@@ -124,7 +124,6 @@ public class Main {
             configurableBuilder.build(LoggerInitiator.class, props);
             
             Command command = configurableBuilder.build(commCls, props);
-            command.configurate(props, configurableBuilder);
             command.exec();
         } catch (Exception e) {
             HelpFormatter hf = new HelpFormatter();
