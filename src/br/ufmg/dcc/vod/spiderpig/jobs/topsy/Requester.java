@@ -58,19 +58,18 @@ public class Requester implements ConfigurableRequester {
 		try {
 			PayloadsFactory payloadsFactory = new PayloadsFactory();
 			int numResults = 0;
-			int offset = 0;
+			int page = 1;
 			do {
-				HttpGet getMethod = new HttpGet(createUrl(query, offset));
+				HttpGet getMethod = new HttpGet(createUrl(query, page));
 				byte[] jsonResult = 
 						this.urlGetter.getHtml(this.httpClient, getMethod, 
 								"", "");
-				payloadsFactory.addPayload(crawlID, jsonResult, offset + "");
+				payloadsFactory.addPayload(crawlID, jsonResult, page + "");
 				
 				String jsonString = new String(jsonResult);
 				JSONObject json = new JSONObject(jsonString);
 				JSONArray results = 
 						json.getJSONObject("response").getJSONArray("list");
-				
 				for (int i = 0; i < results.length(); i++) {
 					JSONObject aResult = results.getJSONObject(i);
 					long tstamp = aResult.getLong("firstpost_date");
@@ -81,7 +80,7 @@ public class Requester implements ConfigurableRequester {
 				}
 				
 				numResults = results.length();
-				offset += 1;
+				page += 1;
 			} while (numResults > 0);
 			return crawlResult.buildOK(payloadsFactory.build(), toQueue);
 		} catch (IOException | URISyntaxException | JSONException e) {
@@ -90,15 +89,18 @@ public class Requester implements ConfigurableRequester {
 		}
 	}
 
-	private URI createUrl(String query, int offset) throws URISyntaxException {
+	private URI createUrl(String query, int page) throws URISyntaxException {
 		URIBuilder builder = new URIBuilder();
         builder.setScheme("http").
                 setHost("otter.topsy.com").
                 setPath("/search.js").
                 setParameter("window", "a").
                 setParameter("apikey", "09C43A9B270A470B8EB8F2946A9369F3").
-                setParameter("perpage", "100").
-                setParameter("offset", "" + (100 * offset));
+                setParameter("perpage", "100");
+        
+        if (page > 0) {
+        	builder.setParameter("page", ""+page);
+        }
         
 		String[] split = query.split("\t");
 		if (split.length == 2) {
@@ -109,5 +111,12 @@ public class Requester implements ConfigurableRequester {
 		}
 		
 		return builder.build();
-	}	
+	}
+	
+	public static void main(String[] args) throws BuildException, QuotaException {
+		Requester re = new Requester();
+		re.configurate(null, null);
+		CrawlResult res = re.performRequest(CrawlID.newBuilder().setId("cscw2010").build());
+		System.out.println(res);
+	}
 }
