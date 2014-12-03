@@ -13,6 +13,7 @@ import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.log4j.Logger;
 
 import twitter4j.JSONArray;
 import twitter4j.JSONException;
@@ -29,7 +30,7 @@ import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
 
 public class Requester implements ConfigurableRequester {
-
+	private static final Logger LOG = Logger.getLogger(Requester.class);
 	private DefaultHttpClient httpClient;
     private URLGetter urlGetter;
 	
@@ -61,6 +62,7 @@ public class Requester implements ConfigurableRequester {
 			int page = 1;
 			do {
 				HttpGet getMethod = new HttpGet(createUrl(query, page));
+				LOG.info(getMethod);
 				byte[] jsonResult = 
 						this.urlGetter.getHtml(this.httpClient, getMethod, 
 								"", "");
