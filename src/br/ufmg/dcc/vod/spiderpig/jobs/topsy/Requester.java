@@ -97,7 +97,7 @@ public class Requester implements ConfigurableRequester {
                 setParameter("window", "a").
                 setParameter("apikey", "09C43A9B270A470B8EB8F2946A9369F3").
                 setParameter("perpage", "100").
-                setParameter("sort", "date");
+                setParameter("sort_method", "date");
         
         if (page > 0) {
         	builder.setParameter("page", ""+page);
@@ -106,7 +106,7 @@ public class Requester implements ConfigurableRequester {
 		String[] split = query.split("\t");
 		if (split.length == 2) {
 			builder.setParameter("q", split[0]);
-			builder.setParameter("maxtime", split[1]);
+			builder.setParameter("max_time", split[1]);
 		} else {
 			builder.setParameter("q", query);
 		}
