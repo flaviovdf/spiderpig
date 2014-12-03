@@ -34,13 +34,14 @@ public class Walker implements ConfigurableWalker {
         }
         
         ArrayList<Long> timeStamps = getTimeStamps(links);
-        Long last = timeStamps.get(timeStamps.size() - 1);
+        Long minDate = timeStamps.get(0);
         
         String query = id.getId();
         String[] split = query.split("\t");
         String queryText = split[0];
         
-        String nextQuery = queryText + "\t" + last;
+      //-1 because inclusive
+        String nextQuery = queryText + "\t" + (minDate - 1); 
         LOG.info("New Seed 1/2l = " + nextQuery);
         
         return Lists.newArrayList(
