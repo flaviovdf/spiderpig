@@ -64,7 +64,8 @@ public class Requester implements ConfigurableRequester {
         
         Query query = new Query(hashtag);
         query.setResultType(Query.RECENT);
-        query.setMaxId(maxId);
+        if (maxId != Long.MAX_VALUE)
+        	query.setMaxId(maxId);
         query.setCount(100);
         
         StringBuilder returnValue = new StringBuilder();
@@ -83,6 +84,8 @@ public class Requester implements ConfigurableRequester {
                 List<Status> tweets = result.getTweets();
                 for (Status tweet : tweets) {
                     returnValue.append(i++);
+                    returnValue.append("\t");
+                    returnValue.append(hashtag);
                     returnValue.append("\t");
                     returnValue.append(tweet);
                     returnValue.append(System.lineSeparator());

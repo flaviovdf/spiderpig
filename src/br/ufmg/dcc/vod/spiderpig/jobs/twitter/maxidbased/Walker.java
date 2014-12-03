@@ -38,14 +38,21 @@ public class Walker implements ConfigurableWalker {
     		long nextMaxId = Long.parseLong(links.iterator().next().getId());
     		
     		String[] split = id.getId().split("\t");
-    		String max = split[0];
-            String hashtag = split[1];
+    		long currMaxId;
+            String hashtag;
+            if (split.length == 2) {
+            	currMaxId = Long.parseLong(split[0]);
+                hashtag = split[1];
+            } else {
+            	currMaxId = Long.MAX_VALUE;
+            	hashtag = id.getId();
+            }
             
-    		long currMaxId = Long.parseLong(max);
-    		LOG.info("Received results up to id " + nextMaxId);
+            LOG.info("Received results for " + hashtag + " max " + currMaxId);
+    		LOG.info("Will begin next query at " + nextMaxId);
     		
     		if (currMaxId == nextMaxId) {
-    			LOG.info("No Overflow! Nothing more to do for " + hashtag);
+    			LOG.info("Nothing more to do for (curr == next) " + hashtag);
                 return Collections.emptyList();
     		} else {
     			String crawlString = nextMaxId + "\t" + hashtag;
@@ -54,7 +61,7 @@ public class Walker implements ConfigurableWalker {
     			return Lists.newArrayList(nextToCrawl);
     		}
     	} else {
-    		LOG.info("Nothing more to do for " + id);
+    		LOG.info("Nothing more to do for (no result) " + id);
     		return Collections.emptyList();
     	}
     }
