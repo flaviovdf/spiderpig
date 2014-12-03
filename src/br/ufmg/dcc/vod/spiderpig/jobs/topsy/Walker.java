@@ -40,8 +40,7 @@ public class Walker implements ConfigurableWalker {
         String[] split = query.split("\t");
         String queryText = split[0];
         
-      //-1 because inclusive
-        String nextQuery = queryText + "\t" + (minDate - 1); 
+        String nextQuery = queryText + "\t" + minDate; 
         LOG.info("New Seed 1/2l = " + nextQuery);
         
         return Lists.newArrayList(
