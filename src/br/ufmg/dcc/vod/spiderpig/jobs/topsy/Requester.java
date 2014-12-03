@@ -59,9 +59,11 @@ public class Requester implements ConfigurableRequester {
 		try {
 			PayloadsFactory payloadsFactory = new PayloadsFactory();
 			int numResults = 0;
-			int page = 1;
+			int page = 0;
+			int offset = 0;
 			do {
-				HttpGet getMethod = new HttpGet(createUrl(query, page));
+				HttpGet getMethod = new HttpGet(createUrl(query, page, offset));
+				System.out.println(getMethod);
 				LOG.info(getMethod);
 				byte[] jsonResult = 
 						this.urlGetter.getHtml(this.httpClient, getMethod, 
@@ -82,7 +84,10 @@ public class Requester implements ConfigurableRequester {
 				}
 				
 				numResults = results.length();
-				page += 1;
+				offset = json.getJSONObject("response").
+						 getInt("last_offset");
+				page = json.getJSONObject("response").
+						 getInt("page") + 1;
 			} while (numResults > 0);
 			return crawlResult.buildOK(payloadsFactory.build(), toQueue);
 		} catch (IOException | URISyntaxException | JSONException e) {
@@ -91,7 +96,8 @@ public class Requester implements ConfigurableRequester {
 		}
 	}
 
-	private URI createUrl(String query, int page) throws URISyntaxException {
+	private URI createUrl(String query, int page, int offset)
+			throws URISyntaxException {
 		URIBuilder builder = new URIBuilder();
         builder.setScheme("http").
                 setHost("otter.topsy.com").
@@ -102,6 +108,10 @@ public class Requester implements ConfigurableRequester {
         
         if (page > 0) {
         	builder.setParameter("page", ""+page);
+        }
+        
+        if (offset > 0) {
+        	builder.setParameter("offset", ""+offset);
         }
         
 		String[] split = query.split("\t");
@@ -120,6 +130,6 @@ public class Requester implements ConfigurableRequester {
 		Requester re = new Requester();
 		re.configurate(null, null);
 		CrawlResult res = re.performRequest(CrawlID.newBuilder().setId("#cscw2010").build());
-		System.out.println(res);
+//		System.out.println(res);
 	}
 }
