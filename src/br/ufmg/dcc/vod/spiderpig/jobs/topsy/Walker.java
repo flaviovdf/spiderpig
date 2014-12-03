@@ -21,7 +21,7 @@ public class Walker implements ConfigurableWalker {
 
 	private static final ExhaustCondition CONDITION = new ExhaustCondition();
     private static final Logger LOG = Logger.getLogger(Walker.class);
-    private int OVERFLOW_NUM = 0;
+    private int OVERFLOW_NUM = 1;
     
 	@Override
 	public Iterable<CrawlID> walk(CrawlID id, Iterable<CrawlID> links) {
