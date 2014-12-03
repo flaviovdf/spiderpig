@@ -19,7 +19,6 @@ import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
 import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultFactory;
 import br.ufmg.dcc.vod.spiderpig.jobs.PayloadsFactory;
 import br.ufmg.dcc.vod.spiderpig.jobs.QuotaException;
-import br.ufmg.dcc.vod.spiderpig.jobs.ThroughputManager;
 import br.ufmg.dcc.vod.spiderpig.jobs.youtube.UnableToCrawlException;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
@@ -50,7 +49,7 @@ public class Requester implements ConfigurableRequester {
         String hashtag;
         if (split.length == 2) {
 	        String max = split[0];
-	        hashtag = split[1];
+	        hashtag = split[1].trim();
 	        
 	        try {
 	        	maxId = Integer.parseInt(max);
@@ -58,28 +57,30 @@ public class Requester implements ConfigurableRequester {
 	        	maxId = Long.MAX_VALUE;
 	        }
         } else {
-        	hashtag = queryContents;
+        	hashtag = queryContents.trim();
         	maxId = Long.MAX_VALUE;
         }
         
-        Query query = new Query(hashtag);
-        query.setResultType(Query.RECENT);
-        if (maxId != Long.MAX_VALUE)
-        	query.setMaxId(maxId);
-        query.setCount(100);
         
         StringBuilder returnValue = new StringBuilder();
         List<CrawlID> toQueue = new ArrayList<>();
         int i = 0;
         
         try {
+        	Query query = new Query(hashtag);
+            query.setResultType(Query.RECENT);
+            if (maxId != Long.MAX_VALUE)
+            	query.setMaxId(maxId);
+            query.setCount(100);
+            
             QueryResult result;
-            long maxResultId = Long.MIN_VALUE;
+            long minSinceId = Long.MAX_VALUE;
             
             do {
             	LOG.info("Query " + query);
                 result = twitter.search(query);
-                maxResultId = Math.max(maxResultId, result.getMaxId());
+                LOG.info(result.toString());
+                minSinceId = Math.min(minSinceId, result.getSinceId());
                 
                 List<Status> tweets = result.getTweets();
                 for (Status tweet : tweets) {
@@ -91,8 +92,10 @@ public class Requester implements ConfigurableRequester {
                     returnValue.append(System.lineSeparator());
                 }
             } while ((query = result.nextQuery()) != null);
-            toQueue.add(CrawlID.newBuilder().setId(maxResultId+"").build());
+            LOG.info("Next time will begin at " + minSinceId);
+            toQueue.add(CrawlID.newBuilder().setId(minSinceId+"").build());
         } catch (TwitterException e) {
+        	LOG.info(e);
             int errorCode = e.getErrorCode();
             if (errorCode == QUOTA_ERROR) {
                 throw new QuotaException(e);

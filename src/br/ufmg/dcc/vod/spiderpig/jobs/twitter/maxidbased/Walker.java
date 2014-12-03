@@ -42,9 +42,9 @@ public class Walker implements ConfigurableWalker {
             String hashtag;
             if (split.length == 2) {
             	currMaxId = Long.parseLong(split[0]);
-                hashtag = split[1];
+                hashtag = split[1].trim();
             } else {
-            	currMaxId = Long.MAX_VALUE;
+            	currMaxId = -1;
             	hashtag = id.getId();
             }
             
