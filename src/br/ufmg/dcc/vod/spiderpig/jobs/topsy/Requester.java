@@ -108,7 +108,7 @@ public class Requester implements ConfigurableRequester {
 		String[] split = query.split("\t");
 		if (split.length == 2) {
 			builder.setParameter("q", split[0]);
-			builder.setParameter("max_time", split[1]);
+			builder.setParameter("maxtime", split[1]);
 		} else {
 			builder.setParameter("q", query);
 		}
