@@ -45,7 +45,7 @@ public class Walker implements ConfigurableWalker {
     		LOG.info("Received results up to id " + nextMaxId);
     		
     		if (currMaxId == nextMaxId) {
-    			LOG.info("No Overflow! Done " + hashtag);
+    			LOG.info("No Overflow! Nothing more to do for " + hashtag);
                 return Collections.emptyList();
     		} else {
     			String crawlString = nextMaxId + "\t" + hashtag;
@@ -54,6 +54,7 @@ public class Walker implements ConfigurableWalker {
     			return Lists.newArrayList(nextToCrawl);
     		}
     	} else {
+    		LOG.info("Nothing more to do for " + id);
     		return Collections.emptyList();
     	}
     }

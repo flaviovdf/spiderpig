@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
+import org.apache.log4j.Logger;
 
 import twitter4j.Query;
 import twitter4j.QueryResult;
@@ -18,6 +19,7 @@ import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
 import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultFactory;
 import br.ufmg.dcc.vod.spiderpig.jobs.PayloadsFactory;
 import br.ufmg.dcc.vod.spiderpig.jobs.QuotaException;
+import br.ufmg.dcc.vod.spiderpig.jobs.ThroughputManager;
 import br.ufmg.dcc.vod.spiderpig.jobs.youtube.UnableToCrawlException;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
@@ -26,6 +28,7 @@ import com.google.common.collect.Sets;
 
 public class Requester implements ConfigurableRequester {
 
+	private static final Logger LOG = Logger.getLogger(Requester.class);
     private static final int QUOTA_ERROR = 429;
     
     private static final String CONKEY = "worker.job.twitter.conkey";
@@ -55,7 +58,7 @@ public class Requester implements ConfigurableRequester {
 	        	maxId = Long.MAX_VALUE;
 	        }
         } else {
-        	hashtag = split[0];
+        	hashtag = queryContents;
         	maxId = Long.MAX_VALUE;
         }
         
@@ -73,6 +76,7 @@ public class Requester implements ConfigurableRequester {
             long maxResultId = Long.MIN_VALUE;
             
             do {
+            	LOG.info("Query " + query);
                 result = twitter.search(query);
                 maxResultId = Math.max(maxResultId, result.getMaxId());
                 
