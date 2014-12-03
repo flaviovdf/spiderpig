@@ -96,7 +96,8 @@ public class Requester implements ConfigurableRequester {
                 setPath("/search.js").
                 setParameter("window", "a").
                 setParameter("apikey", "09C43A9B270A470B8EB8F2946A9369F3").
-                setParameter("perpage", "100");
+                setParameter("perpage", "100").
+                setParameter("sort", "date");
         
         if (page > 0) {
         	builder.setParameter("page", ""+page);
@@ -116,7 +117,7 @@ public class Requester implements ConfigurableRequester {
 	public static void main(String[] args) throws BuildException, QuotaException {
 		Requester re = new Requester();
 		re.configurate(null, null);
-		CrawlResult res = re.performRequest(CrawlID.newBuilder().setId("cscw2010").build());
+		CrawlResult res = re.performRequest(CrawlID.newBuilder().setId("#cscw2010").build());
 		System.out.println(res);
 	}
 }
