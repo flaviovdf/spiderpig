@@ -71,7 +71,7 @@ public class Requester implements ConfigurableRequester {
 				JSONArray results = 
 						json.getJSONObject("response").getJSONArray("list");
 				
-				for (int i = 0; i < results.length(); i ++) {
+				for (int i = 0; i < results.length(); i++) {
 					JSONObject aResult = results.getJSONObject(i);
 					long tstamp = aResult.getLong("firstpost_date");
 					String tstampStr = tstamp + "";
@@ -101,10 +101,9 @@ public class Requester implements ConfigurableRequester {
                 setParameter("offset", "" + (100 * offset));
         
 		String[] split = query.split("\t");
-		if (split.length == 3) {
+		if (split.length == 2) {
 			builder.setParameter("q", split[0]);
-			builder.setParameter("mintime", split[1]);
-			builder.setParameter("maxtime", split[2]);
+			builder.setParameter("maxtime", split[1]);
 		} else {
 			builder.setParameter("q", query);
 		}
