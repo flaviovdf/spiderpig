@@ -113,13 +113,13 @@ cdeploy() {
         mkdir -p $work_dir > /dev/null 2>&1
 
         #Creates new properties file
-        sed "s/$SERVICE_HOST_PROP\s\+=.*/$SERVICE_HOST_PROP=$ehost/g" \
+        sed "s/$SERVICE_HOST_PROP\s*=.*/$SERVICE_HOST_PROP=$ehost/g" \
             $BASE_PROPERTIES > $work_dir/$PROPERTIES_FNAME
 
-        sed -i "s/$SERVICE_PORT_PROP\s\+=.*/$SERVICE_PORT_PROP=$port/g" \
+        sed -i "s/$SERVICE_PORT_PROP\s*=.*/$SERVICE_PORT_PROP=$port/g" \
             $work_dir/$PROPERTIES_FNAME
         
-        sed -i "s/$CONTROL_HOST_PROP\s\+=.*/$CONTROL_HOST_PROP=$ehost/g" \
+        sed -i "s/$CONTROL_HOST_PROP\s*=.*/$CONTROL_HOST_PROP=$ehost/g" \
             $work_dir/$PROPERTIES_FNAME
 
         local to_compact="$PROPERTIES_FNAME"
