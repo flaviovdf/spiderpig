@@ -74,7 +74,7 @@ public class Requester implements ConfigurableRequester {
 						json.getJSONObject("response").getJSONArray("list");
 				for (int i = 0; i < results.length(); i++) {
 					JSONObject aResult = results.getJSONObject(i);
-					long tstamp = aResult.getLong("firstpost_date");
+					long tstamp = aResult.getLong("trackback_date");
 					String tstampStr = tstamp + "";
 					toQueue.add(
 							CrawlID.newBuilder().
@@ -96,7 +96,6 @@ public class Requester implements ConfigurableRequester {
         builder.setScheme("http").
                 setHost("otter.topsy.com").
                 setPath("/search.js").
-                setParameter("window", "a").
                 setParameter("apikey", "09C43A9B270A470B8EB8F2946A9369F3").
                 setParameter("perpage", "100").
                 setParameter("sort_method", "date");
@@ -111,6 +110,7 @@ public class Requester implements ConfigurableRequester {
 			builder.setParameter("maxtime", split[1]);
 		} else {
 			builder.setParameter("q", query);
+			builder.setParameter("window", "a");
 		}
 		
 		return builder.build();
