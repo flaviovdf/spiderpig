@@ -25,7 +25,7 @@ import com.google.common.collect.Sets;
 
 public class TwitterSearchRequester implements ConfigurableRequester {
 
-    private static final int QUOTA_ERROR = 429;
+    private static final int QUOTA_ERROR = 88;
     
     private static final String CONKEY = "worker.job.twitter.conkey";
     private static final String CONSECRET = "worker.job.twitter.consecret";
