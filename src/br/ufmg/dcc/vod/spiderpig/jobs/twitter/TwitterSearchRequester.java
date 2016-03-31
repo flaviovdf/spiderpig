@@ -25,7 +25,7 @@ import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
 
 public class TwitterSearchRequester implements ConfigurableRequester {
-
+	
     private static final int QUOTA_ERROR = 88;
     
     private static final String CONKEY = "worker.job.twitter.conkey";
@@ -37,51 +37,9 @@ public class TwitterSearchRequester implements ConfigurableRequester {
 	
     @Override
 	public Request createRequest(final CrawlID crawlID) {
-		return new Request() {
-			@Override
-			public CrawlResult continueRequest() throws QuotaException {
-				return performRequest(crawlID);
-			}
-		};
+    	return new TwitterRequest(crawlID);
 	}
     
-    public CrawlResult performRequest(CrawlID crawlID) throws QuotaException {
-        
-        CrawlResultFactory crawlResult = new CrawlResultFactory(crawlID);
-        String id = crawlID.getId();
-        
-        Query query = new Query(id);
-        query.setCount(100);
-        StringBuilder returnValue = new StringBuilder();
-        int i = 0;
-            
-        try {
-            QueryResult result;
-            do {
-                result = twitter.search(query);
-                List<Status> tweets = result.getTweets();
-                for (Status tweet : tweets) {
-                    returnValue.append(i++);
-                    returnValue.append(" - ");
-                    returnValue.append(tweet);
-                    returnValue.append(System.lineSeparator());
-                }
-            } while ((query = result.nextQuery()) != null);
-        } catch (TwitterException e) {
-            int errorCode = e.getErrorCode();
-            if (errorCode == QUOTA_ERROR) {
-                throw new QuotaException(e);
-            } else {
-                UnableToCrawlException cause = new UnableToCrawlException(e);
-                return crawlResult.buildNonQuotaError(cause);
-            }
-        }
-        
-        PayloadsFactory payloadBuilder = new PayloadsFactory();
-        payloadBuilder.addPayload(crawlID, returnValue.toString().getBytes());
-        return crawlResult.buildOK(payloadBuilder.build(), null);
-    }
-
     @Override
     public Set<String> getRequiredParameters() {
         return Sets.newHashSet(CONKEY, CONSECRET, TOKEN, TOKENSECRET);
@@ -99,4 +57,52 @@ public class TwitterSearchRequester implements ConfigurableRequester {
         
         this.twitter = new TwitterFactory(cb.build()).getInstance();
     }
+    
+	private class TwitterRequest implements Request {
+		private CrawlID crawlID;
+		private int i;
+		private Query query;
+
+		public TwitterRequest(CrawlID crawlID) {
+			String id = crawlID.getId();
+			this.crawlID = crawlID;
+			this.i = 0;
+			this.query = new Query(id);
+		}
+		
+		@Override
+		public CrawlResult continueRequest() throws QuotaException {
+			CrawlResultFactory crawlResult = new CrawlResultFactory(crawlID);
+	        this.query.setCount(100);
+	        StringBuilder returnValue = new StringBuilder();
+	            
+	        try {
+	            QueryResult result;
+	            do {
+	                result = TwitterSearchRequester.this.twitter.search(query);
+	                List<Status> tweets = result.getTweets();
+	                for (Status tweet : tweets) {
+	                    returnValue.append(this.i++);
+	                    returnValue.append(" - ");
+	                    returnValue.append(tweet);
+	                    returnValue.append(System.lineSeparator());
+	                }
+	            } while ((this.query = result.nextQuery()) != null);
+	        } catch (TwitterException e) {
+	            int errorCode = e.getErrorCode();
+	            if (errorCode == QUOTA_ERROR) {
+	                throw new QuotaException(e);
+	            } else {
+	                UnableToCrawlException cause = 
+	                		new UnableToCrawlException(e);
+	                return crawlResult.buildNonQuotaError(cause);
+	            }
+	        }
+	        
+	        PayloadsFactory payloadBuilder = new PayloadsFactory();
+	        payloadBuilder.addPayload(this.crawlID,
+	        		returnValue.toString().getBytes());
+	        return crawlResult.buildOK(payloadBuilder.build(), null);
+		}
+	}
 }
