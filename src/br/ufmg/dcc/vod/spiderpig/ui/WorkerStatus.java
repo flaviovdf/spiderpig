@@ -5,6 +5,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.configuration.Configuration;
 
+import com.google.common.collect.Sets;
+
 import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
 import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
 import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
@@ -14,8 +16,6 @@ import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.FDListener;
 import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.FDServerActor;
 import br.ufmg.dcc.vod.spiderpig.common.queue.QueueService;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
-
-import com.google.common.collect.Sets;
 
 public class WorkerStatus implements Command {
 

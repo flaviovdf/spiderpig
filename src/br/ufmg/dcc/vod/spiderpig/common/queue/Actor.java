@@ -5,11 +5,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
+import com.google.protobuf.MessageLite;
+
 import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
 import br.ufmg.dcc.vod.spiderpig.common.queue.serializer.MessageLiteSerializer;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
-
-import com.google.protobuf.MessageLite;
 
 public abstract class Actor<T extends MessageLite> {
 

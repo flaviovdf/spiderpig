@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.protobuf.ByteString;
+
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.Payload;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.Payload.Builder;
-
-import com.google.protobuf.ByteString;
 
 public class PayloadsFactory {
 

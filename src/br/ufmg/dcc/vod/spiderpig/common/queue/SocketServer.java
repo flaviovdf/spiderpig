@@ -9,10 +9,10 @@ import java.util.concurrent.ExecutorService;
 
 import org.apache.log4j.Logger;
 
+import com.google.protobuf.MessageLite;
+
 import br.ufmg.dcc.vod.spiderpig.common.queue.common.ProtocolBufferUtils;
 import br.ufmg.dcc.vod.spiderpig.common.queue.serializer.MessageLiteSerializer;
-
-import com.google.protobuf.MessageLite;
 
 /**
  * A multi-threaded socket server where where in each connection a protocol

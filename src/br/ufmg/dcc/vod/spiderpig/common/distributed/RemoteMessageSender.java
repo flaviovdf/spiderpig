@@ -7,10 +7,10 @@ import java.net.Socket;
 
 import org.apache.log4j.Logger;
 
+import com.google.protobuf.MessageLite;
+
 import br.ufmg.dcc.vod.spiderpig.common.queue.common.ProtocolBufferUtils;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
-
-import com.google.protobuf.MessageLite;
 
 /**
  * Class used to send messages to remote services. It uses sockets and streams.

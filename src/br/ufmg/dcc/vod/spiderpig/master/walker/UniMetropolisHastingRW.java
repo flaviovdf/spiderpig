@@ -12,13 +12,13 @@ import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 
+import com.google.common.collect.Sets;
+
 import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
 import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.ExhaustCondition;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
-
-import com.google.common.collect.Sets;
 
 /**
  * This class implements the broad class of metropolis hastings random walks.

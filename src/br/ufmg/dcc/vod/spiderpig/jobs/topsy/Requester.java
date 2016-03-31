@@ -15,9 +15,6 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.Logger;
 
-import twitter4j.JSONArray;
-import twitter4j.JSONException;
-import twitter4j.JSONObject;
 import br.ufmg.dcc.vod.spiderpig.common.URLGetter;
 import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
 import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
@@ -25,15 +22,30 @@ import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
 import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultFactory;
 import br.ufmg.dcc.vod.spiderpig.jobs.PayloadsFactory;
 import br.ufmg.dcc.vod.spiderpig.jobs.QuotaException;
+import br.ufmg.dcc.vod.spiderpig.jobs.Request;
 import br.ufmg.dcc.vod.spiderpig.jobs.youtube.UnableToCrawlException;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
+import twitter4j.JSONArray;
+import twitter4j.JSONException;
+import twitter4j.JSONObject;
 
 public class Requester implements ConfigurableRequester {
+	
 	private static final Logger LOG = Logger.getLogger(Requester.class);
 	private DefaultHttpClient httpClient;
     private URLGetter urlGetter;
 	
+	@Override
+	public Request createRequest(final CrawlID crawlID) {
+		return new Request() {
+			@Override
+			public CrawlResult continueRequest() throws QuotaException {
+				return performRequest(crawlID);
+			}
+		};
+	}
+    
 	@Override
 	public void configurate(Configuration configuration,
 			ConfigurableBuilder builder) throws BuildException {
@@ -50,7 +62,6 @@ public class Requester implements ConfigurableRequester {
 		return null;
 	}
 
-	@Override
 	public CrawlResult performRequest(CrawlID crawlID) throws QuotaException {
 		String query = crawlID.getId();
 		CrawlResultFactory crawlResult = new CrawlResultFactory(crawlID);

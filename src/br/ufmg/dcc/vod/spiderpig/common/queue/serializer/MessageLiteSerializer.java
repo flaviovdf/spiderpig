@@ -1,11 +1,11 @@
 package br.ufmg.dcc.vod.spiderpig.common.queue.serializer;
 
-import br.ufmg.dcc.vod.spiderpig.common.queue.QueueServiceException;
-
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 import com.google.protobuf.MessageLite.Builder;
+
+import br.ufmg.dcc.vod.spiderpig.common.queue.QueueServiceException;
 
 public class MessageLiteSerializer<T extends MessageLite> 
         implements Serializer<T> {

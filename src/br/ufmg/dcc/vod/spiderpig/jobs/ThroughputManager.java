@@ -4,10 +4,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
+import com.google.common.base.Stopwatch;
+
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
-
-import com.google.common.base.Stopwatch;
 
 public class ThroughputManager {
 
@@ -29,12 +29,11 @@ public class ThroughputManager {
     
     private CrawlResult getAndStartWatch(CrawlID crawlID, Requester requester) { 
         
-        boolean backoff = true;
         CrawlResult result = null;
+        Request request = requester.createRequest(crawlID);
         do {
             try {
-                result = requester.performRequest(crawlID);
-                backoff = false;
+            	result = request.continueRequest();
             } catch (QuotaException e) {
                 LOG.info("Quota Exceeded. Backing off for " + 
                         this.backoffTime + "ms -" + e);
@@ -46,7 +45,7 @@ public class ThroughputManager {
                     }
                 }
             }
-        } while (backoff);
+        } while (result == null);
         
         this.stopwatch.reset();
         this.stopwatch.start();

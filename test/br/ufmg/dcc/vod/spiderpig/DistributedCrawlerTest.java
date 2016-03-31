@@ -11,9 +11,6 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
 import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.junit.After;
@@ -31,6 +28,8 @@ import br.ufmg.dcc.vod.spiderpig.jobs.test.TestFileSaver;
 import br.ufmg.dcc.vod.spiderpig.jobs.test.TestJobRequester;
 import br.ufmg.dcc.vod.spiderpig.master.walker.BFSWalker;
 import br.ufmg.dcc.vod.spiderpig.worker.WorkerActor;
+import junit.framework.Assert;
+import junit.framework.TestCase;
 
 public class DistributedCrawlerTest  extends TestCase {
 

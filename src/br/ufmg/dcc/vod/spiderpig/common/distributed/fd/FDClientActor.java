@@ -5,14 +5,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.google.common.base.Stopwatch;
+
 import br.ufmg.dcc.vod.spiderpig.common.distributed.RemoteMessageSender;
 import br.ufmg.dcc.vod.spiderpig.common.queue.Actor;
 import br.ufmg.dcc.vod.spiderpig.common.queue.QueueProcessor;
 import br.ufmg.dcc.vod.spiderpig.common.queue.serializer.MessageLiteSerializer;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Fd.PingPong;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
-
-import com.google.common.base.Stopwatch;
 
 /**
  * A really basic failure detector. Basically it has two parameters, a pingTime 

@@ -5,9 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.SynchronousQueue;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
+
+import com.google.common.io.Files;
 
 import br.ufmg.dcc.vod.spiderpig.common.FileUtil;
 import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
@@ -19,8 +19,7 @@ import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaverImpl;
 import br.ufmg.dcc.vod.spiderpig.filesaver.FileWrapper;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.Payload;
-
-import com.google.common.io.Files;
+import junit.framework.Assert;
 
 public class FileSaverUnitTest {
 

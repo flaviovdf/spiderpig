@@ -1,11 +1,8 @@
 package br.ufmg.dcc.vod.spiderpig.master.walker.tracker;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 
-import br.ufmg.dcc.vod.spiderpig.master.walker.tracker.BloomFilterTrackerFactory;
-import br.ufmg.dcc.vod.spiderpig.master.walker.tracker.Tracker;
+import junit.framework.Assert;
 
 public class BloomFilterTrackerTest {
 

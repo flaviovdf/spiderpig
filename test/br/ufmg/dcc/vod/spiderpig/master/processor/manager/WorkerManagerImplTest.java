@@ -4,14 +4,13 @@ import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.HashSet;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 
 import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
 import br.ufmg.dcc.vod.spiderpig.master.processor.manager.WorkerManagerImpl.WorkerState;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
+import junit.framework.Assert;
 
 public class WorkerManagerImplTest {
 

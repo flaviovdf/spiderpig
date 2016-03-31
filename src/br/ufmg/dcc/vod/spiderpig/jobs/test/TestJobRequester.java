@@ -7,15 +7,17 @@ import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 
+import com.google.common.collect.Sets;
+
 import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
 import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
 import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
 import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultFactory;
 import br.ufmg.dcc.vod.spiderpig.jobs.PayloadsFactory;
+import br.ufmg.dcc.vod.spiderpig.jobs.QuotaException;
+import br.ufmg.dcc.vod.spiderpig.jobs.Request;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
-
-import com.google.common.collect.Sets;
 
 public class TestJobRequester implements ConfigurableRequester {
 
@@ -24,12 +26,22 @@ public class TestJobRequester implements ConfigurableRequester {
     
     private RandomizedSyncGraph g;
 
-    @Override
+	@Override
+	public Request createRequest(final CrawlID crawlID) {
+		return new Request() {
+			@Override
+			public CrawlResult continueRequest() throws QuotaException {
+				return performRequest(crawlID);
+			}
+		};
+	}
+    
     public CrawlResult performRequest(CrawlID crawlID) {
-        int vertex = Integer.parseInt(crawlID.getId());
+		int vertex = Integer.parseInt(crawlID.getId());
         int[] neighbours = g.getNeighbours(vertex);
         
-        ByteBuffer buff = ByteBuffer.allocate(neighbours.length * INT_SIZE);
+        ByteBuffer buff = ByteBuffer.allocate(
+        		neighbours.length * INT_SIZE);
         List<CrawlID> toQueue = new LinkedList<>();
         for (int n : neighbours) {
             toQueue.add(CrawlID.newBuilder().setId(""+n).build());

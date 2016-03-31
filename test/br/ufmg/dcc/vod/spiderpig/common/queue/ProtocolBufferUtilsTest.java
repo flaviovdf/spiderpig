@@ -5,16 +5,15 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.concurrent.ExecutionException;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
+
+import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import br.ufmg.dcc.vod.spiderpig.common.queue.common.ProtocolBufferUtils;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.Payload;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.Payload.Builder;
-
-import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
+import junit.framework.Assert;
 
 public class ProtocolBufferUtilsTest {
 

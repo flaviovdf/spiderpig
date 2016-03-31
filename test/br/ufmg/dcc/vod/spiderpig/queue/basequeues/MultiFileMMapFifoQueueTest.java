@@ -5,8 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Random;
 
-import junit.framework.TestCase;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +12,7 @@ import org.junit.Test;
 import br.ufmg.dcc.vod.spiderpig.common.queue.QueueServiceException;
 import br.ufmg.dcc.vod.spiderpig.common.queue.basequeues.MultiFileMMapFifoQueue;
 import br.ufmg.dcc.vod.spiderpig.common.queue.serializer.StringSerializer;
+import junit.framework.TestCase;
 
 public class MultiFileMMapFifoQueueTest extends TestCase {
 	

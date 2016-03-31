@@ -8,14 +8,14 @@ import java.util.Set;
 import org.apache.commons.configuration.Configuration;
 import org.apache.log4j.Logger;
 
+import com.google.common.collect.Lists;
+
 import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
 import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
 import br.ufmg.dcc.vod.spiderpig.master.walker.ConfigurableWalker;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.ExhaustCondition;
 import br.ufmg.dcc.vod.spiderpig.master.walker.monitor.StopCondition;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
-
-import com.google.common.collect.Lists;
 
 public class Walker implements ConfigurableWalker {
 

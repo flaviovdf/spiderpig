@@ -6,13 +6,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import junit.framework.TestCase;
-
 import org.junit.Test;
 
 import br.ufmg.dcc.vod.spiderpig.common.queue.QueueServiceException;
 import br.ufmg.dcc.vod.spiderpig.common.queue.basequeues.MemoryMappedFIFOQueue;
 import br.ufmg.dcc.vod.spiderpig.common.queue.serializer.StringSerializer;
+import junit.framework.TestCase;
 
 public class MemoryMappedQueueTest extends TestCase {
 

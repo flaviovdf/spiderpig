@@ -6,18 +6,13 @@ import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
 import org.junit.After;
 import org.junit.Before;
 
-import br.ufmg.dcc.vod.spiderpig.common.queue.Actor;
-import br.ufmg.dcc.vod.spiderpig.common.queue.MonitoredSyncQueue;
-import br.ufmg.dcc.vod.spiderpig.common.queue.QueueProcessor;
-import br.ufmg.dcc.vod.spiderpig.common.queue.QueueService;
 import br.ufmg.dcc.vod.spiderpig.common.queue.serializer.MessageLiteSerializer;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
+import junit.framework.Assert;
+import junit.framework.TestCase;
 
 public class QueueServiceTest extends TestCase {
 

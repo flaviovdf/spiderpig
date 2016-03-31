@@ -14,14 +14,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.google.protobuf.MessageLite;
+
 import br.ufmg.dcc.vod.spiderpig.common.Tuple;
 import br.ufmg.dcc.vod.spiderpig.common.queue.basequeues.MultiFileMMapFifoQueue;
 import br.ufmg.dcc.vod.spiderpig.common.queue.basequeues.SimpleEventQueue;
 import br.ufmg.dcc.vod.spiderpig.common.queue.serializer.MessageLiteSerializer;
-
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import com.google.protobuf.MessageLite;
 
 /**
  * QueueServices are used to create MonitoredSyncQueues, add objects to these

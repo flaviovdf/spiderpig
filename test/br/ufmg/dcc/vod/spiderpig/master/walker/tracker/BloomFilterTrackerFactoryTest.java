@@ -6,11 +6,6 @@ import java.lang.reflect.Modifier;
 import org.junit.Assert;
 import org.junit.Test;
 
-import br.ufmg.dcc.vod.spiderpig.master.walker.tracker.BloomFilterTrackerFactory;
-import br.ufmg.dcc.vod.spiderpig.master.walker.tracker.InstatiationException;
-import br.ufmg.dcc.vod.spiderpig.master.walker.tracker.ThreadSafeTracker;
-import br.ufmg.dcc.vod.spiderpig.master.walker.tracker.Tracker;
-
 public class BloomFilterTrackerFactoryTest {
 
 	@Test

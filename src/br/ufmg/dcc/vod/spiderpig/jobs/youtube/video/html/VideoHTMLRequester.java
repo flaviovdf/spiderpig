@@ -22,18 +22,20 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
+import com.google.common.collect.Sets;
+
 import br.ufmg.dcc.vod.spiderpig.common.URLGetter;
 import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
 import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
 import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
 import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultFactory;
 import br.ufmg.dcc.vod.spiderpig.jobs.PayloadsFactory;
+import br.ufmg.dcc.vod.spiderpig.jobs.QuotaException;
+import br.ufmg.dcc.vod.spiderpig.jobs.Request;
 import br.ufmg.dcc.vod.spiderpig.jobs.youtube.UnableToCrawlException;
 import br.ufmg.dcc.vod.spiderpig.jobs.youtube.YTConstants;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
-
-import com.google.common.collect.Sets;
 
 public class VideoHTMLRequester implements ConfigurableRequester {
     
@@ -125,7 +127,6 @@ public class VideoHTMLRequester implements ConfigurableRequester {
         return "".getBytes();
     }
     
-    @Override
     public CrawlResult performRequest(CrawlID crawlID) {
         CrawlResultFactory resultBuilder = new CrawlResultFactory(crawlID);
         PayloadsFactory payloadBuilder = new PayloadsFactory();
@@ -152,4 +153,14 @@ public class VideoHTMLRequester implements ConfigurableRequester {
             return resultBuilder.buildNonQuotaError(cause);
         }
     }
+
+	@Override
+	public Request createRequest(final CrawlID crawlID) {
+		return new Request() {
+			@Override
+			public CrawlResult continueRequest() throws QuotaException {
+				return performRequest(crawlID);
+			}
+		};
+	}
 }

@@ -5,11 +5,11 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import br.ufmg.dcc.vod.spiderpig.common.Tuple;
-import br.ufmg.dcc.vod.spiderpig.common.queue.basequeues.EventQueue;
-
 import com.google.common.base.Preconditions;
 import com.google.protobuf.MessageLite;
+
+import br.ufmg.dcc.vod.spiderpig.common.Tuple;
+import br.ufmg.dcc.vod.spiderpig.common.queue.basequeues.EventQueue;
 
 /**
  * A synchronized queue of objects. This is a thread safe queue in which objects

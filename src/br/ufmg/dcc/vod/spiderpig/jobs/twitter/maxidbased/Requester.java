@@ -7,6 +7,17 @@ import java.util.Set;
 import org.apache.commons.configuration.Configuration;
 import org.apache.log4j.Logger;
 
+import com.google.common.collect.Sets;
+
+import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
+import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
+import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultFactory;
+import br.ufmg.dcc.vod.spiderpig.jobs.PayloadsFactory;
+import br.ufmg.dcc.vod.spiderpig.jobs.QuotaException;
+import br.ufmg.dcc.vod.spiderpig.jobs.Request;
+import br.ufmg.dcc.vod.spiderpig.jobs.youtube.UnableToCrawlException;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
 import twitter4j.Query;
 import twitter4j.QueryResult;
 import twitter4j.Status;
@@ -14,16 +25,6 @@ import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
-import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
-import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
-import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultFactory;
-import br.ufmg.dcc.vod.spiderpig.jobs.PayloadsFactory;
-import br.ufmg.dcc.vod.spiderpig.jobs.QuotaException;
-import br.ufmg.dcc.vod.spiderpig.jobs.youtube.UnableToCrawlException;
-import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
-import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
-
-import com.google.common.collect.Sets;
 
 public class Requester implements ConfigurableRequester {
 
@@ -37,7 +38,16 @@ public class Requester implements ConfigurableRequester {
     
     private Twitter twitter;
     
-    @Override
+	@Override
+	public Request createRequest(final CrawlID crawlID) {
+		return new Request() {
+			@Override
+			public CrawlResult continueRequest() throws QuotaException {
+				return performRequest(crawlID);
+			}
+		};
+	}
+    
     public CrawlResult performRequest(CrawlID crawlID) throws QuotaException {
         
         CrawlResultFactory crawlResult = new CrawlResultFactory(crawlID);

@@ -6,18 +6,19 @@ import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 
+import com.google.common.collect.Sets;
+
 import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
 import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
 import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
 import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultFactory;
 import br.ufmg.dcc.vod.spiderpig.jobs.QuotaException;
+import br.ufmg.dcc.vod.spiderpig.jobs.Request;
 import br.ufmg.dcc.vod.spiderpig.jobs.youtube.video.api.VideoAPIRequester;
 import br.ufmg.dcc.vod.spiderpig.jobs.youtube.video.html.VideoHTMLRequester;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.Payload;
-
-import com.google.common.collect.Sets;
 
 public class VideoRequester implements ConfigurableRequester {
 
@@ -54,23 +55,29 @@ public class VideoRequester implements ConfigurableRequester {
         return req;
     }
 
-    @Override
-    public CrawlResult performRequest(CrawlID crawlID) throws QuotaException {
-        CrawlResult apiResult = this.apiRequester.performRequest(crawlID);
-        if (apiResult.hasIsError()) {
-            return apiResult;
-        }
-        
-        CrawlResult htmlResult = this.htmlRequester.performRequest(crawlID);
-        if (htmlResult.hasIsError()) {
-            return htmlResult;
-        }
-        
-        CrawlResultFactory resultBuilder = new CrawlResultFactory(crawlID);
-        List<Payload> payloads = new ArrayList<>();
-        payloads.addAll(apiResult.getPayLoadList());
-        payloads.addAll(htmlResult.getPayLoadList());
-        
-        return resultBuilder.buildOK(payloads, null);
-    }
+	@Override
+	public Request createRequest(final CrawlID crawlID) {
+		return new Request() {
+			@Override
+			public CrawlResult continueRequest() throws QuotaException {
+		        CrawlResult apiResult = apiRequester.performRequest(crawlID);
+		        if (apiResult.hasIsError()) {
+		            return apiResult;
+		        }
+		        
+		        CrawlResult htmlResult = htmlRequester.performRequest(crawlID);
+		        if (htmlResult.hasIsError()) {
+		            return htmlResult;
+		        }
+		        
+		        CrawlResultFactory resultBuilder = 
+		        		new CrawlResultFactory(crawlID);
+		        List<Payload> payloads = new ArrayList<>();
+		        payloads.addAll(apiResult.getPayLoadList());
+		        payloads.addAll(htmlResult.getPayLoadList());
+		        
+		        return resultBuilder.buildOK(payloads, null);
+			}
+		};
+	}
 }

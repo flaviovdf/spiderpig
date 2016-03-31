@@ -3,11 +3,11 @@ package br.ufmg.dcc.vod.spiderpig.master.walker;
 import java.util.List;
 import java.util.Set;
 
-import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
 public class IDStruct {
 

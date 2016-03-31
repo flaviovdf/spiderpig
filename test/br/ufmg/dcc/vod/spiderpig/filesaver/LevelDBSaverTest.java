@@ -3,8 +3,6 @@ package br.ufmg.dcc.vod.spiderpig.filesaver;
 import java.io.File;
 import java.io.IOException;
 
-import junit.framework.Assert;
-
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBFactory;
@@ -12,6 +10,8 @@ import org.iq80.leveldb.Options;
 import org.junit.Test;
 
 import com.google.common.io.Files;
+
+import junit.framework.Assert;
 
 public class LevelDBSaverTest {
 

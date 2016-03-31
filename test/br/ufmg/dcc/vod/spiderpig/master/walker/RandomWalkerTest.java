@@ -8,10 +8,10 @@ import org.apache.commons.configuration.BaseConfiguration;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.google.common.collect.Lists;
+
 import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
-
-import com.google.common.collect.Lists;
 
 public class RandomWalkerTest {
 

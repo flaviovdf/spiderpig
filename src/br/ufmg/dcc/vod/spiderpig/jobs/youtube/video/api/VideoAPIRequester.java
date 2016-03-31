@@ -9,18 +9,6 @@ import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 
-import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
-import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
-import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
-import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultFactory;
-import br.ufmg.dcc.vod.spiderpig.jobs.PayloadsFactory;
-import br.ufmg.dcc.vod.spiderpig.jobs.QuotaException;
-import br.ufmg.dcc.vod.spiderpig.jobs.youtube.UnableToCrawlException;
-import br.ufmg.dcc.vod.spiderpig.jobs.youtube.YTConstants;
-import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
-import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
-import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.Payload;
-
 import com.google.common.collect.Sets;
 import com.google.gdata.client.youtube.YouTubeService;
 import com.google.gdata.data.geo.impl.GeoRssWhere;
@@ -32,12 +20,24 @@ import com.google.gdata.data.youtube.YtStatistics;
 import com.google.gdata.util.ServiceException;
 import com.google.gson.Gson;
 
+import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
+import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
+import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
+import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultFactory;
+import br.ufmg.dcc.vod.spiderpig.jobs.PayloadsFactory;
+import br.ufmg.dcc.vod.spiderpig.jobs.QuotaException;
+import br.ufmg.dcc.vod.spiderpig.jobs.Request;
+import br.ufmg.dcc.vod.spiderpig.jobs.youtube.UnableToCrawlException;
+import br.ufmg.dcc.vod.spiderpig.jobs.youtube.YTConstants;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.Payload;
+
 public class VideoAPIRequester implements ConfigurableRequester {
     
     private static final String QUOTA_ERR = "yt:quota";
     private YouTubeService service;
 
-    @Override
     public CrawlResult performRequest(CrawlID crawlID) throws QuotaException {
         CrawlResultFactory resultBuilder = new CrawlResultFactory(crawlID);
         try {
@@ -178,4 +178,14 @@ public class VideoAPIRequester implements ConfigurableRequester {
     public Set<String> getRequiredParameters() {
         return Sets.newHashSet(YTConstants.DEV_KEY_V2, YTConstants.APP_NAME_V2);
     }
+    
+	@Override
+	public Request createRequest(final CrawlID crawlID) {
+		return new Request() {
+			@Override
+			public CrawlResult continueRequest() throws QuotaException {
+				return performRequest(crawlID);
+			}
+		};
+	}
 }

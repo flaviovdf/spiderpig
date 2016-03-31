@@ -1,9 +1,9 @@
 package br.ufmg.dcc.vod.spiderpig.common;
 
-import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
-
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
 
 public class StringUtils {
 

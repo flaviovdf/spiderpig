@@ -1,9 +1,9 @@
 package br.ufmg.dcc.vod.spiderpig.filesaver;
 
-import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.Payload;
-
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.Payload;
 
 public class FileWrapper {
 

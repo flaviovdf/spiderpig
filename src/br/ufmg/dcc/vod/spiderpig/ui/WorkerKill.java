@@ -4,6 +4,8 @@ import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 
+import com.google.common.collect.Sets;
+
 import br.ufmg.dcc.vod.spiderpig.common.ServiceIDUtils;
 import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
 import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
@@ -13,8 +15,6 @@ import br.ufmg.dcc.vod.spiderpig.common.distributed.fd.KillerActor;
 import br.ufmg.dcc.vod.spiderpig.common.queue.QueueService;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Fd.PingPong;
 import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.ServiceID;
-
-import com.google.common.collect.Sets;
 
 public class WorkerKill implements Command {
 

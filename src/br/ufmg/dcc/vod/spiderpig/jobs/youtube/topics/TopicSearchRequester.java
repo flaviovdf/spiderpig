@@ -7,17 +7,6 @@ import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 
-import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
-import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
-import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
-import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultFactory;
-import br.ufmg.dcc.vod.spiderpig.jobs.PayloadsFactory;
-import br.ufmg.dcc.vod.spiderpig.jobs.QuotaException;
-import br.ufmg.dcc.vod.spiderpig.jobs.youtube.UnableToCrawlException;
-import br.ufmg.dcc.vod.spiderpig.jobs.youtube.YTConstants;
-import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
-import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
-
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.youtube.YouTube;
@@ -25,6 +14,18 @@ import com.google.api.services.youtube.model.ResourceId;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
 import com.google.common.collect.Sets;
+
+import br.ufmg.dcc.vod.spiderpig.common.config.BuildException;
+import br.ufmg.dcc.vod.spiderpig.common.config.ConfigurableBuilder;
+import br.ufmg.dcc.vod.spiderpig.jobs.ConfigurableRequester;
+import br.ufmg.dcc.vod.spiderpig.jobs.CrawlResultFactory;
+import br.ufmg.dcc.vod.spiderpig.jobs.PayloadsFactory;
+import br.ufmg.dcc.vod.spiderpig.jobs.QuotaException;
+import br.ufmg.dcc.vod.spiderpig.jobs.Request;
+import br.ufmg.dcc.vod.spiderpig.jobs.youtube.UnableToCrawlException;
+import br.ufmg.dcc.vod.spiderpig.jobs.youtube.YTConstants;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Ids.CrawlID;
+import br.ufmg.dcc.vod.spiderpig.protocol_buffers.Worker.CrawlResult;
 
 public class TopicSearchRequester implements ConfigurableRequester {
 
@@ -34,7 +35,16 @@ public class TopicSearchRequester implements ConfigurableRequester {
     private YouTube youtube;
     private String apiKey;
 
-    @Override
+	@Override
+	public Request createRequest(final CrawlID crawlID) {
+		return new Request() {
+			@Override
+			public CrawlResult continueRequest() throws QuotaException {
+				return performRequest(crawlID);
+			}
+		};
+	}
+    
     public CrawlResult performRequest(CrawlID crawlID) throws QuotaException {
         
         String topicIdFreebaseFmt = crawlID.getId();

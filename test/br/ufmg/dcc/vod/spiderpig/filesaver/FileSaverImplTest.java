@@ -5,14 +5,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 
-import br.ufmg.dcc.vod.spiderpig.common.FileUtil;
-import br.ufmg.dcc.vod.spiderpig.filesaver.FileSaverImpl;
-
 import com.google.common.io.Files;
+
+import br.ufmg.dcc.vod.spiderpig.common.FileUtil;
+import junit.framework.Assert;
 
 public class FileSaverImplTest {
 
