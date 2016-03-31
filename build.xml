@@ -45,7 +45,7 @@ Ant build file for spiderpig
 
         <javac srcdir="${src.dir}:${test.dir}:${src.gen.dir}"
             destdir="${classes.dir}" target="${build.target}" optimize="on" 
-            debug="on" debuglevel="lines,vars,source" 
+            source="${build.source}" debug="on" debuglevel="lines,vars,source" 
             includeantruntime="false">
             <classpath> <path refid="build.classpath"/> </classpath>
             <include name="**" />
